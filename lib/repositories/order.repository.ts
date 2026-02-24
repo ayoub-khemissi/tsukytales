@@ -1,0 +1,151 @@
+import { RowDataPacket } from "mysql2";
+
+import { pool } from "@/lib/db/connection";
+import { BaseRepository } from "./base.repository";
+import { getPagination, getPagingData } from "@/lib/utils/pagination";
+import type { OrderRow } from "@/types/db.types";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Params = any[];
+
+class OrderRepository extends BaseRepository<OrderRow> {
+  constructor() {
+    super("orders");
+  }
+
+  async sumTotal(): Promise<number> {
+    const [[row]] = await pool.execute<(RowDataPacket & { total: number })[]>(
+      "SELECT COALESCE(SUM(total), 0) as total FROM orders",
+    );
+    return Number(row.total) || 0;
+  }
+
+  async getDailySales(days: number = 7): Promise<{ date: string; total: number }[]> {
+    const [rows] = await pool.execute<(RowDataPacket & { date: string; total: number })[]>(
+      `SELECT DATE(createdAt) as date, COALESCE(SUM(total), 0) as total
+       FROM orders
+       WHERE createdAt >= DATE_SUB(NOW(), INTERVAL ? DAY)
+       GROUP BY DATE(createdAt)
+       ORDER BY date ASC`,
+      [days],
+    );
+    return rows;
+  }
+
+  async adminSearch(options: {
+    page?: number | string;
+    size?: number | string;
+    search?: string;
+    status?: string;
+  }) {
+    const { limit, offset } = getPagination(options.page, options.size);
+    const conditions: string[] = [];
+    const params: Params = [];
+
+    if (options.status && options.status !== "all") {
+      conditions.push("status = ?");
+      params.push(options.status);
+    }
+    if (options.search) {
+      conditions.push("(email LIKE ? OR CAST(id AS CHAR) LIKE ?)");
+      const search = `%${options.search}%`;
+      const idSearch = `%${options.search.replace(/[^0-9]/g, "")}%`;
+      params.push(search, idSearch);
+    }
+
+    const where = conditions.length ? conditions.join(" AND ") : "1=1";
+
+    const [[countRow]] = await pool.execute<(RowDataPacket & { total: number })[]>(
+      `SELECT COUNT(*) as total FROM orders WHERE ${where}`,
+      params,
+    );
+    const [rows] = await pool.execute<OrderRow[]>(
+      `SELECT * FROM orders WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset],
+    );
+
+    return { ...getPagingData(rows, countRow.total, options.page, limit), rows };
+  }
+
+  async findByIds(ids: number[]): Promise<OrderRow[]> {
+    if (ids.length === 0) return [];
+    const placeholders = ids.map(() => "?").join(",");
+    const [rows] = await pool.execute<OrderRow[]>(
+      `SELECT * FROM orders WHERE id IN (${placeholders}) ORDER BY createdAt DESC`,
+      ids,
+    );
+    return rows;
+  }
+
+  async findByCustomerIdOrEmail(
+    customerId: number,
+    email: string,
+    options?: { status?: string; dateFrom?: string; dateTo?: string; page?: number; size?: number },
+  ) {
+    const { limit, offset } = getPagination(options?.page, options?.size);
+    const conditions: string[] = ["(customer_id = ? OR LOWER(email) = ?)"];
+    const params: Params = [customerId, email.toLowerCase().trim()];
+
+    if (options?.status) {
+      conditions.push("status = ?");
+      params.push(options.status);
+    }
+    if (options?.dateFrom) {
+      conditions.push("createdAt >= ?");
+      params.push(options.dateFrom);
+    }
+    if (options?.dateTo) {
+      conditions.push("createdAt <= ?");
+      params.push(options.dateTo);
+    }
+
+    const where = conditions.join(" AND ");
+
+    const [[countRow]] = await pool.execute<(RowDataPacket & { total: number })[]>(
+      `SELECT COUNT(*) as total FROM orders WHERE ${where}`,
+      params,
+    );
+    const [rows] = await pool.execute<OrderRow[]>(
+      `SELECT * FROM orders WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset],
+    );
+
+    return getPagingData(rows, countRow.total, options?.page, limit);
+  }
+
+  async updateCustomerIdByEmail(email: string, customerId: number): Promise<void> {
+    await pool.execute(
+      "UPDATE orders SET customer_id = ? WHERE LOWER(email) = ? AND (customer_id IS NULL OR customer_id != ?)",
+      [customerId, email.toLowerCase().trim(), customerId],
+    );
+  }
+
+  async getSalesHistory(months: number = 6): Promise<{ month: string; revenue: number; count: number }[]> {
+    const [rows] = await pool.execute<(RowDataPacket & { month: string; revenue: number; count: number })[]>(
+      `SELECT
+        DATE_FORMAT(createdAt, '%Y-%m') as month,
+        COALESCE(SUM(total), 0) as revenue,
+        COUNT(*) as count
+      FROM orders
+      WHERE createdAt >= DATE_SUB(NOW(), INTERVAL ? MONTH) AND payment_status = 'captured'
+      GROUP BY DATE_FORMAT(createdAt, '%Y-%m')
+      ORDER BY month DESC`,
+      [months],
+    );
+    return rows;
+  }
+
+  async getFinancialReport(months: number = 6) {
+    return this.getSalesHistory(months);
+  }
+
+  async findByShippingOrderId(shippingOrderId: string): Promise<OrderRow | null> {
+    const [rows] = await pool.execute<OrderRow[]>(
+      "SELECT * FROM orders WHERE JSON_EXTRACT(metadata, '$.shipping_order_id') = ? LIMIT 1",
+      [shippingOrderId],
+    );
+    return rows[0] ?? null;
+  }
+}
+
+export const orderRepository = new OrderRepository();
