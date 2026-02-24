@@ -54,6 +54,7 @@ export default function AccountPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -77,13 +78,16 @@ export default function AccountPage() {
 
   const updateProfile = async (data: Record<string, unknown>) => {
     setSaving(true);
+    setSaved(false);
     await fetch("/api/store/customer/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
     setSaving(false);
+    setSaved(true);
     fetchData();
+    setTimeout(() => setSaved(false), 3000);
   };
 
   if (loading) {
@@ -110,7 +114,7 @@ export default function AccountPage() {
                 <Input label="Nom" defaultValue={profile?.last_name || ""} onBlur={(e) => updateProfile({ last_name: e.target.value })} />
               </div>
               <Input label="Email" value={profile?.email || session?.user?.email || ""} isReadOnly />
-              {saving && <p className="text-success text-sm">{t("profile_saved")}</p>}
+              {saved && <p className="text-success text-sm">{t("profile_saved")}</p>}
             </CardBody>
           </Card>
         </Tab>
@@ -156,7 +160,7 @@ export default function AccountPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="font-semibold">{addr.label}</span>
-                      {addr.is_default && <Chip size="sm" color="primary" variant="flat" className="ml-2">{t("addresses_default")}</Chip>}
+                      {!!addr.is_default && <Chip size="sm" color="primary" variant="flat" className="ml-2">{t("addresses_default")}</Chip>}
                     </div>
                     <Button size="sm" variant="light" color="danger" onPress={async () => { await fetch(`/api/store/addresses/${addr.id}`, { method: "DELETE" }); fetchData(); }}>
                       {common("delete")}
@@ -184,7 +188,7 @@ export default function AccountPage() {
                 description="Fantasy, SF, Romance, Thriller..."
                 onBlur={(e) => {
                   const genres = e.target.value.split(",").map((g: string) => g.trim()).filter(Boolean);
-                  updateProfile({ preferences: JSON.stringify({ ...profile?.preferences, literary_genres: genres }) });
+                  updateProfile({ preferences: { ...profile?.preferences, literary_genres: genres } });
                 }}
               />
               <Input
@@ -192,7 +196,7 @@ export default function AccountPage() {
                 defaultValue={profile?.preferences?.favorite_authors?.join(", ") || ""}
                 onBlur={(e) => {
                   const authors = e.target.value.split(",").map((a: string) => a.trim()).filter(Boolean);
-                  updateProfile({ preferences: JSON.stringify({ ...profile?.preferences, favorite_authors: authors }) });
+                  updateProfile({ preferences: { ...profile?.preferences, favorite_authors: authors } });
                 }}
               />
               <Select
@@ -200,14 +204,14 @@ export default function AccountPage() {
                 defaultSelectedKeys={profile?.preferences?.reading_pace ? [profile.preferences.reading_pace] : []}
                 onSelectionChange={(keys) => {
                   const pace = Array.from(keys)[0] as string;
-                  updateProfile({ preferences: JSON.stringify({ ...profile?.preferences, reading_pace: pace }) });
+                  updateProfile({ preferences: { ...profile?.preferences, reading_pace: pace } });
                 }}
               >
                 <SelectItem key="lent">{t("preferences_pace_slow")}</SelectItem>
                 <SelectItem key="normal">{t("preferences_pace_normal")}</SelectItem>
                 <SelectItem key="rapide">{t("preferences_pace_fast")}</SelectItem>
               </Select>
-              {saving && <p className="text-success text-sm">{t("preferences_saved")}</p>}
+              {saved && <p className="text-success text-sm">{t("preferences_saved")}</p>}
             </CardBody>
           </Card>
         </Tab>
