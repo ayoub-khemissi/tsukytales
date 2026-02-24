@@ -19,6 +19,7 @@ function createPool(): Pool {
     connectionLimit: 10,
     charset: "utf8mb4",
     timezone: "+00:00",
+    decimalNumbers: true,
     typeCast(field, next) {
       if (field.type === "JSON") {
         const val = field.string();
