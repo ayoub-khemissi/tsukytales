@@ -1,17 +1,25 @@
-import { stripe } from "./payment.service";
-import { customerRepository } from "@/lib/repositories/customer.repository";
-import { logger } from "@/lib/utils/logger";
 import type { CustomerRow } from "@/types/db.types";
 
-export async function getOrCreateStripeCustomer(customer: CustomerRow): Promise<string> {
+import { stripe } from "./payment.service";
+
+import { customerRepository } from "@/lib/repositories/customer.repository";
+
+export async function getOrCreateStripeCustomer(
+  customer: CustomerRow,
+): Promise<string> {
   let stripeCustomerId = customer.metadata?.stripe_customer_id;
 
   if (!stripeCustomerId) {
     const stripeCustomer = await stripe.customers.create({
       email: customer.email,
-      name: [customer.first_name, customer.last_name].filter(Boolean).join(" ").trim() || undefined,
+      name:
+        [customer.first_name, customer.last_name]
+          .filter(Boolean)
+          .join(" ")
+          .trim() || undefined,
       metadata: { customer_id: String(customer.id) },
     });
+
     stripeCustomerId = stripeCustomer.id;
 
     await customerRepository.updateMetadata(customer.id, {
@@ -50,19 +58,28 @@ export async function createSetupIntent(stripeCustomerId: string) {
     customer: stripeCustomerId,
     payment_method_types: ["card"],
   });
+
   return { client_secret: setupIntent.client_secret };
 }
 
-export async function detachPaymentMethod(paymentMethodId: string, stripeCustomerId: string) {
+export async function detachPaymentMethod(
+  paymentMethodId: string,
+  stripeCustomerId: string,
+) {
   const pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+
   if (pm.customer !== stripeCustomerId) {
     throw new Error("Ce moyen de paiement ne vous appartient pas.");
   }
   await stripe.paymentMethods.detach(paymentMethodId);
 }
 
-export async function setDefaultPaymentMethod(paymentMethodId: string, stripeCustomerId: string) {
+export async function setDefaultPaymentMethod(
+  paymentMethodId: string,
+  stripeCustomerId: string,
+) {
   const pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+
   if (pm.customer !== stripeCustomerId) {
     throw new Error("Ce moyen de paiement ne vous appartient pas.");
   }
@@ -71,10 +88,14 @@ export async function setDefaultPaymentMethod(paymentMethodId: string, stripeCus
   });
 }
 
-export async function createBillingPortalSession(stripeCustomerId: string, returnUrl: string) {
+export async function createBillingPortalSession(
+  stripeCustomerId: string,
+  returnUrl: string,
+) {
   const session = await stripe.billingPortal.sessions.create({
     customer: stripeCustomerId,
     return_url: returnUrl,
   });
+
   return { url: session.url };
 }

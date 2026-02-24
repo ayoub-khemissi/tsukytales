@@ -10,18 +10,22 @@ import { logger } from "@/lib/utils/logger";
 export const POST = withErrorHandler(async () => {
   const session = await requireCustomer();
   const customer = await customerRepository.findById(session.user.customerId!);
+
   if (!customer) throw new AppError("Client introuvable", 404);
 
   const scheduleId = customer.metadata?.subscription_schedule_id;
+
   if (!scheduleId) throw new AppError("Aucun abonnement actif.", 400);
 
   await stripe.subscriptionSchedules.cancel(scheduleId);
 
   const meta = { ...(customer.metadata || {}) };
+
   delete meta.subscription_schedule_id;
   delete meta.subscription_product_id;
   await customerRepository.updateMetadata(customer.id, meta);
 
   logger.info(`Subscription schedule cancelled: ${scheduleId}`);
+
   return NextResponse.json({ success: true });
 });

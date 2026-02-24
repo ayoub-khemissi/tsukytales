@@ -13,5 +13,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const search = searchParams.get("search") || undefined;
 
   const result = await customerRepository.adminSearch({ page, size, search });
+
   return NextResponse.json(result);
 });

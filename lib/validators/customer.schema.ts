@@ -4,7 +4,9 @@ export const registerCustomerSchema = z.object({
   first_name: z.string().min(1, "Le prénom est requis"),
   last_name: z.string().min(1, "Le nom est requis"),
   email: z.email("Email invalide"),
-  password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+  password: z
+    .string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
 });
 
 export const updateCustomerSchema = z.object({

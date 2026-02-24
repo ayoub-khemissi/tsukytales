@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import clsx from "clsx";
 
 import { Providers } from "./providers";
+
 import { fontSans, fontSerif } from "@/config/fonts";
 import { routing } from "@/i18n/routing";
 
@@ -17,7 +18,8 @@ export const metadata: Metadata = {
     default: "Tsuky Tales — Créateur d'imaginaires",
     template: "%s | Tsuky Tales",
   },
-  description: "Livres illustrés uniques et abonnements littéraires. Tsuky Tales éveille l'imagination des petits et des grands.",
+  description:
+    "Livres illustrés uniques et abonnements littéraires. Tsuky Tales éveille l'imagination des petits et des grands.",
   metadataBase: new URL("https://tsukytales.com"),
   icons: {
     icon: "/favicon.ico",
@@ -29,7 +31,8 @@ export const metadata: Metadata = {
     alternateLocale: ["en_US", "es_ES", "de_DE", "it_IT"],
     url: "https://tsukytales.com",
     title: "Tsuky Tales — Créateur d'imaginaires",
-    description: "Livres illustrés uniques et abonnements littéraires. Tsuky Tales éveille l'imagination des petits et des grands.",
+    description:
+      "Livres illustrés uniques et abonnements littéraires. Tsuky Tales éveille l'imagination des petits et des grands.",
   },
   twitter: {
     card: "summary_large_image",
@@ -67,6 +70,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }

@@ -29,6 +29,7 @@ export default function CartPage() {
         body: JSON.stringify({ code: promoCode, total }),
       });
       const data = await res.json();
+
       if (res.ok && data.discount) {
         setDiscount(data.discount);
       } else {
@@ -47,7 +48,13 @@ export default function CartPage() {
         </div>
         <h1 className="text-2xl font-bold mb-2">{t("title")}</h1>
         <p className="text-default-500 mb-6">{t("empty")}</p>
-        <Button as={Link} href="/shop" color="primary" variant="shadow" radius="full">
+        <Button
+          as={Link}
+          color="primary"
+          href="/shop"
+          radius="full"
+          variant="shadow"
+        >
           {t("empty_cta")}
         </Button>
       </div>
@@ -62,17 +69,20 @@ export default function CartPage() {
         {/* Cart items */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
-            <Card key={item.variantId ?? item.id} className="border border-divider">
+            <Card
+              key={item.variantId ?? item.id}
+              className="border border-divider"
+            >
               <CardBody className="p-4">
                 <div className="flex gap-4">
                   <div className="w-20 h-28 bg-default-100 rounded-lg overflow-hidden relative flex-shrink-0">
                     {item.image ? (
                       <Image
-                        src={`/${item.image}`}
-                        alt={item.name}
                         fill
+                        alt={item.name}
                         className="object-cover"
                         sizes="80px"
+                        src={`/${item.image}`}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
@@ -82,11 +92,15 @@ export default function CartPage() {
                   </div>
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      <Link href={`/product/${item.slug}`} className="font-semibold text-foreground hover:text-primary transition-colors">
+                      <Link
+                        className="font-semibold text-foreground hover:text-primary transition-colors"
+                        href={`/product/${item.slug}`}
+                      >
                         {item.name}
                       </Link>
                       <p className="text-primary font-bold mt-1">
-                        {item.price}{common("currency")}
+                        {item.price}
+                        {common("currency")}
                       </p>
                     </div>
                     <div className="flex items-center justify-between mt-2">
@@ -95,29 +109,44 @@ export default function CartPage() {
                           isIconOnly
                           size="sm"
                           variant="flat"
-                          onPress={() => updateQuantity(item.id, item.quantity - 1, item.variantId)}
+                          onPress={() =>
+                            updateQuantity(
+                              item.id,
+                              item.quantity - 1,
+                              item.variantId,
+                            )
+                          }
                         >
                           -
                         </Button>
-                        <span className="w-8 text-center font-medium">{item.quantity}</span>
+                        <span className="w-8 text-center font-medium">
+                          {item.quantity}
+                        </span>
                         <Button
                           isIconOnly
                           size="sm"
                           variant="flat"
-                          onPress={() => updateQuantity(item.id, item.quantity + 1, item.variantId)}
+                          onPress={() =>
+                            updateQuantity(
+                              item.id,
+                              item.quantity + 1,
+                              item.variantId,
+                            )
+                          }
                         >
                           +
                         </Button>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="font-bold">
-                          {(item.price * item.quantity).toFixed(2)}{common("currency")}
+                          {(item.price * item.quantity).toFixed(2)}
+                          {common("currency")}
                         </span>
                         <Button
                           isIconOnly
+                          color="danger"
                           size="sm"
                           variant="light"
-                          color="danger"
                           onPress={() => removeItem(item.id, item.variantId)}
                         >
                           <TrashIcon size={16} />
@@ -131,10 +160,10 @@ export default function CartPage() {
           ))}
 
           <div className="flex justify-between items-center pt-2">
-            <Button as={Link} href="/shop" variant="light" size="sm">
+            <Button as={Link} href="/shop" size="sm" variant="light">
               &larr; {t("continue_shopping")}
             </Button>
-            <Button variant="flat" color="danger" size="sm" onPress={clearCart}>
+            <Button color="danger" size="sm" variant="flat" onPress={clearCart}>
               {t("clear")}
             </Button>
           </div>
@@ -147,40 +176,55 @@ export default function CartPage() {
               <h3 className="font-semibold text-lg">{t("subtotal")}</h3>
               <div className="flex justify-between text-sm">
                 <span className="text-default-600">{t("subtotal")}</span>
-                <span>{total.toFixed(2)}{common("currency")}</span>
+                <span>
+                  {total.toFixed(2)}
+                  {common("currency")}
+                </span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-sm text-success">
-                  <span>{t("discount_applied", { amount: discount.toFixed(2) })}</span>
+                  <span>
+                    {t("discount_applied", { amount: discount.toFixed(2) })}
+                  </span>
                 </div>
               )}
               <p className="text-xs text-default-400">{t("shipping_info")}</p>
               <Divider />
               <div className="flex justify-between text-xl font-bold">
                 <span>{common("total")}</span>
-                <span className="text-primary">{(total - discount).toFixed(2)}{common("currency")}</span>
+                <span className="text-primary">
+                  {(total - discount).toFixed(2)}
+                  {common("currency")}
+                </span>
               </div>
 
               {/* Promo code */}
               <div className="flex gap-2">
                 <Input
-                  size="sm"
                   placeholder={t("promo_code")}
+                  size="sm"
                   value={promoCode}
                   onValueChange={setPromoCode}
                 />
-                <Button size="sm" variant="flat" color="primary" onPress={applyPromo}>
+                <Button
+                  color="primary"
+                  size="sm"
+                  variant="flat"
+                  onPress={applyPromo}
+                >
                   {t("apply")}
                 </Button>
               </div>
-              {promoError && <p className="text-danger text-xs">{promoError}</p>}
+              {promoError && (
+                <p className="text-danger text-xs">{promoError}</p>
+              )}
 
               <Button
                 as={Link}
-                href="/checkout"
-                color="primary"
-                size="lg"
                 className="w-full font-semibold"
+                color="primary"
+                href="/checkout"
+                size="lg"
                 variant="shadow"
               >
                 {t("checkout")}

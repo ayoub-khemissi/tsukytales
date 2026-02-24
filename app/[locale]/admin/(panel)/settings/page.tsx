@@ -22,6 +22,7 @@ export default function SettingsPage() {
 
     if (newPassword !== confirmPassword) {
       setError(t("settings_password_error"));
+
       return;
     }
 
@@ -59,7 +60,7 @@ export default function SettingsPage() {
           </h2>
         </CardHeader>
         <CardBody className="px-6 pb-6">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             {success && (
               <div className="bg-success-50 text-success text-sm p-3 rounded-lg text-center">
                 {success}
@@ -71,34 +72,34 @@ export default function SettingsPage() {
               </div>
             )}
             <Input
+              isRequired
+              autoComplete="current-password"
               label={t("settings_current_password")}
               type="password"
               value={currentPassword}
               onValueChange={setCurrentPassword}
-              isRequired
-              autoComplete="current-password"
             />
             <Input
+              isRequired
+              autoComplete="new-password"
               label={t("settings_new_password")}
               type="password"
               value={newPassword}
               onValueChange={setNewPassword}
-              isRequired
-              autoComplete="new-password"
             />
             <Input
+              isRequired
+              autoComplete="new-password"
               label={t("settings_confirm_password")}
               type="password"
               value={confirmPassword}
               onValueChange={setConfirmPassword}
-              isRequired
-              autoComplete="new-password"
             />
             <Button
-              type="submit"
+              className="mt-2"
               color="primary"
               isLoading={loading}
-              className="mt-2"
+              type="submit"
             >
               {t("settings_submit")}
             </Button>

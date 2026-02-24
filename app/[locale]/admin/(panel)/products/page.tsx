@@ -37,12 +37,14 @@ export default function ProductsPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+
       params.set("page", String(page));
       params.set("limit", String(limit));
       if (search) params.set("search", search);
 
       const res = await fetch(`/api/admin/products?${params}`);
       const data = await res.json();
+
       setProducts(data.items || []);
       setTotalPages(Math.ceil((data.total || 0) / (data.limit || limit)));
     } finally {
@@ -58,7 +60,10 @@ export default function ProductsPage() {
     if (!window.confirm(t("products_delete_confirm"))) return;
     setDeletingId(productId);
     try {
-      const res = await fetch(`/api/admin/products/${productId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/products/${productId}`, {
+        method: "DELETE",
+      });
+
       if (res.ok) {
         await fetchProducts();
       }
@@ -74,10 +79,10 @@ export default function ProductsPage() {
         <h1 className="text-2xl font-bold">{t("products_title")}</h1>
         <Button
           as={Link}
-          href="/admin/products/new"
           color="primary"
-          variant="shadow"
+          href="/admin/products/new"
           size="sm"
+          variant="shadow"
         >
           {t("products_add")}
         </Button>
@@ -85,25 +90,27 @@ export default function ProductsPage() {
 
       {/* Search */}
       <Input
+        isClearable
         className="max-w-md"
         placeholder={t("products_search")}
         startContent={<SearchIcon className="text-default-400" />}
         value={search}
+        onClear={() => setSearch("")}
         onValueChange={(v) => {
           setSearch(v);
           setPage(1);
         }}
-        isClearable
-        onClear={() => setSearch("")}
       />
 
       {/* Content */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : products.length === 0 ? (
-        <p className="text-center text-default-500 py-20">{t("products_empty")}</p>
+        <p className="text-center text-default-500 py-20">
+          {t("products_empty")}
+        </p>
       ) : (
         <>
           {/* Desktop table */}
@@ -111,60 +118,87 @@ export default function ProductsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-divider text-left text-default-500">
-                  <th className="pb-3 pr-4 font-medium">{t("products_col_name")}</th>
-                  <th className="pb-3 pr-4 font-medium">{t("products_col_price")}</th>
-                  <th className="pb-3 pr-4 font-medium">{t("products_col_stock")}</th>
-                  <th className="pb-3 pr-4 font-medium">{t("products_col_status")}</th>
-                  <th className="pb-3 font-medium">{t("products_col_actions")}</th>
+                  <th className="pb-3 pr-4 font-medium">
+                    {t("products_col_name")}
+                  </th>
+                  <th className="pb-3 pr-4 font-medium">
+                    {t("products_col_price")}
+                  </th>
+                  <th className="pb-3 pr-4 font-medium">
+                    {t("products_col_stock")}
+                  </th>
+                  <th className="pb-3 pr-4 font-medium">
+                    {t("products_col_status")}
+                  </th>
+                  <th className="pb-3 font-medium">
+                    {t("products_col_actions")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((product) => (
-                  <tr key={product.id} className="border-b border-divider/50 hover:bg-default-50 transition-colors">
+                  <tr
+                    key={product.id}
+                    className="border-b border-divider/50 hover:bg-default-50 transition-colors"
+                  >
                     <td className="py-3 pr-4">
-                      <Link href={`/admin/products/${product.id}`} className="text-primary font-medium hover:underline">
+                      <Link
+                        className="text-primary font-medium hover:underline"
+                        href={`/admin/products/${product.id}`}
+                      >
                         {product.name}
                       </Link>
                     </td>
                     <td className="py-3 pr-4 font-medium">
-                      {Number(product.price).toFixed(2)}{common("currency")}
+                      {Number(product.price).toFixed(2)}
+                      {common("currency")}
                     </td>
                     <td className="py-3 pr-4">
                       <Chip
+                        color={product.stock > 0 ? "success" : "danger"}
                         size="sm"
                         variant="flat"
-                        color={product.stock > 0 ? "success" : "danger"}
                       >
                         {product.stock}
                       </Chip>
                     </td>
                     <td className="py-3 pr-4">
                       <Chip
+                        color={
+                          product.status === "active" ? "success" : "default"
+                        }
                         size="sm"
                         variant="flat"
-                        color={product.status === "active" ? "success" : "default"}
                       >
-                        {t(product.status === "active" ? "products_status_active" : "products_status_draft")}
+                        {t(
+                          product.status === "active"
+                            ? "products_status_active"
+                            : "products_status_draft",
+                        )}
                       </Chip>
                     </td>
                     <td className="py-3">
                       <div className="flex gap-2">
                         <Button
                           as={Link}
+                          color="primary"
                           href={`/admin/products/${product.id}`}
                           size="sm"
                           variant="light"
-                          color="primary"
                         >
                           {t("products_edit")}
                         </Button>
                         <Button
-                          size="sm"
-                          variant="light"
                           color="danger"
                           isLoading={deletingId === product.id}
+                          size="sm"
+                          startContent={
+                            deletingId !== product.id ? (
+                              <TrashIcon size={14} />
+                            ) : undefined
+                          }
+                          variant="light"
                           onPress={() => handleDelete(product.id)}
-                          startContent={deletingId !== product.id ? <TrashIcon size={14} /> : undefined}
                         >
                           {common("delete")}
                         </Button>
@@ -182,19 +216,31 @@ export default function ProductsPage() {
               <Card key={product.id} className="border border-divider">
                 <CardBody className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <Link href={`/admin/products/${product.id}`} className="font-semibold text-primary hover:underline">
+                    <Link
+                      className="font-semibold text-primary hover:underline"
+                      href={`/admin/products/${product.id}`}
+                    >
                       {product.name}
                     </Link>
                     <Chip
+                      color={
+                        product.status === "active" ? "success" : "default"
+                      }
                       size="sm"
                       variant="flat"
-                      color={product.status === "active" ? "success" : "default"}
                     >
-                      {t(product.status === "active" ? "products_status_active" : "products_status_draft")}
+                      {t(
+                        product.status === "active"
+                          ? "products_status_active"
+                          : "products_status_draft",
+                      )}
                     </Chip>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-bold">{Number(product.price).toFixed(2)}{common("currency")}</span>
+                    <span className="font-bold">
+                      {Number(product.price).toFixed(2)}
+                      {common("currency")}
+                    </span>
                     <span className="text-default-500">
                       {t("products_col_stock")}: {product.stock}
                     </span>
@@ -202,19 +248,19 @@ export default function ProductsPage() {
                   <div className="flex gap-2 pt-1">
                     <Button
                       as={Link}
+                      className="flex-1"
+                      color="primary"
                       href={`/admin/products/${product.id}`}
                       size="sm"
                       variant="flat"
-                      color="primary"
-                      className="flex-1"
                     >
                       {t("products_edit")}
                     </Button>
                     <Button
-                      size="sm"
-                      variant="flat"
                       color="danger"
                       isLoading={deletingId === product.id}
+                      size="sm"
+                      variant="flat"
                       onPress={() => handleDelete(product.id)}
                     >
                       <TrashIcon size={14} />
@@ -229,11 +275,11 @@ export default function ProductsPage() {
           {totalPages > 1 && (
             <div className="flex justify-center pt-4">
               <Pagination
-                total={totalPages}
-                page={page}
-                onChange={setPage}
-                color="primary"
                 showControls
+                color="primary"
+                page={page}
+                total={totalPages}
+                onChange={setPage}
               />
             </div>
           )}

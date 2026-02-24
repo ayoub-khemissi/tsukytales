@@ -31,6 +31,7 @@ export default function SubscriptionPage() {
   const { data: session } = useSession();
   const [products, setProducts] = useState<SubscriptionProduct[]>([]);
   const [loading, setLoading] = useState(true);
+
   useScrollReveal();
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function SubscriptionPage() {
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
+
     return d.toLocaleDateString("fr-FR", {
       day: "2-digit",
       month: "2-digit",
@@ -63,7 +65,10 @@ export default function SubscriptionPage() {
             </span>
             <h1
               className="font-heading font-bold text-primary dark:text-white leading-none mb-8"
-              style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", letterSpacing: "-1px" }}
+              style={{
+                fontSize: "clamp(2.5rem, 6vw, 4.5rem)",
+                letterSpacing: "-1px",
+              }}
             >
               {t("hero_title")}
             </h1>
@@ -79,7 +84,7 @@ export default function SubscriptionPage() {
         <div className="container mx-auto max-w-[1200px] px-6">
           {loading ? (
             <div className="flex justify-center py-20">
-              <Spinner size="lg" color="primary" />
+              <Spinner color="primary" size="lg" />
             </div>
           ) : products.length === 0 ? (
             <p className="text-center text-default-500 text-lg">
@@ -90,19 +95,18 @@ export default function SubscriptionPage() {
               {products.map((product, index) => (
                 <PlanCard
                   key={product.id}
-                  product={product}
-                  index={index}
-                  session={session}
-                  t={t}
                   common={common}
                   formatDate={formatDate}
+                  index={index}
+                  product={product}
+                  session={session}
+                  t={t}
                 />
               ))}
             </div>
           )}
         </div>
       </section>
-
     </>
   );
 }
@@ -134,7 +138,8 @@ function PlanCard({
       className="step-card-reveal w-full max-w-[400px]"
       style={{ transitionDelay: `${index * 0.15}s` }}
     >
-      <div className="step-card relative bg-white dark:bg-gray-900 rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-[750px]"
+      <div
+        className="step-card relative bg-white dark:bg-gray-900 rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-[750px]"
         style={{ padding: "5rem 3rem 4rem" }}
       >
         {/* Subscription badge */}
@@ -164,12 +169,12 @@ function PlanCard({
         {/* Logo / Image */}
         <div className="mx-auto mb-6 w-[100px] h-[100px] rounded-full bg-[#f8eef6] dark:bg-primary/20 border-3 border-primary shadow-md flex items-center justify-center overflow-hidden">
           <Image
-            src="/assets/img/hero_logo.png"
             alt={product.name}
-            width={100}
-            height={100}
             className="object-cover scale-[1.8]"
+            height={100}
+            src="/assets/img/hero_logo.png"
             style={{ objectPosition: "center 18%" }}
+            width={100}
           />
         </div>
 
@@ -193,7 +198,8 @@ function PlanCard({
           {/* Price */}
           <div className="mb-4">
             <span className="font-heading text-[2rem] font-bold text-primary">
-              {price.toFixed(2).replace(".", ",")}{common("currency")}
+              {price.toFixed(2).replace(".", ",")}
+              {common("currency")}
             </span>
             {product.is_subscription && (
               <span className="text-text-light dark:text-gray-400 text-sm ml-1">
@@ -205,7 +211,7 @@ function PlanCard({
           {/* Subscription dates */}
           {product.is_subscription && dates.length > 0 && (
             <p className="text-[0.85rem] text-text-light dark:text-gray-400 mb-4">
-              <FontAwesomeIcon icon={faCalendarAlt} className="mr-2" />
+              <FontAwesomeIcon className="mr-2" icon={faCalendarAlt} />
               {t("billing_dates")} : {dates.map(formatDate).join(" · ")}
             </p>
           )}
@@ -214,23 +220,23 @@ function PlanCard({
           {product.is_subscription ? (
             <Button
               as={Link}
-              href={session?.user ? `/product/${product.slug}` : "/login"}
-              size="lg"
-              radius="full"
-              isDisabled={isOutOfStock}
               className="btn-brand bg-primary font-semibold w-full"
+              href={session?.user ? `/product/${product.slug}` : "/login"}
+              isDisabled={isOutOfStock}
+              radius="full"
+              size="lg"
             >
-              <FontAwesomeIcon icon={faSyncAlt} className="mr-2" />
+              <FontAwesomeIcon className="mr-2" icon={faSyncAlt} />
               {t("subscribe_cta")}
             </Button>
           ) : (
             <Button
               as={Link}
-              href={`/product/${product.slug}`}
-              size="lg"
-              radius="full"
-              isDisabled={isOutOfStock}
               className="btn-brand bg-primary font-semibold w-full"
+              href={`/product/${product.slug}`}
+              isDisabled={isOutOfStock}
+              radius="full"
+              size="lg"
             >
               {t("add_to_cart")}
             </Button>

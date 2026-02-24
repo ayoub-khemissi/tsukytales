@@ -15,24 +15,31 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const customerId = session.user.customerId!;
 
   const customer = await customerRepository.findById(customerId);
+
   if (!customer) throw new AppError("Client introuvable", 404);
 
-  const stripeCustomerId = await stripeCustomerService.getOrCreateStripeCustomer(customer);
+  const stripeCustomerId =
+    await stripeCustomerService.getOrCreateStripeCustomer(customer);
   const setupIntent = await stripe.setupIntents.retrieve(setup_intent_id);
+
   if (setupIntent.status !== "succeeded") {
     throw new AppError("Le moyen de paiement n'a pas été confirmé.", 400);
   }
 
   // Set default payment method
   await stripe.customers.update(stripeCustomerId, {
-    invoice_settings: { default_payment_method: setupIntent.payment_method as string },
+    invoice_settings: {
+      default_payment_method: setupIntent.payment_method as string,
+    },
   });
 
   const meta = setupIntent.metadata!;
   const priceId = meta.stripe_price_id;
   const dates: string[] = JSON.parse(meta.subscription_dates);
 
-  const timestamps = dates.map((d) => Math.floor(new Date(d + "T00:00:00Z").getTime() / 1000));
+  const timestamps = dates.map((d) =>
+    Math.floor(new Date(d + "T00:00:00Z").getTime() / 1000),
+  );
   const phases = timestamps.map((start, i) => ({
     items: [{ price: priceId }],
     end_date: timestamps[i + 1] || start + 90 * 24 * 3600,
@@ -48,6 +55,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Store in customer metadata
   const shippingInfo = meta.shipping ? JSON.parse(meta.shipping) : {};
+
   await customerRepository.updateMetadata(customerId, {
     ...(customer.metadata || {}),
     subscription_schedule_id: schedule.id,
@@ -58,6 +66,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Decrement stock
   await productRepository.decrementStock(parseInt(meta.product_id));
 
-  logger.info(`Subscription schedule created: ${schedule.id} for customer ${customerId}`);
+  logger.info(
+    `Subscription schedule created: ${schedule.id} for customer ${customerId}`,
+  );
+
   return NextResponse.json({ success: true, schedule_id: schedule.id });
 });

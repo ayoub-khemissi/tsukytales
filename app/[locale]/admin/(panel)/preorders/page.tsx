@@ -76,11 +76,7 @@ export default function PreordersPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{t("preorders_title")}</h1>
         {preorders.length > 0 && (
-          <Button
-            color="primary"
-            isLoading={shipping}
-            onPress={handleShipAll}
-          >
+          <Button color="primary" isLoading={shipping} onPress={handleShipAll}>
             {t("preorders_ship_all")}
           </Button>
         )}
@@ -88,7 +84,7 @@ export default function PreordersPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : preorders.length === 0 ? (
         <Card className="border border-divider">
@@ -121,7 +117,7 @@ export default function PreordersPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Chip variant="flat" size="sm" color="warning">
+                    <Chip color="warning" size="sm" variant="flat">
                       {order.status}
                     </Chip>
                   </TableCell>
@@ -136,11 +132,11 @@ export default function PreordersPage() {
           {totalPages > 1 && (
             <div className="flex justify-center">
               <Pagination
-                total={totalPages}
-                page={page}
-                onChange={setPage}
-                color="primary"
                 showControls
+                color="primary"
+                page={page}
+                total={totalPages}
+                onChange={setPage}
               />
             </div>
           )}

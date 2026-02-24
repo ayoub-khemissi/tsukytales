@@ -47,26 +47,53 @@ export default function LoginPage() {
           <p className="text-sm text-default-500">{t("login_subtitle")}</p>
         </CardHeader>
         <CardBody>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-danger-50 text-danger text-sm p-3 rounded-lg">{error}</div>
+              <div className="bg-danger-50 text-danger text-sm p-3 rounded-lg">
+                {error}
+              </div>
             )}
-            <Input label={t("email")} type="email" value={email} onValueChange={setEmail} isRequired autoComplete="email" />
-            <Input label={t("password")} type="password" value={password} onValueChange={setPassword} isRequired autoComplete="current-password" />
-            <Button type="submit" color="primary" isLoading={loading} className="mt-2">
+            <Input
+              isRequired
+              autoComplete="email"
+              label={t("email")}
+              type="email"
+              value={email}
+              onValueChange={setEmail}
+            />
+            <Input
+              isRequired
+              autoComplete="current-password"
+              label={t("password")}
+              type="password"
+              value={password}
+              onValueChange={setPassword}
+            />
+            <Button
+              className="mt-2"
+              color="primary"
+              isLoading={loading}
+              type="submit"
+            >
               {t("login_button")}
             </Button>
           </form>
 
           <Divider className="my-6" />
 
-          <Button variant="bordered" className="w-full" onPress={() => signIn("google", { callbackUrl })}>
+          <Button
+            className="w-full"
+            variant="bordered"
+            onPress={() => signIn("google", { callbackUrl })}
+          >
             {t("or_continue_with")} {t("google")}
           </Button>
 
           <p className="text-sm text-center mt-6 text-default-500">
             {t("no_account")}{" "}
-            <Link href="/register" className="text-primary font-medium">{t("register_button")}</Link>
+            <Link className="text-primary font-medium" href="/register">
+              {t("register_button")}
+            </Link>
           </p>
         </CardBody>
       </Card>

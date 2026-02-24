@@ -15,26 +15,33 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const customerId = session.user.customerId!;
 
   const product = await productRepository.findById(product_id);
+
   if (!product || !product.is_subscription) {
     throw new AppError("Ce produit n'est pas disponible en abonnement.", 400);
   }
   if (product.stock <= 0) throw new AppError("Ce produit est épuisé.", 400);
 
   const customer = await customerRepository.findById(customerId);
+
   if (!customer) throw new AppError("Client introuvable", 404);
   if (customer.metadata?.subscription_schedule_id) {
     throw new AppError("Vous avez déjà un abonnement actif.", 400);
   }
 
-  const stripeCustomerId = await stripeCustomerService.getOrCreateStripeCustomer(customer);
+  const stripeCustomerId =
+    await stripeCustomerService.getOrCreateStripeCustomer(customer);
 
   // Calculate shipping
   const shipCountry = (shipping?.country || "FR").toUpperCase();
   const shipMethod = shipping?.method || "home";
-  const shippingRates = getShippingRates(Number(product.weight) || 1.0, shipCountry);
-  const shippingCost = shipMethod === "home" || !shippingRates.relay
-    ? shippingRates.home.price
-    : shippingRates.relay.price;
+  const shippingRates = getShippingRates(
+    Number(product.weight) || 1.0,
+    shipCountry,
+  );
+  const shippingCost =
+    shipMethod === "home" || !shippingRates.relay
+      ? shippingRates.home.price
+      : shippingRates.relay.price;
   const totalPerQuarter = Number(product.subscription_price) + shippingCost;
 
   // Create Stripe product + price

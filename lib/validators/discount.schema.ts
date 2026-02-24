@@ -1,7 +1,10 @@
 import { z } from "zod/v4";
 
 export const createDiscountSchema = z.object({
-  code: z.string().min(1, "Le code est requis").transform((v) => v.toUpperCase()),
+  code: z
+    .string()
+    .min(1, "Le code est requis")
+    .transform((v) => v.toUpperCase()),
   rule: z.object({
     type: z.enum(["percentage", "fixed"]),
     value: z.number().positive("La valeur doit être positive"),

@@ -1,6 +1,8 @@
-import { pool } from "@/lib/db/connection";
-import { BaseRepository } from "./base.repository";
 import type { CartRow } from "@/types/db.types";
+
+import { BaseRepository } from "./base.repository";
+
+import { pool } from "@/lib/db/connection";
 
 class CartRepository extends BaseRepository<CartRow> {
   constructor() {
@@ -12,6 +14,7 @@ class CartRepository extends BaseRepository<CartRow> {
       "SELECT * FROM carts WHERE id = ? LIMIT 1",
       [id],
     );
+
     return rows[0] ?? null;
   }
 
@@ -20,6 +23,7 @@ class CartRepository extends BaseRepository<CartRow> {
       "SELECT * FROM carts WHERE customer_id = ? AND completed_at IS NULL ORDER BY createdAt DESC LIMIT 1",
       [customerId],
     );
+
     return rows[0] ?? null;
   }
 }

@@ -51,13 +51,16 @@ const CATEGORY_KEYS: Category[] = ["social", "web", "print"];
 
 function downloadBanner(width: number, height: number, filename: string) {
   const canvas = document.createElement("canvas");
+
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
+
   if (!ctx) return;
 
   // Gradient background
   const grad = ctx.createLinearGradient(0, 0, width, height);
+
   grad.addColorStop(0, "#581668");
   grad.addColorStop(1, "#7a218f");
   ctx.fillStyle = grad;
@@ -65,6 +68,7 @@ function downloadBanner(width: number, height: number, filename: string) {
 
   // Title
   const titleSize = Math.max(16, Math.round(width * 0.05));
+
   ctx.font = `bold ${titleSize}px sans-serif`;
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
@@ -73,14 +77,20 @@ function downloadBanner(width: number, height: number, filename: string) {
 
   // Tagline
   const tagSize = Math.max(10, Math.round(titleSize * 0.45));
+
   ctx.font = `${tagSize}px sans-serif`;
   ctx.fillStyle = "rgba(255,255,255,0.6)";
-  ctx.fillText("Cr\u00e9ateur d\u2019imaginaires", width / 2, height / 2 + titleSize * 0.6);
+  ctx.fillText(
+    "Cr\u00e9ateur d\u2019imaginaires",
+    width / 2,
+    height / 2 + titleSize * 0.6,
+  );
 
   canvas.toBlob((blob) => {
     if (!blob) return;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -150,6 +160,7 @@ export default function BrandingPage() {
   /* Sync resize observer -> inputs */
   useEffect(() => {
     const el = resizableRef.current;
+
     if (!el) return;
 
     const observer = new ResizeObserver((entries) => {
@@ -157,6 +168,7 @@ export default function BrandingPage() {
       for (const entry of entries) {
         const w = Math.round(entry.contentRect.width);
         const h = Math.round(entry.contentRect.height);
+
         if (w > 0 && h > 0) {
           setCustomWidth(w);
           setCustomHeight(h);
@@ -180,6 +192,7 @@ export default function BrandingPage() {
   /* Sync inputs -> resizable div */
   useEffect(() => {
     const el = resizableRef.current;
+
     if (!el) return;
 
     isObserving.current = false;
@@ -198,11 +211,13 @@ export default function BrandingPage() {
 
   const handleWidthChange = useCallback((val: string) => {
     const n = parseInt(val, 10);
+
     if (!isNaN(n)) setCustomWidth(clamp(n));
   }, []);
 
   const handleHeightChange = useCallback((val: string) => {
     const n = parseInt(val, 10);
+
     if (!isNaN(n)) setCustomHeight(clamp(n));
   }, []);
 
@@ -237,7 +252,9 @@ export default function BrandingPage() {
       {/* ============================================================ */}
       <section className="space-y-8">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl md:text-3xl font-bold">{t("banners_title")}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold">
+            {t("banners_title")}
+          </h2>
           <p className="text-default-500">{t("banners_subtitle")}</p>
         </div>
 
@@ -246,9 +263,9 @@ export default function BrandingPage() {
           {CATEGORY_KEYS.map((cat) => (
             <Chip
               key={cat}
-              variant={activeCategory === cat ? "solid" : "bordered"}
-              color="secondary"
               className="cursor-pointer select-none"
+              color="secondary"
+              variant={activeCategory === cat ? "solid" : "bordered"}
               onClick={() => setActiveCategory(cat)}
             >
               {t(categoryTranslationKey[cat])}
@@ -261,16 +278,18 @@ export default function BrandingPage() {
           {PRESETS[activeCategory].map((preset) => (
             <Card key={preset.label} className="border border-divider">
               <CardHeader className="flex flex-col items-start pb-0">
-                <h3 className="font-semibold text-foreground">{preset.label}</h3>
+                <h3 className="font-semibold text-foreground">
+                  {preset.label}
+                </h3>
                 <span className="text-xs text-default-400">
                   {preset.width} &times; {preset.height} px
                 </span>
               </CardHeader>
               <CardBody className="flex flex-col items-center gap-4">
-                <BannerPreview width={preset.width} height={preset.height} />
+                <BannerPreview height={preset.height} width={preset.width} />
                 <Button
-                  size="sm"
                   color="primary"
+                  size="sm"
                   variant="flat"
                   onPress={() =>
                     downloadBanner(
@@ -301,32 +320,32 @@ export default function BrandingPage() {
         {/* Controls */}
         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 max-w-xl mx-auto">
           <Input
-            type="number"
+            className="flex-1"
+            endContent={<span className="text-default-400 text-xs">px</span>}
             label={t("width")}
-            min={100}
             max={5000}
+            min={100}
+            type="number"
             value={String(customWidth)}
             onValueChange={handleWidthChange}
-            endContent={<span className="text-default-400 text-xs">px</span>}
-            className="flex-1"
           />
           <Input
-            type="number"
+            className="flex-1"
+            endContent={<span className="text-default-400 text-xs">px</span>}
             label={t("height")}
-            min={100}
             max={5000}
+            min={100}
+            type="number"
             value={String(customHeight)}
             onValueChange={handleHeightChange}
-            endContent={<span className="text-default-400 text-xs">px</span>}
-            className="flex-1"
           />
         </div>
 
         <div className="flex flex-col items-center gap-2">
           <Checkbox
+            color="secondary"
             isSelected={locked}
             onValueChange={setLocked}
-            color="secondary"
           >
             {t("lock_resize")}
           </Checkbox>
@@ -350,13 +369,17 @@ export default function BrandingPage() {
           >
             <span
               className="font-bold text-white select-none"
-              style={{ fontSize: Math.max(12, Math.min(customWidth, 600) * 0.05) }}
+              style={{
+                fontSize: Math.max(12, Math.min(customWidth, 600) * 0.05),
+              }}
             >
               TSUKY TALES
             </span>
             <span
               className="text-white/60 select-none"
-              style={{ fontSize: Math.max(8, Math.min(customWidth, 600) * 0.028) }}
+              style={{
+                fontSize: Math.max(8, Math.min(customWidth, 600) * 0.028),
+              }}
             >
               Cr&eacute;ateur d&rsquo;imaginaires
             </span>

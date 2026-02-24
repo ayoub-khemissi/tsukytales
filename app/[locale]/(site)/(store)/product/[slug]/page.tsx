@@ -50,7 +50,7 @@ export default function ProductPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-32">
-        <Spinner size="lg" color="primary" />
+        <Spinner color="primary" size="lg" />
       </div>
     );
   }
@@ -59,7 +59,7 @@ export default function ProductPage() {
     return (
       <div className="container mx-auto max-w-7xl px-6 py-20 text-center">
         <h1 className="text-2xl font-bold mb-4">{t("not_found")}</h1>
-        <Button as={Link} href="/shop" variant="bordered" color="primary">
+        <Button as={Link} color="primary" href="/shop" variant="bordered">
           {t("back_to_shop")}
         </Button>
       </div>
@@ -68,7 +68,7 @@ export default function ProductPage() {
 
   return (
     <div className="container mx-auto max-w-7xl px-6 py-12">
-      <Button as={Link} href="/shop" variant="light" size="sm" className="mb-6">
+      <Button as={Link} className="mb-6" href="/shop" size="sm" variant="light">
         &larr; {t("back_to_shop")}
       </Button>
 
@@ -77,12 +77,12 @@ export default function ProductPage() {
         <div className="aspect-[3/4] bg-default-100 rounded-2xl overflow-hidden relative">
           {product.image ? (
             <Image
-              src={`/${product.image}`}
-              alt={product.name}
               fill
+              priority
+              alt={product.name}
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
-              priority
+              src={`/${product.image}`}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -95,25 +95,35 @@ export default function ProductPage() {
         <div className="flex flex-col">
           <div className="flex items-start gap-2 mb-2">
             {product.is_preorder && (
-              <Chip color="warning" size="sm">{common("preorder")}</Chip>
+              <Chip color="warning" size="sm">
+                {common("preorder")}
+              </Chip>
             )}
             {product.stock > 0 ? (
-              <Chip color="success" variant="flat" size="sm">{common("in_stock")}</Chip>
+              <Chip color="success" size="sm" variant="flat">
+                {common("in_stock")}
+              </Chip>
             ) : (
-              <Chip color="danger" variant="flat" size="sm">{common("out_of_stock")}</Chip>
+              <Chip color="danger" size="sm" variant="flat">
+                {common("out_of_stock")}
+              </Chip>
             )}
           </div>
 
-          <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            {product.name}
+          </h1>
           <p className="text-3xl font-bold text-primary mb-6">
-            {product.price}{common("currency")}
+            {product.price}
+            {common("currency")}
           </p>
 
           <Button
-            color={added ? "success" : "primary"}
-            size="lg"
             className="mb-8 font-semibold"
+            color={added ? "success" : "primary"}
             isDisabled={product.stock <= 0}
+            size="lg"
+            startContent={<CartIcon size={20} />}
             onPress={() => {
               addItem({
                 id: product.id,
@@ -126,7 +136,6 @@ export default function ProductPage() {
               setAdded(true);
               setTimeout(() => setAdded(false), 2000);
             }}
-            startContent={<CartIcon size={20} />}
           >
             {t(added ? "added" : "add_to_cart")}
           </Button>
@@ -148,7 +157,9 @@ export default function ProductPage() {
               <div className="text-default-500">{t("weight")}</div>
               <div>{product.weight} kg</div>
               <div className="text-default-500">{t("dimensions")}</div>
-              <div>{product.length} x {product.width} x {product.height} cm</div>
+              <div>
+                {product.length} x {product.width} x {product.height} cm
+              </div>
             </div>
           </div>
         </div>

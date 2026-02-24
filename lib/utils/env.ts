@@ -19,7 +19,9 @@ const envSchema = z.object({
   DB_HOST: z.string().min(1),
   DB_PORT: z.coerce.number().default(3306),
   DB_USER: z.string().min(1),
-  DB_PASS: z.preprocess((val) => (val === "" ? undefined : val), z.string().optional()).default(""),
+  DB_PASS: z
+    .preprocess((val) => (val === "" ? undefined : val), z.string().optional())
+    .default(""),
   DB_NAME: z.string().min(1),
 
   // NextAuth
@@ -71,12 +73,16 @@ function validateEnv(): Env {
 
   if (!result.success) {
     const formatted = z.prettifyError(result.error);
+
     if (process.env.NODE_ENV === "production") {
+      // eslint-disable-next-line no-console
       console.error("Invalid environment variables:", formatted);
       process.exit(1);
     } else {
+      // eslint-disable-next-line no-console
       console.warn("Warning — missing/invalid env vars:", formatted);
     }
+
     return process.env as unknown as Env;
   }
 

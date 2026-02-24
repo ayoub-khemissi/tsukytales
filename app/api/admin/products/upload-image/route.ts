@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
+
+import { NextRequest, NextResponse } from "next/server";
 
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
@@ -13,6 +14,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const formData = await req.formData();
   const file = formData.get("image") as File | null;
+
   if (!file) throw new AppError("Aucune image reçue", 400);
 
   // Validate file
@@ -34,5 +36,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   fs.writeFileSync(path.join(productsImgDir, filename), buffer);
 
-  return NextResponse.json({ success: true, url: `assets/img/products/${filename}` });
+  return NextResponse.json({
+    success: true,
+    url: `assets/img/products/${filename}`,
+  });
 });

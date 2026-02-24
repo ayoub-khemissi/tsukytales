@@ -32,6 +32,7 @@ export const Navbar = () => {
       setScrolled(window.scrollY > 50);
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -39,26 +40,26 @@ export const Navbar = () => {
 
   return (
     <HeroUINavbar
-      maxWidth="xl"
       shouldHideOnScroll
       classNames={{
         base: `navbar-shrink bg-background/90 backdrop-blur-[15px] border-b border-[rgba(88,22,104,0.05)] transition-all duration-300 ${scrolled ? "py-1 shadow-md bg-background/95" : "py-2"}`,
       }}
+      maxWidth="xl"
     >
       {/* Left nav */}
       <NavbarContent className="hidden lg:flex basis-1/3" justify="start">
         <NavbarItem>
           <Link
-            href="/"
             className="text-[0.95rem] font-medium uppercase tracking-[0.5px] text-foreground hover:text-primary transition-colors"
+            href="/"
           >
             {t("home")}
           </Link>
         </NavbarItem>
         <NavbarItem>
           <Link
-            href="/about"
             className="text-[0.95rem] font-medium uppercase tracking-[0.5px] text-foreground hover:text-primary transition-colors"
+            href="/about"
           >
             {t("about")}
           </Link>
@@ -66,15 +67,15 @@ export const Navbar = () => {
       </NavbarContent>
 
       {/* Center logo */}
-      <NavbarContent justify="center" className="basis-1/3">
-        <Link href="/" className="flex items-center">
+      <NavbarContent className="basis-1/3" justify="center">
+        <Link className="flex items-center" href="/">
           <Image
-            src="/assets/img/logo.png"
-            alt="Tsuky Tales"
-            width={logoSize}
-            height={logoSize}
-            className="transition-all duration-300 object-contain"
             priority
+            alt="Tsuky Tales"
+            className="transition-all duration-300 object-contain"
+            height={logoSize}
+            src="/assets/img/logo.png"
+            width={logoSize}
           />
         </Link>
       </NavbarContent>
@@ -83,16 +84,16 @@ export const Navbar = () => {
       <NavbarContent className="hidden lg:flex basis-1/3" justify="end">
         <NavbarItem>
           <Link
-            href="/contact"
             className="text-[0.95rem] font-medium uppercase tracking-[0.5px] text-foreground hover:text-primary transition-colors"
+            href="/contact"
           >
             {t("contact")}
           </Link>
         </NavbarItem>
         <NavbarItem>
           <Link
-            href="/subscription"
             className="text-[0.95rem] font-medium uppercase tracking-[0.5px] text-foreground hover:text-primary transition-colors"
+            href="/subscription"
           >
             {t("subscription")}
           </Link>
@@ -102,25 +103,40 @@ export const Navbar = () => {
           <ThemeSwitch />
           <Link href="/cart">
             <Badge
-              content={itemCount > 0 ? itemCount : undefined}
               color="primary"
-              size="sm"
+              content={itemCount > 0 ? itemCount : undefined}
               shape="circle"
+              size="sm"
             >
-              <Button isIconOnly variant="light" aria-label={t("cart")} size="sm">
+              <Button
+                isIconOnly
+                aria-label={t("cart")}
+                size="sm"
+                variant="light"
+              >
                 <CartIcon className="text-default-500" />
               </Button>
             </Badge>
           </Link>
           {session?.user ? (
             <Link href="/account">
-              <Button isIconOnly variant="light" aria-label={t("account")} size="sm">
+              <Button
+                isIconOnly
+                aria-label={t("account")}
+                size="sm"
+                variant="light"
+              >
                 <UserIcon className="text-default-500" />
               </Button>
             </Link>
           ) : (
             <Link href="/login">
-              <Button isIconOnly variant="light" aria-label={t("login")} size="sm">
+              <Button
+                isIconOnly
+                aria-label={t("login")}
+                size="sm"
+                variant="light"
+              >
                 <UserIcon className="text-default-500" />
               </Button>
             </Link>
@@ -132,10 +148,10 @@ export const Navbar = () => {
       <NavbarContent className="lg:hidden basis-1 pl-4" justify="end">
         <Link href="/cart">
           <Badge
-            content={itemCount > 0 ? itemCount : undefined}
             color="primary"
-            size="sm"
+            content={itemCount > 0 ? itemCount : undefined}
             shape="circle"
+            size="sm"
           >
             <CartIcon className="text-default-500" size={20} />
           </Badge>
@@ -147,44 +163,47 @@ export const Navbar = () => {
       <NavbarMenu>
         <div className="mx-4 mt-2 flex flex-col gap-2">
           <NavbarMenuItem>
-            <Link href="/" className="w-full text-lg text-foreground">
+            <Link className="w-full text-lg text-foreground" href="/">
               {t("home")}
             </Link>
           </NavbarMenuItem>
           <NavbarMenuItem>
-            <Link href="/shop" className="w-full text-lg text-foreground">
+            <Link className="w-full text-lg text-foreground" href="/shop">
               {t("shop")}
             </Link>
           </NavbarMenuItem>
           <NavbarMenuItem>
-            <Link href="/subscription" className="w-full text-lg text-foreground">
+            <Link
+              className="w-full text-lg text-foreground"
+              href="/subscription"
+            >
               {t("subscription")}
             </Link>
           </NavbarMenuItem>
           <NavbarMenuItem>
-            <Link href="/about" className="w-full text-lg text-foreground">
+            <Link className="w-full text-lg text-foreground" href="/about">
               {t("about")}
             </Link>
           </NavbarMenuItem>
           <NavbarMenuItem>
-            <Link href="/contact" className="w-full text-lg text-foreground">
+            <Link className="w-full text-lg text-foreground" href="/contact">
               {t("contact")}
             </Link>
           </NavbarMenuItem>
           <NavbarMenuItem>
-            <Link href="/cart" className="w-full text-lg text-foreground">
+            <Link className="w-full text-lg text-foreground" href="/cart">
               {t("cart")}
             </Link>
           </NavbarMenuItem>
           {session?.user ? (
             <NavbarMenuItem>
-              <Link href="/account" className="w-full text-lg text-primary">
+              <Link className="w-full text-lg text-primary" href="/account">
                 {t("account")}
               </Link>
             </NavbarMenuItem>
           ) : (
             <NavbarMenuItem>
-              <Link href="/login" className="w-full text-lg text-primary">
+              <Link className="w-full text-lg text-primary" href="/login">
                 {t("login")}
               </Link>
             </NavbarMenuItem>

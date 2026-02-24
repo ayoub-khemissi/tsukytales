@@ -12,6 +12,7 @@ export function validate<T extends z.ZodType>(
     const messages = result.error.issues
       .map((issue) => issue.message)
       .join(", ");
+
     throw new AppError(messages, 400);
   }
 

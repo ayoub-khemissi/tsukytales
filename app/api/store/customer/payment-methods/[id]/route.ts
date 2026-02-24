@@ -10,9 +10,12 @@ export const DELETE = withErrorHandler(async (_req: NextRequest, context) => {
   const session = await requireCustomer();
   const { id } = await context!.params;
   const customer = await customerRepository.findById(session.user.customerId!);
+
   if (!customer) throw new AppError("Client introuvable", 404);
 
-  const stripeCustomerId = await stripeCustomerService.getOrCreateStripeCustomer(customer);
+  const stripeCustomerId =
+    await stripeCustomerService.getOrCreateStripeCustomer(customer);
+
   await stripeCustomerService.detachPaymentMethod(id, stripeCustomerId);
 
   return NextResponse.json({ success: true });

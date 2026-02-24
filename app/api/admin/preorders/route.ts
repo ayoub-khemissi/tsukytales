@@ -14,8 +14,9 @@ export const GET = withErrorHandler(async () => {
   });
 
   const preorders = orders.filter(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (o) => !(o.metadata as any)?.subscription && o.items?.some((i: any) => i.is_preorder),
+    (o) =>
+      !(o.metadata as any)?.subscription &&
+      o.items?.some((i: any) => i.is_preorder),
   );
 
   return NextResponse.json(preorders);

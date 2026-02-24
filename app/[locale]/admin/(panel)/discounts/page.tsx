@@ -49,7 +49,9 @@ export default function DiscountsPage() {
   // Create form state
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [formCode, setFormCode] = useState("");
-  const [formType, setFormType] = useState<"percentage" | "fixed">("percentage");
+  const [formType, setFormType] = useState<"percentage" | "fixed">(
+    "percentage",
+  );
   const [formValue, setFormValue] = useState("");
   const [formMaxUsage, setFormMaxUsage] = useState("");
   const [formExpiresAt, setFormExpiresAt] = useState("");
@@ -57,19 +59,26 @@ export default function DiscountsPage() {
 
   // Delete confirmation
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onOpenChange: onDeleteOpenChange,
+  } = useDisclosure();
   const [deleting, setDeleting] = useState(false);
 
   const fetchDiscounts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+
       params.set("page", String(page));
       params.set("limit", String(limit));
 
       const res = await fetch(`/api/admin/discounts?${params}`);
+
       if (res.ok) {
         const data: DiscountsResponse = await res.json();
+
         setDiscounts(data.items || []);
         setTotalPages(Math.ceil((data.total || 0) / limit) || 1);
       }
@@ -98,6 +107,7 @@ export default function DiscountsPage() {
         type: formType,
         value: Number(formValue),
       };
+
       if (formMaxUsage) body.max_usage = Number(formMaxUsage);
       if (formExpiresAt) body.expires_at = formExpiresAt;
 
@@ -134,6 +144,7 @@ export default function DiscountsPage() {
     if (discount.type === "percentage") {
       return `${discount.value}%`;
     }
+
     return `${Number(discount.value).toFixed(2)}${common("currency")}`;
   };
 
@@ -150,10 +161,12 @@ export default function DiscountsPage() {
       {/* Content */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : discounts.length === 0 ? (
-        <p className="text-center text-default-500 py-20">{t("discounts_empty")}</p>
+        <p className="text-center text-default-500 py-20">
+          {t("discounts_empty")}
+        </p>
       ) : (
         <>
           {/* Table header */}
@@ -175,20 +188,30 @@ export default function DiscountsPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-3 lg:gap-4 items-center">
                     {/* Code */}
                     <div>
-                      <span className="font-mono font-bold text-foreground">{discount.code}</span>
+                      <span className="font-mono font-bold text-foreground">
+                        {discount.code}
+                      </span>
                     </div>
 
                     {/* Type */}
                     <div>
-                      <Chip size="sm" variant="flat" color={discount.type === "percentage" ? "secondary" : "primary"}>
-                        {discount.type === "percentage" ? t("discounts_type_percentage") : t("discounts_type_fixed")}
+                      <Chip
+                        color={
+                          discount.type === "percentage"
+                            ? "secondary"
+                            : "primary"
+                        }
+                        size="sm"
+                        variant="flat"
+                      >
+                        {discount.type === "percentage"
+                          ? t("discounts_type_percentage")
+                          : t("discounts_type_fixed")}
                       </Chip>
                     </div>
 
                     {/* Value */}
-                    <div className="font-semibold">
-                      {formatValue(discount)}
-                    </div>
+                    <div className="font-semibold">{formatValue(discount)}</div>
 
                     {/* Usage */}
                     <div className="text-sm text-default-600">
@@ -205,20 +228,22 @@ export default function DiscountsPage() {
                     {/* Active */}
                     <div>
                       <Chip
+                        color={discount.is_active ? "success" : "default"}
                         size="sm"
                         variant="flat"
-                        color={discount.is_active ? "success" : "default"}
                       >
-                        {discount.is_active ? t("discounts_active") : "Inactive"}
+                        {discount.is_active
+                          ? t("discounts_active")
+                          : "Inactive"}
                       </Chip>
                     </div>
 
                     {/* Actions */}
                     <div className="lg:text-right">
                       <Button
+                        color="danger"
                         size="sm"
                         variant="flat"
-                        color="danger"
                         onPress={() => {
                           setDeleteId(discount.id);
                           onDeleteOpen();
@@ -237,11 +262,11 @@ export default function DiscountsPage() {
           {totalPages > 1 && (
             <div className="flex justify-center mt-6">
               <Pagination
-                total={totalPages}
-                page={page}
-                onChange={setPage}
-                color="primary"
                 showControls
+                color="primary"
+                page={page}
+                total={totalPages}
+                onChange={setPage}
               />
             </div>
           )}
@@ -249,55 +274,60 @@ export default function DiscountsPage() {
       )}
 
       {/* Create discount modal */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
+      <Modal isOpen={isOpen} placement="center" onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader>{t("discounts_add")}</ModalHeader>
               <ModalBody className="space-y-4">
                 <Input
+                  isRequired
                   label={t("discounts_code")}
                   placeholder="SUMMER25"
                   value={formCode}
                   onValueChange={setFormCode}
-                  isRequired
                 />
                 <Select
+                  isRequired
                   label={t("discounts_type")}
                   selectedKeys={[formType]}
                   onSelectionChange={(keys) => {
                     const val = Array.from(keys)[0] as "percentage" | "fixed";
+
                     if (val) setFormType(val);
                   }}
-                  isRequired
                 >
-                  <SelectItem key="percentage">{t("discounts_type_percentage")}</SelectItem>
-                  <SelectItem key="fixed">{t("discounts_type_fixed")}</SelectItem>
+                  <SelectItem key="percentage">
+                    {t("discounts_type_percentage")}
+                  </SelectItem>
+                  <SelectItem key="fixed">
+                    {t("discounts_type_fixed")}
+                  </SelectItem>
                 </Select>
                 <Input
-                  label={t("discounts_value")}
-                  type="number"
-                  placeholder={formType === "percentage" ? "25" : "10.00"}
-                  value={formValue}
-                  onValueChange={setFormValue}
+                  isRequired
                   endContent={
                     <span className="text-default-400 text-sm">
                       {formType === "percentage" ? "%" : common("currency")}
                     </span>
                   }
-                  isRequired
+                  label={t("discounts_value")}
+                  placeholder={formType === "percentage" ? "25" : "10.00"}
+                  type="number"
+                  value={formValue}
+                  onValueChange={setFormValue}
                 />
                 <Input
                   label={t("discounts_max_usage")}
-                  type="number"
                   placeholder="100"
+                  type="number"
                   value={formMaxUsage}
                   onValueChange={setFormMaxUsage}
                 />
                 <Input
                   label={t("discounts_expires")}
-                  type="date"
                   placeholder="YYYY-MM-DD"
+                  type="date"
                   value={formExpiresAt}
                   onValueChange={setFormExpiresAt}
                 />
@@ -308,8 +338,8 @@ export default function DiscountsPage() {
                 </Button>
                 <Button
                   color="primary"
-                  isLoading={creating}
                   isDisabled={!formCode.trim() || !formValue}
+                  isLoading={creating}
                   onPress={() => handleCreate(onClose)}
                 >
                   {common("confirm")}
@@ -321,7 +351,11 @@ export default function DiscountsPage() {
       </Modal>
 
       {/* Delete confirmation modal */}
-      <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange} placement="center">
+      <Modal
+        isOpen={isDeleteOpen}
+        placement="center"
+        onOpenChange={onDeleteOpenChange}
+      >
         <ModalContent>
           {(onClose) => (
             <>

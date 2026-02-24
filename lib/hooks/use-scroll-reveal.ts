@@ -2,9 +2,12 @@
 
 import { useEffect } from "react";
 
-export function useScrollReveal(selector: string = ".section-reveal, .step-card-reveal") {
+export function useScrollReveal(
+  selector: string = ".section-reveal, .step-card-reveal",
+) {
   useEffect(() => {
     const elements = document.querySelectorAll(selector);
+
     if (elements.length === 0) return;
 
     const observer = new IntersectionObserver(

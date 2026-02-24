@@ -11,6 +11,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, context) => {
 
   const { id } = await context.params;
   const customer = await customerRepository.findById(parseInt(id));
+
   if (!customer) throw new AppError("Client introuvable", 404);
 
   const orders = await orderRepository.findAll({
@@ -21,8 +22,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, context) => {
 
   const totalSpent = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
-  // Exclude password from response
-  const { password: _, ...customerData } = customer;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password: _password, ...customerData } = customer;
 
   return NextResponse.json({
     ...customerData,

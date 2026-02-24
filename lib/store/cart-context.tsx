@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 
 export interface CartItem {
   id: number;
@@ -31,6 +38,7 @@ function loadCart(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
     const stored = localStorage.getItem(CART_KEY);
+
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
@@ -55,36 +63,47 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (loaded) saveCart(items);
   }, [items, loaded]);
 
-  const addItem = useCallback((newItem: Omit<CartItem, "quantity"> & { quantity?: number }) => {
-    setItems((prev) => {
-      const key = newItem.variantId ?? newItem.id;
-      const existing = prev.find((i) => (i.variantId ?? i.id) === key);
-      if (existing) {
-        return prev.map((i) =>
-          (i.variantId ?? i.id) === key
-            ? { ...i, quantity: i.quantity + (newItem.quantity || 1) }
-            : i,
-        );
-      }
-      return [...prev, { ...newItem, quantity: newItem.quantity || 1 }];
-    });
-  }, []);
+  const addItem = useCallback(
+    (newItem: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+      setItems((prev) => {
+        const key = newItem.variantId ?? newItem.id;
+        const existing = prev.find((i) => (i.variantId ?? i.id) === key);
+
+        if (existing) {
+          return prev.map((i) =>
+            (i.variantId ?? i.id) === key
+              ? { ...i, quantity: i.quantity + (newItem.quantity || 1) }
+              : i,
+          );
+        }
+
+        return [...prev, { ...newItem, quantity: newItem.quantity || 1 }];
+      });
+    },
+    [],
+  );
 
   const removeItem = useCallback((id: number, variantId?: number) => {
-    setItems((prev) => prev.filter((i) => !((i.variantId ?? i.id) === (variantId ?? id))));
+    setItems((prev) =>
+      prev.filter((i) => !((i.variantId ?? i.id) === (variantId ?? id))),
+    );
   }, []);
 
-  const updateQuantity = useCallback((id: number, quantity: number, variantId?: number) => {
-    if (quantity <= 0) {
-      removeItem(id, variantId);
-      return;
-    }
-    setItems((prev) =>
-      prev.map((i) =>
-        (i.variantId ?? i.id) === (variantId ?? id) ? { ...i, quantity } : i,
-      ),
-    );
-  }, [removeItem]);
+  const updateQuantity = useCallback(
+    (id: number, quantity: number, variantId?: number) => {
+      if (quantity <= 0) {
+        removeItem(id, variantId);
+
+        return;
+      }
+      setItems((prev) =>
+        prev.map((i) =>
+          (i.variantId ?? i.id) === (variantId ?? id) ? { ...i, quantity } : i,
+        ),
+      );
+    },
+    [removeItem],
+  );
 
   const clearCart = useCallback(() => setItems([]), []);
 
@@ -92,7 +111,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, itemCount, total }}>
+    <CartContext.Provider
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        itemCount,
+        total,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -100,6 +129,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const ctx = useContext(CartContext);
+
   if (!ctx) throw new Error("useCart must be used within CartProvider");
+
   return ctx;
 }

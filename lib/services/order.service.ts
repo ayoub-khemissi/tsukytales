@@ -1,17 +1,18 @@
+import type { ProductRow } from "@/types/db.types";
+
 import { ResultSetHeader } from "mysql2";
 
-import { pool, withTransaction } from "@/lib/db/connection";
-import { orderRepository } from "@/lib/repositories/order.repository";
-import { productRepository } from "@/lib/repositories/product.repository";
-import { discountRepository } from "@/lib/repositories/discount.repository";
-import { customerRepository } from "@/lib/repositories/customer.repository";
 import * as paymentService from "./payment.service";
 import * as shippingService from "./shipping.service";
 import * as mailService from "./mail.service";
 import * as stripeCustomerService from "./stripe-customer.service";
+
+import { withTransaction } from "@/lib/db/connection";
+import { orderRepository } from "@/lib/repositories/order.repository";
+import { discountRepository } from "@/lib/repositories/discount.repository";
+import { customerRepository } from "@/lib/repositories/customer.repository";
 import { logger } from "@/lib/utils/logger";
 import { AppError } from "@/lib/errors/app-error";
-import type { OrderRow, ProductRow } from "@/types/db.types";
 
 interface CreateOrderInput {
   items: { id: number; price: number; quantity?: number; name?: string }[];
@@ -24,16 +25,25 @@ interface CreateOrderInput {
   promo_code?: string;
 }
 
-export async function createOrder(customerId: number, userEmail: string, data: CreateOrderInput) {
+export async function createOrder(
+  customerId: number,
+  userEmail: string,
+  data: CreateOrderInput,
+) {
   return withTransaction(async (connection) => {
     let finalTotal = data.total;
 
     // Apply discount
     if (data.promo_code) {
       const discount = await discountRepository.findByCode(data.promo_code);
+
       if (discount) {
-        const itemsTotal = data.items.reduce((sum, i) => sum + i.price * (i.quantity || 1), 0);
+        const itemsTotal = data.items.reduce(
+          (sum, i) => sum + i.price * (i.quantity || 1),
+          0,
+        );
         let reduction = 0;
+
         if (discount.rule.type === "percentage") {
           reduction = itemsTotal * (discount.rule.value / 100);
         } else {
@@ -59,7 +69,9 @@ export async function createOrder(customerId: number, userEmail: string, data: C
       const p = dbProducts.find((dbP) => dbP.id === item.id);
       const weight = p ? Number(p.weight) : 1.0;
       const quantity = item.quantity || 1;
+
       totalWeight += weight * quantity;
+
       return {
         ...item,
         name: item.name || p?.name || "Produit",
@@ -73,7 +85,10 @@ export async function createOrder(customerId: number, userEmail: string, data: C
 
     // Calculate shipping
     const shipCountry = (data.country || "FR").toUpperCase();
-    const shippingRates = shippingService.getShippingRates(totalWeight, shipCountry);
+    const shippingRates = shippingService.getShippingRates(
+      totalWeight,
+      shipCountry,
+    );
     const shippingCost =
       data.method === "home" || !shippingRates.relay
         ? shippingRates.home.price
@@ -82,7 +97,12 @@ export async function createOrder(customerId: number, userEmail: string, data: C
     const shippingAddress =
       data.method === "home" && data.shipping_address
         ? data.shipping_address
-        : { relay: typeof data.relay === "string" ? { name: data.relay } : data.relay };
+        : {
+            relay:
+              typeof data.relay === "string"
+                ? { name: data.relay }
+                : data.relay,
+          };
 
     // Create order
     const [result] = await connection.execute<ResultSetHeader>(
@@ -107,12 +127,15 @@ export async function createOrder(customerId: number, userEmail: string, data: C
 
     const orderId = result.insertId;
     const order = await orderRepository.findById(orderId);
+
     if (!order) throw new AppError("Erreur création commande", 500);
 
     // Get Stripe customer
     const customer = await customerRepository.findById(customerId);
+
     if (!customer) throw new AppError("Client introuvable", 404);
-    const stripeCustomerId = await stripeCustomerService.getOrCreateStripeCustomer(customer);
+    const stripeCustomerId =
+      await stripeCustomerService.getOrCreateStripeCustomer(customer);
 
     // Create PaymentIntent
     const orderData = {
@@ -127,7 +150,10 @@ export async function createOrder(customerId: number, userEmail: string, data: C
 
     // Store payment_intent_id
     await orderRepository.update(orderId, {
-      metadata: JSON.stringify({ ...(order.metadata || {}), payment_intent_id: paymentResult.payment_intent_id }),
+      metadata: JSON.stringify({
+        ...(order.metadata || {}),
+        payment_intent_id: paymentResult.payment_intent_id,
+      }),
     });
 
     return {
@@ -139,22 +165,31 @@ export async function createOrder(customerId: number, userEmail: string, data: C
 
 export async function confirmOrder(orderId: number, customerId: number) {
   const order = await orderRepository.findById(orderId);
+
   if (!order || order.customer_id !== customerId) {
     throw new AppError("Commande introuvable", 404);
   }
 
   const paymentIntentId = order.metadata?.payment_intent_id;
-  if (!paymentIntentId) throw new AppError("Aucun paiement associé à cette commande", 400);
 
-  const intent = await paymentService.stripe.paymentIntents.retrieve(paymentIntentId, {
-    expand: ["payment_method"],
-  });
+  if (!paymentIntentId)
+    throw new AppError("Aucun paiement associé à cette commande", 400);
+
+  const intent = await paymentService.stripe.paymentIntents.retrieve(
+    paymentIntentId,
+    {
+      expand: ["payment_method"],
+    },
+  );
+
   if (intent.status !== "succeeded") {
     throw new AppError("Le paiement n'a pas été confirmé", 400);
   }
 
   const pmType =
-    typeof intent.payment_method === "object" ? intent.payment_method?.type : "card";
+    typeof intent.payment_method === "object"
+      ? intent.payment_method?.type
+      : "card";
   const updatedMetadata = { ...(order.metadata || {}), payment_method: pmType };
 
   await orderRepository.update(orderId, {
@@ -171,15 +206,24 @@ export async function confirmOrder(orderId: number, customerId: number) {
     total: Number(order.total),
     metadata: updatedMetadata,
   };
-  mailService.sendOrderConfirmation(orderData).catch((err) =>
-    logger.error("Email error: " + (err instanceof Error ? err.message : String(err))),
-  );
+
+  mailService
+    .sendOrderConfirmation(orderData)
+    .catch((err) =>
+      logger.error(
+        "Email error: " + (err instanceof Error ? err.message : String(err)),
+      ),
+    );
 
   // Auto-ship (skip preorders)
   if (!order.metadata?.preorder) {
-    shippingService.createShipment(order.id).catch((err) =>
-      logger.error(`[Auto-ship] Order TSK-${order.id}: ${err instanceof Error ? err.message : String(err)}`),
-    );
+    shippingService
+      .createShipment(order.id)
+      .catch((err) =>
+        logger.error(
+          `[Auto-ship] Order TSK-${order.id}: ${err instanceof Error ? err.message : String(err)}`,
+        ),
+      );
   }
 
   return { success: true, order };
@@ -188,9 +232,16 @@ export async function confirmOrder(orderId: number, customerId: number) {
 export async function listCustomerOrders(
   customerId: number,
   email: string,
-  options?: { status?: string; dateFrom?: string; dateTo?: string; page?: number; size?: number },
+  options?: {
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    page?: number;
+    size?: number;
+  },
 ) {
   // Sync customer_id for orders with this email
   await orderRepository.updateCustomerIdByEmail(email, customerId);
+
   return orderRepository.findByCustomerIdOrEmail(customerId, email, options);
 }

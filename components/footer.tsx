@@ -17,11 +17,11 @@ export function Footer() {
         <div className="flex justify-center mb-6">
           <Link href="/">
             <Image
-              src="/assets/img/logo.png"
               alt="Tsuky Tales"
-              width={130}
-              height={130}
               className="object-contain"
+              height={130}
+              src="/assets/img/logo.png"
+              width={130}
             />
           </Link>
         </div>
@@ -29,29 +29,29 @@ export function Footer() {
         {/* Social icons */}
         <div className="flex justify-center gap-10 mb-6">
           <a
-            href="https://www.instagram.com/tsukytales/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="social-link-hover w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300"
             aria-label="Instagram"
+            className="social-link-hover w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300"
+            href="https://www.instagram.com/tsukytales/"
+            rel="noopener noreferrer"
+            target="_blank"
           >
             <InstagramIcon size={18} />
           </a>
           <a
-            href="https://x.com/tsukytales"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="social-link-hover w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300"
             aria-label="X (Twitter)"
+            className="social-link-hover w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300"
+            href="https://x.com/tsukytales"
+            rel="noopener noreferrer"
+            target="_blank"
           >
             <XTwitterIcon size={18} />
           </a>
           <a
-            href="https://www.tiktok.com/@tsukytales"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="social-link-hover w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300"
             aria-label="TikTok"
+            className="social-link-hover w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300"
+            href="https://www.tiktok.com/@tsukytales"
+            rel="noopener noreferrer"
+            target="_blank"
           >
             <TiktokIcon size={18} />
           </a>
@@ -60,20 +60,20 @@ export function Footer() {
         {/* Legal links */}
         <div className="flex flex-wrap justify-center gap-6 mb-6">
           <Link
-            href="/terms"
             className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-gray-400 hover:text-primary transition-colors"
+            href="/terms"
           >
             {t("terms")}
           </Link>
           <Link
-            href="/legal"
             className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-gray-400 hover:text-primary transition-colors"
+            href="/legal"
           >
             {t("legal")}
           </Link>
           <Link
-            href="/privacy"
             className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-gray-400 hover:text-primary transition-colors"
+            href="/privacy"
           >
             {t("privacy")}
           </Link>

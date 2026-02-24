@@ -1,8 +1,10 @@
+import type { DiscountRow } from "@/types/db.types";
+
 import { ResultSetHeader } from "mysql2";
 
-import { pool } from "@/lib/db/connection";
 import { BaseRepository } from "./base.repository";
-import type { DiscountRow } from "@/types/db.types";
+
+import { pool } from "@/lib/db/connection";
 
 class DiscountRepository extends BaseRepository<DiscountRow> {
   constructor() {
@@ -14,6 +16,7 @@ class DiscountRepository extends BaseRepository<DiscountRow> {
       "SELECT * FROM discounts WHERE code = ? LIMIT 1",
       [code.toUpperCase()],
     );
+
     return rows[0] ?? null;
   }
 

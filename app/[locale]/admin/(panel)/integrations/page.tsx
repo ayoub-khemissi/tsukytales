@@ -20,7 +20,7 @@ interface IntegrationsResponse {
 export default function IntegrationsPage() {
   const t = useTranslations("admin");
   const [integrations, setIntegrations] = useState<IntegrationsResponse | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +34,7 @@ export default function IntegrationsPage() {
   const getStatusChip = (status: IntegrationStatus) => {
     if (status.error) {
       return (
-        <Chip color="warning" variant="flat" size="sm">
+        <Chip color="warning" size="sm" variant="flat">
           {t("integrations_error")}
         </Chip>
       );
@@ -42,14 +42,14 @@ export default function IntegrationsPage() {
 
     if (status.connected) {
       return (
-        <Chip color="success" variant="flat" size="sm">
+        <Chip color="success" size="sm" variant="flat">
           {t("integrations_connected")}
         </Chip>
       );
     }
 
     return (
-      <Chip color="danger" variant="flat" size="sm">
+      <Chip color="danger" size="sm" variant="flat">
         {t("integrations_disconnected")}
       </Chip>
     );
@@ -81,7 +81,7 @@ export default function IntegrationsPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : !integrations ? (
         <Card className="border border-divider">
@@ -95,9 +95,7 @@ export default function IntegrationsPage() {
             <Card key={integration.key} className="border border-divider">
               <CardBody className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">
-                    {integration.label}
-                  </h2>
+                  <h2 className="text-lg font-semibold">{integration.label}</h2>
                   {getStatusChip(integration.status)}
                 </div>
                 {integration.status.error && (

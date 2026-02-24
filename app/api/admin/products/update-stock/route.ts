@@ -8,6 +8,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   await requireAdmin();
 
   const { id, stock } = await req.json();
+
   await productRepository.updateStock(id, stock);
 
   return NextResponse.json({ success: true });

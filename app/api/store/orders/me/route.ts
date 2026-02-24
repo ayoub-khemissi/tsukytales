@@ -12,8 +12,12 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     session.user.customerId!,
     session.user.email,
     {
-      page: searchParams.get("page") ? parseInt(searchParams.get("page")!) : undefined,
-      size: searchParams.get("size") ? parseInt(searchParams.get("size")!) : undefined,
+      page: searchParams.get("page")
+        ? parseInt(searchParams.get("page")!)
+        : undefined,
+      size: searchParams.get("size")
+        ? parseInt(searchParams.get("size")!)
+        : undefined,
       status: searchParams.get("status") ?? undefined,
       dateFrom: searchParams.get("date_from") ?? undefined,
       dateTo: searchParams.get("date_to") ?? undefined,

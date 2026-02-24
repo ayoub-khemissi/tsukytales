@@ -6,7 +6,10 @@ import { discountRepository } from "@/lib/repositories/discount.repository";
 
 export const GET = withErrorHandler(async () => {
   await requireAdmin();
-  const discounts = await discountRepository.findAll({ orderBy: "createdAt DESC" });
+  const discounts = await discountRepository.findAll({
+    orderBy: "createdAt DESC",
+  });
+
   return NextResponse.json(discounts);
 });
 
@@ -21,5 +24,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const id = await discountRepository.create(body);
   const discount = await discountRepository.findById(id);
+
   return NextResponse.json(discount, { status: 201 });
 });

@@ -12,7 +12,13 @@ import { Link } from "@/i18n/navigation";
 
 export default function RegisterPage() {
   const t = useTranslations("auth");
-  const [form, setForm] = useState({ first_name: "", last_name: "", email: "", password: "", passwordConfirm: "" });
+  const [form, setForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+    passwordConfirm: "",
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,26 +29,54 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (form.password !== form.passwordConfirm) { setError(t("passwords_mismatch")); return; }
-    if (form.password.length < 8) { setError(t("password_min")); return; }
+    if (form.password !== form.passwordConfirm) {
+      setError(t("passwords_mismatch"));
+
+      return;
+    }
+    if (form.password.length < 8) {
+      setError(t("password_min"));
+
+      return;
+    }
 
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ first_name: form.first_name, last_name: form.last_name, email: form.email, password: form.password }),
+        body: JSON.stringify({
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+          password: form.password,
+        }),
       });
+
       if (!res.ok) {
         const data = await res.json();
+
         setError(data.error || t("error_exists"));
         setLoading(false);
+
         return;
       }
-      const result = await signIn("customer-credentials", { email: form.email, password: form.password, redirect: false });
-      if (result?.error) { setError(result.error); setLoading(false); }
-      else { window.location.href = "/account"; }
-    } catch { setError("Erreur réseau"); setLoading(false); }
+      const result = await signIn("customer-credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError(result.error);
+        setLoading(false);
+      } else {
+        window.location.href = "/account";
+      }
+    } catch {
+      setError("Erreur réseau");
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,24 +87,71 @@ export default function RegisterPage() {
           <p className="text-sm text-default-500">{t("register_subtitle")}</p>
         </CardHeader>
         <CardBody>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {error && <div className="bg-danger-50 text-danger text-sm p-3 rounded-lg">{error}</div>}
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-danger-50 text-danger text-sm p-3 rounded-lg">
+                {error}
+              </div>
+            )}
             <div className="flex gap-3">
-              <Input label={t("first_name")} value={form.first_name} onValueChange={update("first_name")} isRequired />
-              <Input label={t("last_name")} value={form.last_name} onValueChange={update("last_name")} isRequired />
+              <Input
+                isRequired
+                label={t("first_name")}
+                value={form.first_name}
+                onValueChange={update("first_name")}
+              />
+              <Input
+                isRequired
+                label={t("last_name")}
+                value={form.last_name}
+                onValueChange={update("last_name")}
+              />
             </div>
-            <Input label={t("email")} type="email" value={form.email} onValueChange={update("email")} isRequired autoComplete="email" />
-            <Input label={t("password")} type="password" value={form.password} onValueChange={update("password")} isRequired description={t("password_min")} />
-            <Input label={t("password_confirm")} type="password" value={form.passwordConfirm} onValueChange={update("passwordConfirm")} isRequired />
-            <Button type="submit" color="primary" isLoading={loading} className="mt-2">{t("register_button")}</Button>
+            <Input
+              isRequired
+              autoComplete="email"
+              label={t("email")}
+              type="email"
+              value={form.email}
+              onValueChange={update("email")}
+            />
+            <Input
+              isRequired
+              description={t("password_min")}
+              label={t("password")}
+              type="password"
+              value={form.password}
+              onValueChange={update("password")}
+            />
+            <Input
+              isRequired
+              label={t("password_confirm")}
+              type="password"
+              value={form.passwordConfirm}
+              onValueChange={update("passwordConfirm")}
+            />
+            <Button
+              className="mt-2"
+              color="primary"
+              isLoading={loading}
+              type="submit"
+            >
+              {t("register_button")}
+            </Button>
           </form>
           <Divider className="my-6" />
-          <Button variant="bordered" className="w-full" onPress={() => signIn("google", { callbackUrl: "/account" })}>
+          <Button
+            className="w-full"
+            variant="bordered"
+            onPress={() => signIn("google", { callbackUrl: "/account" })}
+          >
             {t("or_continue_with")} {t("google")}
           </Button>
           <p className="text-sm text-center mt-6 text-default-500">
             {t("has_account")}{" "}
-            <Link href="/login" className="text-primary font-medium">{t("login_button")}</Link>
+            <Link className="text-primary font-medium" href="/login">
+              {t("login_button")}
+            </Link>
           </p>
         </CardBody>
       </Card>

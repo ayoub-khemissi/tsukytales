@@ -1,9 +1,15 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
 import { Button } from "@heroui/button";
+
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 const locales = [
   { code: "fr", label: "FR", flag: "🇫🇷" },
@@ -22,7 +28,7 @@ export function LocaleSwitcher() {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button variant="light" size="sm" className="min-w-0 px-2 gap-1">
+        <Button className="min-w-0 px-2 gap-1" size="sm" variant="light">
           <span>{current.flag}</span>
           <span className="hidden sm:inline text-xs">{current.label}</span>
         </Button>
@@ -33,6 +39,7 @@ export function LocaleSwitcher() {
         selectionMode="single"
         onSelectionChange={(keys) => {
           const selected = Array.from(keys)[0] as string;
+
           router.replace(pathname, { locale: selected });
         }}
       >

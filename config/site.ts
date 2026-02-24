@@ -2,7 +2,8 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Tsuky Tales",
-  description: "Créateur d'imaginaires — Livres illustrés et abonnements littéraires",
+  description:
+    "Créateur d'imaginaires — Livres illustrés et abonnements littéraires",
   navItems: [
     { label: "Accueil", href: "/" },
     { label: "Boutique", href: "/boutique" },

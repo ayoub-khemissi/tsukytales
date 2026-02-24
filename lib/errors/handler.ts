@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { AppError } from "./app-error";
+
 import { logger } from "@/lib/utils/logger";
 
 type RouteContext = { params: Promise<Record<string, string>> };

@@ -31,7 +31,10 @@ interface Stats {
   dailySales: DailySale[];
 }
 
-const statusColorMap: Record<string, "warning" | "success" | "danger" | "primary" | "default"> = {
+const statusColorMap: Record<
+  string,
+  "warning" | "success" | "danger" | "primary" | "default"
+> = {
   pending: "warning",
   processing: "primary",
   shipped: "primary",
@@ -80,8 +83,17 @@ export default function AdminDashboardPage() {
       label: t("dashboard_total_revenue"),
       value: `${stats.totalRevenue.toFixed(2)} ${currency}`,
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="12" y1="1" x2="12" y2="23" />
+        <svg
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="24"
+        >
+          <line x1="12" x2="12" y1="1" y2="23" />
           <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
       ),
@@ -92,10 +104,19 @@ export default function AdminDashboardPage() {
       label: t("dashboard_total_orders"),
       value: stats.totalOrders.toString(),
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="24"
+        >
           <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16v-2" />
           <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-          <line x1="12" y1="22.08" x2="12" y2="12" />
+          <line x1="12" x2="12" y1="22.08" y2="12" />
         </svg>
       ),
       color: "text-primary",
@@ -105,7 +126,16 @@ export default function AdminDashboardPage() {
       label: t("dashboard_total_customers"),
       value: stats.totalCustomers.toString(),
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="24"
+        >
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -119,7 +149,16 @@ export default function AdminDashboardPage() {
       label: t("dashboard_total_products"),
       value: stats.totalProducts.toString(),
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="24"
+        >
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
         </svg>
@@ -131,7 +170,16 @@ export default function AdminDashboardPage() {
       label: t("dashboard_pending_orders"),
       value: stats.pendingOrders.toString(),
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="24"
+        >
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
@@ -143,10 +191,19 @@ export default function AdminDashboardPage() {
       label: t("dashboard_low_stock"),
       value: stats.lowStockProducts.toString(),
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="24"
+        >
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-          <line x1="12" y1="9" x2="12" y2="13" />
-          <line x1="12" y1="17" x2="12.01" y2="17" />
+          <line x1="12" x2="12" y1="9" y2="13" />
+          <line x1="12" x2="12.01" y1="17" y2="17" />
         </svg>
       ),
       color: "text-danger",
@@ -164,7 +221,9 @@ export default function AdminDashboardPage() {
         {statCards.map((card) => (
           <Card key={card.label} className="border border-divider">
             <CardBody className="flex flex-row items-center gap-4 py-5">
-              <div className={`${card.bg} ${card.color} p-3 rounded-xl shrink-0`}>
+              <div
+                className={`${card.bg} ${card.color} p-3 rounded-xl shrink-0`}
+              >
                 {card.icon}
               </div>
               <div className="min-w-0">
@@ -181,7 +240,9 @@ export default function AdminDashboardPage() {
         {/* Recent Orders */}
         <Card className="border border-divider">
           <CardHeader className="pb-2">
-            <h2 className="text-lg font-semibold">{t("dashboard_recent_orders")}</h2>
+            <h2 className="text-lg font-semibold">
+              {t("dashboard_recent_orders")}
+            </h2>
           </CardHeader>
           <CardBody className="gap-0 px-0 pt-0">
             {stats.recentOrders.length === 0 ? (
@@ -197,15 +258,15 @@ export default function AdminDashboardPage() {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <Link
-                        href={`/admin/orders/${order.id}`}
                         className="text-sm font-medium text-primary hover:underline"
+                        href={`/admin/orders/${order.id}`}
                       >
                         #{order.id}
                       </Link>
                       <Chip
+                        color={statusColorMap[order.status] || "default"}
                         size="sm"
                         variant="flat"
-                        color={statusColorMap[order.status] || "default"}
                       >
                         {order.status}
                       </Chip>
@@ -228,7 +289,9 @@ export default function AdminDashboardPage() {
         {/* Sales Chart */}
         <Card className="border border-divider">
           <CardHeader className="pb-2">
-            <h2 className="text-lg font-semibold">{t("dashboard_sales_chart")}</h2>
+            <h2 className="text-lg font-semibold">
+              {t("dashboard_sales_chart")}
+            </h2>
           </CardHeader>
           <CardBody>
             {stats.dailySales.length === 0 ? (

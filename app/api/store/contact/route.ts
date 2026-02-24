@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
 import dns from "dns/promises";
+
+import { NextRequest, NextResponse } from "next/server";
 
 import { withErrorHandler } from "@/lib/errors/handler";
 import { validate } from "@/lib/middleware/validate";
@@ -17,14 +18,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // DNS validation
   let hasMailServer = false;
+
   try {
     const mxRecords = await dns.resolveMx(domain);
+
     if (mxRecords.length > 0 && mxRecords[0].exchange !== ".") {
       hasMailServer = true;
     }
   } catch {
     try {
       const aRecords = await dns.resolve4(domain);
+
       if (aRecords.length > 0) hasMailServer = true;
     } catch {
       hasMailServer = false;
@@ -39,5 +43,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   await mailService.sendContactEmail(data);
-  return NextResponse.json({ success: true, message: "Message envoyé avec succès" });
+
+  return NextResponse.json({
+    success: true,
+    message: "Message envoyé avec succès",
+  });
 });

@@ -60,8 +60,8 @@ export default function FinancesPage() {
         <h1 className="text-2xl font-bold">{t("finances_title")}</h1>
         <Button
           as={Link}
-          href="/api/admin/financial-report?export=xlsx"
           color="primary"
+          href="/api/admin/financial-report?export=xlsx"
           variant="flat"
         >
           {t("finances_export")}
@@ -70,7 +70,7 @@ export default function FinancesPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : !report ? (
         <Card className="border border-divider">

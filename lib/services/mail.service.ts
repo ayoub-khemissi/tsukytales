@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { logger } from "@/lib/utils/logger";
 
 let resend: Resend | null = null;
+
 if (process.env.RESEND_API_KEY) {
   resend = new Resend(process.env.RESEND_API_KEY);
   logger.info("MailService initialized with Resend API Key");
@@ -13,7 +14,7 @@ const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 interface OrderLike {
   id: number;
   email: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   items: any[];
   total: number;
   metadata?: { label_url?: string; [key: string]: unknown } | null;
@@ -21,7 +22,10 @@ interface OrderLike {
 
 export async function sendOrderConfirmation(order: OrderLike) {
   if (!resend) {
-    logger.error("Resend not initialized. Cannot send order confirmation email.");
+    logger.error(
+      "Resend not initialized. Cannot send order confirmation email.",
+    );
+
     return;
   }
 
@@ -43,7 +47,9 @@ export async function sendOrderConfirmation(order: OrderLike) {
         <div style="margin: 35px 0; padding: 25px; background: linear-gradient(to bottom, #fdfaff, #f8f2f9); border-radius: 16px; border: 1px solid #f0e6f2;">
           <h3 style="color: #581668; margin-top: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #e8d5eb; padding-bottom: 10px;">Récapitulatif</h3>
           <table style="width: 100%; border-collapse: collapse;">
-            ${order.items.map((item) => `
+            ${order.items
+              .map(
+                (item) => `
               <tr>
                 <td style="padding: 12px 0; color: #4a3a4d; font-size: 15px;">
                   <span style="font-weight: 600;">${item.name}</span>
@@ -51,7 +57,9 @@ export async function sendOrderConfirmation(order: OrderLike) {
                 </td>
                 <td style="padding: 12px 0; color: #581668; text-align: right; font-weight: 600; font-size: 15px;">${item.price}€</td>
               </tr>
-            `).join("")}
+            `,
+              )
+              .join("")}
             <tr>
               <td style="padding: 20px 0 0 0; font-weight: 700; color: #2d0b35; font-size: 20px; border-top: 2px solid #e8d5eb;">Total</td>
               <td style="padding: 20px 0 0 0; font-weight: 700; color: #581668; text-align: right; font-size: 22px; border-top: 2px solid #e8d5eb;">${order.total}€</td>
@@ -78,7 +86,10 @@ export async function sendOrderConfirmation(order: OrderLike) {
   else logger.info(`Order confirmation sent: ${data?.id}`);
 }
 
-export async function sendShippingNotification(order: OrderLike, trackingNumber: string) {
+export async function sendShippingNotification(
+  order: OrderLike,
+  trackingNumber: string,
+) {
   if (!resend) return;
 
   const labelUrl = order.metadata?.label_url;
@@ -120,7 +131,12 @@ export async function sendShippingNotification(order: OrderLike, trackingNumber:
   if (error) logger.error(`Resend email error: ${error.message}`);
 }
 
-export async function sendContactEmail(data: { name: string; email: string; subject: string; message: string }) {
+export async function sendContactEmail(data: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
   if (!resend) return;
 
   const html = `
@@ -135,6 +151,7 @@ export async function sendContactEmail(data: { name: string; email: string; subj
     </div>`;
 
   const contactEmail = process.env.CONTACT_EMAIL;
+
   if (!contactEmail) return;
 
   const { error } = await resend.emails.send({

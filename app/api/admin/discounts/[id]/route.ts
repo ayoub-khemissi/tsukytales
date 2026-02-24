@@ -10,8 +10,10 @@ export const DELETE = withErrorHandler(async (_req: NextRequest, context) => {
 
   const { id } = await context.params;
   const discount = await discountRepository.findById(parseInt(id));
+
   if (!discount) throw new AppError("Code promo introuvable", 404);
 
   await discountRepository.delete(parseInt(id));
+
   return NextResponse.json({ success: true });
 });

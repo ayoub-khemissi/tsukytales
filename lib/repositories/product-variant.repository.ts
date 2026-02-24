@@ -1,6 +1,8 @@
-import { pool } from "@/lib/db/connection";
-import { BaseRepository } from "./base.repository";
 import type { ProductVariantRow } from "@/types/db.types";
+
+import { BaseRepository } from "./base.repository";
+
+import { pool } from "@/lib/db/connection";
 
 class ProductVariantRepository extends BaseRepository<ProductVariantRow> {
   constructor() {
@@ -12,6 +14,7 @@ class ProductVariantRepository extends BaseRepository<ProductVariantRow> {
       "SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC",
       [productId],
     );
+
     return rows;
   }
 
@@ -20,6 +23,7 @@ class ProductVariantRepository extends BaseRepository<ProductVariantRow> {
       "SELECT * FROM product_variants WHERE sku = ? LIMIT 1",
       [sku],
     );
+
     return rows[0] ?? null;
   }
 }

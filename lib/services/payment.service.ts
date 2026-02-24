@@ -29,7 +29,9 @@ export async function createPaymentIntent(orderData: OrderData) {
   const shippingCost =
     (meta?.shipping_cost as number) ||
     (meta?.shipping_method === "home" ? 7.5 : 4.9);
-  const totalAmount = Math.round((itemsTotal + shippingCost - discountAmount) * 100);
+  const totalAmount = Math.round(
+    (itemsTotal + shippingCost - discountAmount) * 100,
+  );
 
   const intentOptions: Stripe.PaymentIntentCreateParams = {
     amount: totalAmount,
@@ -51,6 +53,7 @@ export async function createPaymentIntent(orderData: OrderData) {
   const paymentIntent = await stripe.paymentIntents.create(intentOptions);
 
   logger.info(`PaymentIntent created: ${paymentIntent.id}`);
+
   return {
     client_secret: paymentIntent.client_secret,
     payment_intent_id: paymentIntent.id,
@@ -60,16 +63,25 @@ export async function createPaymentIntent(orderData: OrderData) {
 export async function verifyPayment(paymentIntentId: string): Promise<boolean> {
   try {
     const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
     return intent.status === "succeeded";
   } catch (err) {
-    logger.error("Stripe Verify Error: " + (err instanceof Error ? err.message : String(err)));
+    logger.error(
+      "Stripe Verify Error: " +
+        (err instanceof Error ? err.message : String(err)),
+    );
+
     return false;
   }
 }
 
 export async function createRefund(paymentIntentId: string) {
-  const refund = await stripe.refunds.create({ payment_intent: paymentIntentId });
+  const refund = await stripe.refunds.create({
+    payment_intent: paymentIntentId,
+  });
+
   logger.info(`Refund created: ${refund.id} for PI: ${paymentIntentId}`);
+
   return refund;
 }
 

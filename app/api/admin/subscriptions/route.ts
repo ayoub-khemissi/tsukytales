@@ -15,26 +15,37 @@ export const GET = withErrorHandler(async () => {
   });
 
   const customers = await customerRepository.findAll();
-  const customerMap: Record<string, typeof customers[0]> = {};
+  const customerMap: Record<string, (typeof customers)[0]> = {};
+
   customers.forEach((c) => {
     const stripeId = c.metadata?.stripe_customer_id;
+
     if (stripeId && typeof stripeId === "string") {
       customerMap[stripeId] = c;
     }
   });
 
   const result = subscriptions.data.map((sub) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subAny = sub as any;
-    const customer = typeof sub.customer === "object" && sub.customer !== null ? sub.customer : null;
+    const customer =
+      typeof sub.customer === "object" && sub.customer !== null
+        ? sub.customer
+        : null;
+
     return {
       id: sub.id,
       status: sub.status,
       current_period_end: subAny.current_period_end,
       amount: (sub.items.data[0]?.price?.unit_amount || 0) / 100,
       currency: sub.items.data[0]?.price?.currency || "eur",
-      customer_email: customer && "email" in customer ? (customer as { email: string }).email || "" : "",
-      customer: customer && "id" in customer ? customerMap[(customer as { id: string }).id] || null : null,
+      customer_email:
+        customer && "email" in customer
+          ? (customer as { email: string }).email || ""
+          : "",
+      customer:
+        customer && "id" in customer
+          ? customerMap[(customer as { id: string }).id] || null
+          : null,
       cancel_at_period_end: subAny.cancel_at_period_end,
     };
   });

@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import NextAuth from "next-auth";
 
 import { routing } from "./i18n/routing";
+
 import { authConfig } from "@/lib/auth/auth.config";
 
 const intlMiddleware = createMiddleware(routing);
@@ -30,16 +31,23 @@ export default async function middleware(req: NextRequest) {
     : pathname;
 
   // Auth protection for /account/* and /admin/* (except /admin/login)
-  if (strippedPath.startsWith("/account") || strippedPath.startsWith("/admin")) {
+  if (
+    strippedPath.startsWith("/account") ||
+    strippedPath.startsWith("/admin")
+  ) {
     const session = await auth();
 
     if (strippedPath.startsWith("/account") && !session?.user) {
-      const locale = pathnameHasLocale ? pathname.split("/")[1] : routing.defaultLocale;
+      const locale = pathnameHasLocale
+        ? pathname.split("/")[1]
+        : routing.defaultLocale;
       const loginUrl = new URL(
         locale === routing.defaultLocale ? "/login" : `/${locale}/login`,
         req.url,
       );
+
       loginUrl.searchParams.set("callbackUrl", pathname);
+
       return Response.redirect(loginUrl);
     }
 
@@ -48,11 +56,16 @@ export default async function middleware(req: NextRequest) {
       !strippedPath.startsWith("/admin/login") &&
       session?.user?.role !== "admin"
     ) {
-      const locale = pathnameHasLocale ? pathname.split("/")[1] : routing.defaultLocale;
+      const locale = pathnameHasLocale
+        ? pathname.split("/")[1]
+        : routing.defaultLocale;
       const adminLoginUrl = new URL(
-        locale === routing.defaultLocale ? "/admin/login" : `/${locale}/admin/login`,
+        locale === routing.defaultLocale
+          ? "/admin/login"
+          : `/${locale}/admin/login`,
         req.url,
       );
+
       return Response.redirect(adminLoginUrl);
     }
   }

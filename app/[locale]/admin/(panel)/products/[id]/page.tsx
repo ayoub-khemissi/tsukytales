@@ -58,8 +58,10 @@ export default function ProductEditPage() {
   const fetchProduct = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/products/${id}`);
+
       if (res.ok) {
         const data = await res.json();
+
         setForm({
           name: data.name || "",
           slug: data.slug || "",
@@ -80,20 +82,32 @@ export default function ProductEditPage() {
     if (!isNew) fetchProduct();
   }, [isNew, fetchProduct]);
 
-  const updateField = <K extends keyof ProductForm>(key: K, value: ProductForm[K]) => {
+  const updateField = <K extends keyof ProductForm>(
+    key: K,
+    value: ProductForm[K],
+  ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const updateVariant = (index: number, field: keyof Variant, value: string | number) => {
+  const updateVariant = (
+    index: number,
+    field: keyof Variant,
+    value: string | number,
+  ) => {
     setForm((prev) => {
       const variants = [...prev.variants];
+
       variants[index] = { ...variants[index], [field]: value };
+
       return { ...prev, variants };
     });
   };
 
   const addVariant = () => {
-    setForm((prev) => ({ ...prev, variants: [...prev.variants, { ...EMPTY_VARIANT }] }));
+    setForm((prev) => ({
+      ...prev,
+      variants: [...prev.variants, { ...EMPTY_VARIANT }],
+    }));
   };
 
   const removeVariant = (index: number) => {
@@ -105,17 +119,21 @@ export default function ProductEditPage() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
     setUploading(true);
     try {
       const formData = new FormData();
+
       formData.append("image", file);
       const res = await fetch("/api/admin/products/upload-image", {
         method: "POST",
         body: formData,
       });
+
       if (res.ok) {
         const data = await res.json();
+
         setImages((prev) => [...prev, data.url || data.path]);
       }
     } finally {
@@ -133,8 +151,10 @@ export default function ProductEditPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, images }),
       });
+
       if (res.ok) {
         const data = await res.json();
+
         if (isNew && data.id) {
           router.push(`/admin/products/${data.id}`);
         }
@@ -147,7 +167,7 @@ export default function ProductEditPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-32">
-        <Spinner size="lg" color="primary" />
+        <Spinner color="primary" size="lg" />
       </div>
     );
   }
@@ -155,7 +175,7 @@ export default function ProductEditPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Back link */}
-      <Button as={Link} href="/admin/products" variant="light" size="sm">
+      <Button as={Link} href="/admin/products" size="sm" variant="light">
         &larr; {t("products_back")}
       </Button>
 
@@ -173,38 +193,44 @@ export default function ProductEditPage() {
             </CardHeader>
             <CardBody className="space-y-4">
               <Input
+                isRequired
                 label={t("products_field_name")}
                 value={form.name}
                 onValueChange={(v) => updateField("name", v)}
-                isRequired
               />
               <Input
+                description={t("products_slug_hint")}
                 label={t("products_field_slug")}
                 value={form.slug}
                 onValueChange={(v) => updateField("slug", v)}
-                description={t("products_slug_hint")}
               />
               <Textarea
                 label={t("products_field_description")}
+                minRows={4}
                 value={form.description}
                 onValueChange={(v) => updateField("description", v)}
-                minRows={4}
               />
               <div className="grid grid-cols-2 gap-4">
                 <Input
+                  isRequired
+                  endContent={
+                    <span className="text-default-400 text-sm">
+                      {common("currency")}
+                    </span>
+                  }
                   label={t("products_field_price")}
                   type="number"
                   value={String(form.price)}
                   onValueChange={(v) => updateField("price", Number(v))}
-                  endContent={<span className="text-default-400 text-sm">{common("currency")}</span>}
-                  isRequired
                 />
                 <Input
+                  endContent={
+                    <span className="text-default-400 text-sm">kg</span>
+                  }
                   label={t("products_field_weight")}
                   type="number"
                   value={String(form.weight)}
                   onValueChange={(v) => updateField("weight", Number(v))}
-                  endContent={<span className="text-default-400 text-sm">kg</span>}
                 />
               </div>
             </CardBody>
@@ -220,14 +246,19 @@ export default function ProductEditPage() {
                 <div className="flex gap-3 flex-wrap">
                   {images.map((img, i) => (
                     <div key={i} className="relative group">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={img.startsWith("http") ? img : `/${img}`}
                         alt={`Product ${i + 1}`}
                         className="w-24 h-24 object-cover rounded-lg border border-divider"
+                        src={img.startsWith("http") ? img : `/${img}`}
                       />
                       <button
-                        onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
                         className="absolute -top-2 -right-2 w-5 h-5 bg-danger text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() =>
+                          setImages((prev) =>
+                            prev.filter((_, idx) => idx !== i),
+                          )
+                        }
                       >
                         x
                       </button>
@@ -237,20 +268,20 @@ export default function ProductEditPage() {
               )}
               <div>
                 <input
-                  type="file"
                   accept="image/*"
-                  onChange={handleImageUpload}
                   className="hidden"
                   id="image-upload"
+                  type="file"
+                  onChange={handleImageUpload}
                 />
                 <Button
                   as="label"
-                  htmlFor="image-upload"
-                  variant="flat"
-                  color="primary"
-                  size="sm"
-                  isLoading={uploading}
                   className="cursor-pointer"
+                  color="primary"
+                  htmlFor="image-upload"
+                  isLoading={uploading}
+                  size="sm"
+                  variant="flat"
                 >
                   {t("products_upload_image")}
                 </Button>
@@ -261,8 +292,15 @@ export default function ProductEditPage() {
           {/* Variants */}
           <Card className="border border-divider">
             <CardHeader className="flex items-center justify-between">
-              <h2 className="font-semibold text-lg">{t("products_variants")}</h2>
-              <Button size="sm" variant="flat" color="primary" onPress={addVariant}>
+              <h2 className="font-semibold text-lg">
+                {t("products_variants")}
+              </h2>
+              <Button
+                color="primary"
+                size="sm"
+                variant="flat"
+                onPress={addVariant}
+              >
                 {t("products_add_variant")}
               </Button>
             </CardHeader>
@@ -279,32 +317,40 @@ export default function ProductEditPage() {
                       <div className="flex-1 grid grid-cols-3 gap-3">
                         <Input
                           label={t("products_variant_name")}
+                          size="sm"
                           value={variant.name}
                           onValueChange={(v) => updateVariant(i, "name", v)}
-                          size="sm"
                         />
                         <Input
+                          endContent={
+                            <span className="text-default-400 text-xs">
+                              {common("currency")}
+                            </span>
+                          }
                           label={t("products_variant_price")}
+                          size="sm"
                           type="number"
                           value={String(variant.price)}
-                          onValueChange={(v) => updateVariant(i, "price", Number(v))}
-                          size="sm"
-                          endContent={<span className="text-default-400 text-xs">{common("currency")}</span>}
+                          onValueChange={(v) =>
+                            updateVariant(i, "price", Number(v))
+                          }
                         />
                         <Input
                           label={t("products_variant_stock")}
+                          size="sm"
                           type="number"
                           value={String(variant.stock)}
-                          onValueChange={(v) => updateVariant(i, "stock", Number(v))}
-                          size="sm"
+                          onValueChange={(v) =>
+                            updateVariant(i, "stock", Number(v))
+                          }
                         />
                       </div>
                       <Button
-                        size="sm"
-                        variant="light"
-                        color="danger"
                         isIconOnly
                         className="mt-6"
+                        color="danger"
+                        size="sm"
+                        variant="light"
                         onPress={() => removeVariant(i)}
                       >
                         <TrashIcon size={16} />
@@ -330,22 +376,27 @@ export default function ProductEditPage() {
                 selectedKeys={[form.status]}
                 onSelectionChange={(keys) => {
                   const value = Array.from(keys)[0] as string;
+
                   if (value) updateField("status", value);
                 }}
               >
-                <SelectItem key="active">{t("products_status_active")}</SelectItem>
-                <SelectItem key="draft">{t("products_status_draft")}</SelectItem>
+                <SelectItem key="active">
+                  {t("products_status_active")}
+                </SelectItem>
+                <SelectItem key="draft">
+                  {t("products_status_draft")}
+                </SelectItem>
               </Select>
             </CardBody>
           </Card>
 
           {/* Save */}
           <Button
-            color="primary"
-            variant="shadow"
-            size="lg"
             className="w-full font-semibold"
+            color="primary"
             isLoading={saving}
+            size="lg"
+            variant="shadow"
             onPress={handleSave}
           >
             {isNew ? t("products_create") : t("products_save")}

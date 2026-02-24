@@ -37,6 +37,7 @@ export default function ShopPage() {
 
   useEffect(() => {
     const params = new URLSearchParams();
+
     params.set("page", String(page));
     params.set("size", "12");
     if (search) params.set("search", search);
@@ -59,22 +60,22 @@ export default function ShopPage() {
 
       <div className="flex justify-center mb-8">
         <Input
+          isClearable
           className="max-w-md"
           placeholder={t("search_placeholder")}
           startContent={<SearchIcon className="text-default-400" />}
           value={search}
+          onClear={() => setSearch("")}
           onValueChange={(v) => {
             setSearch(v);
             setPage(1);
           }}
-          isClearable
-          onClear={() => setSearch("")}
         />
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : products.length === 0 ? (
         <p className="text-center text-default-500 py-20">{t("empty")}</p>
@@ -88,19 +89,25 @@ export default function ShopPage() {
                     <div className="aspect-[3/4] bg-default-100 rounded-t-lg overflow-hidden relative">
                       {product.image ? (
                         <Image
-                          src={`/${product.image}`}
-                          alt={product.name}
                           fill
+                          alt={product.name}
                           className="object-cover group-hover:scale-105 transition-transform"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                          src={`/${product.image}`}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-4xl text-default-300">{"\uD83D\uDCDA"}</span>
+                          <span className="text-4xl text-default-300">
+                            {"\uD83D\uDCDA"}
+                          </span>
                         </div>
                       )}
                       {product.is_preorder && (
-                        <Chip className="absolute top-2 left-2" color="warning" size="sm">
+                        <Chip
+                          className="absolute top-2 left-2"
+                          color="warning"
+                          size="sm"
+                        >
                           {common("preorder")}
                         </Chip>
                       )}
@@ -114,13 +121,15 @@ export default function ShopPage() {
                     </Link>
                     <div className="flex items-center justify-between mt-3">
                       <span className="text-lg font-bold text-primary">
-                        {product.price}{common("currency")}
+                        {product.price}
+                        {common("currency")}
                       </span>
                       <Button
-                        size="sm"
                         color={addedId === product.id ? "success" : "primary"}
-                        variant="flat"
                         isDisabled={product.stock <= 0}
+                        size="sm"
+                        startContent={<CartIcon size={16} />}
+                        variant="flat"
                         onPress={() => {
                           addItem({
                             id: product.id,
@@ -132,7 +141,6 @@ export default function ShopPage() {
                           setAddedId(product.id);
                           setTimeout(() => setAddedId(null), 1500);
                         }}
-                        startContent={<CartIcon size={16} />}
                       >
                         {addedId === product.id
                           ? t("add_success")
@@ -150,11 +158,11 @@ export default function ShopPage() {
           {totalPages > 1 && (
             <div className="flex justify-center mt-10">
               <Pagination
-                total={totalPages}
-                page={page}
-                onChange={setPage}
-                color="primary"
                 showControls
+                color="primary"
+                page={page}
+                total={totalPages}
+                onChange={setPage}
               />
             </div>
           )}

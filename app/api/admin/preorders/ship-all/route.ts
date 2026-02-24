@@ -15,19 +15,36 @@ export const POST = withErrorHandler(async () => {
   });
 
   const preorders = orders.filter(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (o) => !(o.metadata as any)?.subscription && o.items?.some((i: any) => i.is_preorder),
+    (o) =>
+      !(o.metadata as any)?.subscription &&
+      o.items?.some((i: any) => i.is_preorder),
   );
 
-  const results: { id: number; success: boolean; shippingOrderId?: string; error?: string }[] = [];
+  const results: {
+    id: number;
+    success: boolean;
+    shippingOrderId?: string;
+    error?: string;
+  }[] = [];
 
   for (const order of preorders) {
     try {
       const result = await shippingService.createShipment(order.id);
-      results.push({ id: order.id, success: true, shippingOrderId: result.shippingOrderId });
+
+      results.push({
+        id: order.id,
+        success: true,
+        shippingOrderId: result.shippingOrderId,
+      });
     } catch (err) {
-      logger.error(`[Admin] Preorder ship TSK-${order.id}: ${err instanceof Error ? err.message : String(err)}`);
-      results.push({ id: order.id, success: false, error: err instanceof Error ? err.message : String(err) });
+      logger.error(
+        `[Admin] Preorder ship TSK-${order.id}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      results.push({
+        id: order.id,
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
   }
 

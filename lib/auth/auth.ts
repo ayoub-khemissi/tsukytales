@@ -1,3 +1,5 @@
+import type { CustomerRow, AdminRow } from "@/types/db.types";
+
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -5,8 +7,8 @@ import bcrypt from "bcryptjs";
 import { ResultSetHeader } from "mysql2";
 
 import { authConfig } from "./auth.config";
+
 import { pool } from "@/lib/db/connection";
-import type { CustomerRow, AdminRow } from "@/types/db.types";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -22,6 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         const email = credentials?.email as string;
         const password = credentials?.password as string;
+
         if (!email || !password) return null;
 
         const [rows] = await pool.execute<CustomerRow[]>(
@@ -29,17 +32,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           [email],
         );
         const customer = rows[0];
+
         if (!customer) return null;
 
         const valid = await bcrypt.compare(password, customer.password);
+
         if (!valid) return null;
 
         return {
           id: String(customer.id),
           email: customer.email,
-          name: [customer.first_name, customer.last_name]
-            .filter(Boolean)
-            .join(" ") || null,
+          name:
+            [customer.first_name, customer.last_name]
+              .filter(Boolean)
+              .join(" ") || null,
           role: "customer" as const,
           customerId: customer.id,
         };
@@ -55,6 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         const password = credentials?.password as string;
+
         if (!password) return null;
 
         const [rows] = await pool.execute<AdminRow[]>(
@@ -62,9 +69,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           ["admin"],
         );
         const admin = rows[0];
+
         if (!admin) return null;
 
         const valid = await bcrypt.compare(password, admin.password);
+
         if (!valid) return null;
 
         return {
@@ -104,12 +113,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               true,
             ],
           );
+
           user.customerId = result.insertId;
         } else {
           user.customerId = rows[0].id;
         }
         user.role = "customer";
       }
+
       return true;
     },
   },

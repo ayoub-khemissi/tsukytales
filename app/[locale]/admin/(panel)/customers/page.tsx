@@ -40,13 +40,16 @@ export default function CustomersPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+
       params.set("page", String(page));
       params.set("limit", String(limit));
       if (search) params.set("search", search);
 
       const res = await fetch(`/api/admin/customers?${params}`);
+
       if (res.ok) {
         const data: CustomersResponse = await res.json();
+
         setCustomers(data.items || []);
         setTotalPages(Math.ceil((data.total || 0) / limit) || 1);
       }
@@ -65,27 +68,29 @@ export default function CustomersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl font-bold">{t("customers_title")}</h1>
         <Input
+          isClearable
           className="max-w-xs"
           placeholder={t("customers_search")}
+          size="sm"
           startContent={<SearchIcon className="text-default-400" />}
           value={search}
+          onClear={() => setSearch("")}
           onValueChange={(v) => {
             setSearch(v);
             setPage(1);
           }}
-          isClearable
-          onClear={() => setSearch("")}
-          size="sm"
         />
       </div>
 
       {/* Content */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : customers.length === 0 ? (
-        <p className="text-center text-default-500 py-20">{t("customers_empty")}</p>
+        <p className="text-center text-default-500 py-20">
+          {t("customers_empty")}
+        </p>
       ) : (
         <>
           {/* Table header */}
@@ -106,7 +111,9 @@ export default function CustomersPage() {
                       {/* Name */}
                       <div>
                         <span className="font-semibold text-foreground">
-                          {[customer.first_name, customer.last_name].filter(Boolean).join(" ") || "—"}
+                          {[customer.first_name, customer.last_name]
+                            .filter(Boolean)
+                            .join(" ") || "—"}
                         </span>
                       </div>
 
@@ -117,8 +124,9 @@ export default function CustomersPage() {
 
                       {/* Orders count */}
                       <div className="md:text-center">
-                        <Chip size="sm" variant="flat" color="primary">
-                          {customer.orders_count ?? 0} {t("customers_orders_count").toLowerCase()}
+                        <Chip color="primary" size="sm" variant="flat">
+                          {customer.orders_count ?? 0}{" "}
+                          {t("customers_orders_count").toLowerCase()}
                         </Chip>
                       </div>
 
@@ -137,11 +145,11 @@ export default function CustomersPage() {
           {totalPages > 1 && (
             <div className="flex justify-center mt-6">
               <Pagination
-                total={totalPages}
-                page={page}
-                onChange={setPage}
-                color="primary"
                 showControls
+                color="primary"
+                page={page}
+                total={totalPages}
+                onChange={setPage}
               />
             </div>
           )}

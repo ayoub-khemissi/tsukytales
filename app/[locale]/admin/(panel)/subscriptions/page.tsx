@@ -77,7 +77,7 @@ export default function SubscriptionsPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : subscriptions.length === 0 ? (
         <Card className="border border-divider">
@@ -103,8 +103,8 @@ export default function SubscriptionsPage() {
                   <TableCell>
                     <Chip
                       color={statusColorMap[sub.status] || "default"}
-                      variant="flat"
                       size="sm"
+                      variant="flat"
                     >
                       {t(`subscriptions_status_${sub.status}`)}
                     </Chip>
@@ -115,10 +115,10 @@ export default function SubscriptionsPage() {
                   <TableCell>
                     {sub.status === "active" && (
                       <Button
-                        size="sm"
                         color="danger"
-                        variant="flat"
                         isLoading={cancelingId === sub.id}
+                        size="sm"
+                        variant="flat"
                         onPress={() => handleCancel(sub.id)}
                       >
                         {t("subscriptions_cancel")}
@@ -133,11 +133,11 @@ export default function SubscriptionsPage() {
           {totalPages > 1 && (
             <div className="flex justify-center">
               <Pagination
-                total={totalPages}
-                page={page}
-                onChange={setPage}
-                color="primary"
                 showControls
+                color="primary"
+                page={page}
+                total={totalPages}
+                onChange={setPage}
               />
             </div>
           )}

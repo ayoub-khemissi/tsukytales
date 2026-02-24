@@ -7,5 +7,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const weight = parseFloat(req.nextUrl.searchParams.get("weight") || "1.0");
   const country = req.nextUrl.searchParams.get("country") || "FR";
   const rates = getShippingRates(weight, country);
+
   return NextResponse.json(rates);
 });

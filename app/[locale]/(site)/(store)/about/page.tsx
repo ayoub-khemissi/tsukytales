@@ -4,7 +4,11 @@ import { useTranslations } from "next-intl";
 import { Button } from "@heroui/button";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFeatherAlt, faGem, faCrown } from "@fortawesome/free-solid-svg-icons";
+import {
+  faFeatherAlt,
+  faGem,
+  faCrown,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { Link } from "@/i18n/navigation";
 import { useScrollReveal } from "@/lib/hooks/use-scroll-reveal";
@@ -17,6 +21,7 @@ const VALUES = [
 
 export default function AboutPage() {
   const t = useTranslations("about");
+
   useScrollReveal();
 
   return (
@@ -29,7 +34,10 @@ export default function AboutPage() {
             <span className="magic-text block uppercase tracking-[8px] text-[1rem] font-semibold mb-8">
               {t("hero_subtitle")}
             </span>
-            <h1 className="font-heading font-bold text-primary dark:text-white leading-none mb-8" style={{ fontSize: "5.5rem", letterSpacing: "-2px" }}>
+            <h1
+              className="font-heading font-bold text-primary dark:text-white leading-none mb-8"
+              style={{ fontSize: "5.5rem", letterSpacing: "-2px" }}
+            >
               {t("hero_title_1")} <br />
               {t("hero_title_2")}{" "}
               <span className="magic-text">{t("hero_title_accent")}</span>
@@ -49,11 +57,11 @@ export default function AboutPage() {
             <div className="relative group">
               <div className="absolute -top-[30px] -left-[30px] right-[30px] bottom-[30px] border-2 border-accent-gold rounded-[40px] -z-10" />
               <Image
-                src="/assets/img/bg.png"
                 alt="Tsuky Tales Atelier"
-                width={600}
-                height={600}
                 className="w-full rounded-[40px] shadow-lg transition-transform duration-500 -rotate-3 group-hover:rotate-0 group-hover:scale-[1.02]"
+                height={600}
+                src="/assets/img/bg.png"
+                width={600}
               />
             </div>
 
@@ -88,7 +96,10 @@ export default function AboutPage() {
       {/* ========== VALUES ========== */}
       <section className="section-reveal relative py-24 md:py-48 overflow-hidden">
         <div className="container mx-auto max-w-6xl px-6">
-          <h2 className="font-heading italic text-3xl md:text-[3.5rem] font-bold text-center text-text-brand dark:text-white mb-16 md:mb-24 leading-tight" style={{ textShadow: "0 4px 15px rgba(88,22,104,0.2)" }}>
+          <h2
+            className="font-heading italic text-3xl md:text-[3.5rem] font-bold text-center text-text-brand dark:text-white mb-16 md:mb-24 leading-tight"
+            style={{ textShadow: "0 4px 15px rgba(88,22,104,0.2)" }}
+          >
             {t("values_title")}{" "}
             <span className="magic-text">{t("values_title_accent")}</span>
           </h2>
@@ -97,7 +108,11 @@ export default function AboutPage() {
               <div
                 key={v.key}
                 className="group bg-white dark:bg-gray-900 rounded-[30px] text-center shadow-md border border-[rgba(88,22,104,0.05)] relative transition-all duration-500 ease-out hover:-translate-y-5 hover:shadow-lg"
-                style={{ padding: "5rem 3rem", paddingTop: "5.5rem", marginTop: "2.5rem" }}
+                style={{
+                  padding: "5rem 3rem",
+                  paddingTop: "5.5rem",
+                  marginTop: "2.5rem",
+                }}
               >
                 {/* Icon circle attached to card top */}
                 <div className="absolute -top-[35px] left-1/2 -translate-x-1/2 z-10 w-[70px] h-[70px] rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary text-2xl transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:rotate-[10deg]">
@@ -119,7 +134,9 @@ export default function AboutPage() {
       <section className="section-reveal py-32 md:py-60 text-center">
         <div className="container mx-auto max-w-[1000px] px-6">
           <div className="relative">
-            <span className="absolute top-[-60px] left-1/2 -translate-x-1/2 text-[10rem] opacity-10 text-primary font-heading select-none">&ldquo;</span>
+            <span className="absolute top-[-60px] left-1/2 -translate-x-1/2 text-[10rem] opacity-10 text-primary font-heading select-none">
+              &ldquo;
+            </span>
             <p className="font-heading italic text-2xl md:text-[3.5rem] leading-snug text-primary dark:text-white">
               {t("vision_quote")}
             </p>
@@ -134,10 +151,10 @@ export default function AboutPage() {
           <div className="mt-24">
             <Button
               as={Link}
-              href="/subscription"
-              size="lg"
-              radius="none"
               className="btn-brand bg-primary font-semibold px-8"
+              href="/subscription"
+              radius="none"
+              size="lg"
             >
               {t("vision_cta")}
             </Button>

@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
-import { ChevronLeftIcon, ChevronRightIcon, InstagramIcon } from "@/components/icons";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  InstagramIcon,
+} from "@/components/icons";
 
 interface InstaPost {
   id: string;
@@ -32,10 +36,12 @@ export function InstagramCarousel() {
     fetch("/api/store/instagram")
       .then((r) => {
         if (!r.ok) throw new Error("Failed to fetch");
+
         return r.json();
       })
       .then((data) => {
         const items = data.posts || data.data || data.items || data;
+
         if (Array.isArray(items) && items.length > 0) {
           setPosts(items.slice(0, 12));
         } else {
@@ -49,6 +55,7 @@ export function InstagramCarousel() {
   function scroll(direction: "left" | "right") {
     if (!scrollRef.current) return;
     const amount = 300;
+
     scrollRef.current.scrollBy({
       left: direction === "left" ? -amount : amount,
       behavior: "smooth",
@@ -75,9 +82,9 @@ export function InstagramCarousel() {
         {/* Carousel */}
         <div className="relative">
           <button
-            onClick={() => scroll("left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-[44px] h-[44px] rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md flex items-center justify-center hover:bg-primary hover:text-white hover:scale-110 transition-all -translate-x-1/2"
             aria-label="Scroll left"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-[44px] h-[44px] rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md flex items-center justify-center hover:bg-primary hover:text-white hover:scale-110 transition-all -translate-x-1/2"
+            onClick={() => scroll("left")}
           >
             <ChevronLeftIcon size={20} />
           </button>
@@ -97,28 +104,34 @@ export function InstagramCarousel() {
               : posts.map((post) => (
                   <a
                     key={post.id}
-                    href={post.permalink}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="flex-shrink-0 w-[280px] h-[280px] rounded-2xl overflow-hidden relative group instagram-card-hover border border-[rgba(88,22,104,0.05)] shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
+                    href={post.permalink}
+                    rel="noopener noreferrer"
+                    target="_blank"
                   >
                     {post.media_url ? (
                       <Image
-                        src={post.media_url}
-                        alt={post.caption || "Instagram post"}
                         fill
+                        alt={post.caption || "Instagram post"}
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                         sizes="280px"
+                        src={post.media_url}
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-                        <InstagramIcon size={48} className="text-white/30" />
+                        <InstagramIcon className="text-white/30" size={48} />
                       </div>
                     )}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ background: "linear-gradient(transparent 40%, rgba(88,22,104,0.85) 100%)" }}>
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+                      style={{
+                        background:
+                          "linear-gradient(transparent 40%, rgba(88,22,104,0.85) 100%)",
+                      }}
+                    >
                       <InstagramIcon
-                        size={32}
                         className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        size={32}
                       />
                     </div>
                   </a>
@@ -126,9 +139,9 @@ export function InstagramCarousel() {
           </div>
 
           <button
-            onClick={() => scroll("right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-[44px] h-[44px] rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md flex items-center justify-center hover:bg-primary hover:text-white hover:scale-110 transition-all translate-x-1/2"
             aria-label="Scroll right"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-[44px] h-[44px] rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md flex items-center justify-center hover:bg-primary hover:text-white hover:scale-110 transition-all translate-x-1/2"
+            onClick={() => scroll("right")}
           >
             <ChevronRightIcon size={20} />
           </button>
@@ -137,10 +150,10 @@ export function InstagramCarousel() {
         {/* CTA */}
         <div className="text-center mt-8">
           <a
-            href="https://www.instagram.com/tsukytales/"
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-primary hover:text-primary-light transition-colors font-medium"
+            href="https://www.instagram.com/tsukytales/"
+            rel="noopener noreferrer"
+            target="_blank"
           >
             <InstagramIcon size={20} />
             @tsukytales

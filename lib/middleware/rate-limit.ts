@@ -17,6 +17,7 @@ const store = new Map<string, RateLimitEntry>();
 // Clean up expired entries every 5 minutes
 setInterval(() => {
   const now = Date.now();
+
   store.forEach((entry, key) => {
     if (now > entry.resetAt) {
       store.delete(key);
@@ -30,7 +31,8 @@ export async function rateLimit(
 ) {
   const { windowMs = 15 * 60_000, max = 100 } = options;
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const route = req.nextUrl.pathname;
   const key = `${ip}:${route}`;
 
@@ -39,6 +41,7 @@ export async function rateLimit(
 
   if (!entry || now > entry.resetAt) {
     store.set(key, { count: 1, resetAt: now + windowMs });
+
     return;
   }
 

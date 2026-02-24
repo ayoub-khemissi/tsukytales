@@ -33,12 +33,14 @@ export const authConfig = {
         token.role = user.role;
         token.customerId = user.customerId;
       }
+
       return token;
     },
 
     async session({ session, token }) {
       session.user.role = token.role;
       session.user.customerId = token.customerId;
+
       return session;
     },
   },

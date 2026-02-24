@@ -1,7 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "S'abonner - Box littéraire Tsuky Tales | Formules mensuelle & trimestrielle",
+  title:
+    "S'abonner - Box littéraire Tsuky Tales | Formules mensuelle & trimestrielle",
   description:
     "Abonnez-vous à la box littéraire Tsuky Tales. Formules mensuelle et trimestrielle avec livres collectors et éditions exclusives livrés chez vous.",
   openGraph: {

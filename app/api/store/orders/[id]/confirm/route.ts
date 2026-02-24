@@ -8,6 +8,10 @@ export const POST = withErrorHandler(async (_req: NextRequest, context) => {
   const session = await requireCustomer();
   const { id } = await context!.params;
 
-  const result = await orderService.confirmOrder(parseInt(id), session.user.customerId!);
+  const result = await orderService.confirmOrder(
+    parseInt(id),
+    session.user.customerId!,
+  );
+
   return NextResponse.json(result);
 });

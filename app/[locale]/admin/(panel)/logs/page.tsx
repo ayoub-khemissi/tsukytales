@@ -44,7 +44,7 @@ export default function LogsPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Spinner size="lg" color="primary" />
+          <Spinner color="primary" size="lg" />
         </div>
       ) : logs.length === 0 ? (
         <Card className="border border-divider">
@@ -65,8 +65,8 @@ export default function LogsPage() {
                 <TableCell>
                   <Chip
                     color={levelColorMap[entry.level] || "default"}
-                    variant="flat"
                     size="sm"
+                    variant="flat"
                   >
                     {entry.level.toUpperCase()}
                   </Chip>

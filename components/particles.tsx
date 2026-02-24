@@ -23,13 +23,17 @@ export function Particles({ count = 15 }: { count?: number }) {
       delay: Math.random() * 10,
       opacity: Math.random() * 0.3 + 0.1,
     }));
+
     setParticles(items);
   }, [count]);
 
   if (particles.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden" aria-hidden="true">
+    <div
+      aria-hidden="true"
+      className="fixed inset-0 pointer-events-none z-50 overflow-hidden"
+    >
       {particles.map((p) => (
         <div
           key={p.id}

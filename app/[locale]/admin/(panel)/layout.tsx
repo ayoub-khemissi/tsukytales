@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -8,7 +9,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
+export default function AdminPanelLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex h-screen overflow-hidden">
       <AdminSidebar />

@@ -31,8 +31,7 @@ const fileFormat = winston.format.combine(
   winston.format.json(),
 );
 
-const level =
-  process.env.NODE_ENV === "production" ? "info" : "debug";
+const level = process.env.NODE_ENV === "production" ? "info" : "debug";
 
 export const logger = winston.createLogger({
   level,

@@ -43,27 +43,27 @@ export default function AdminLoginPage() {
           <p className="text-sm text-default-500">{t("login_subtitle")}</p>
         </CardHeader>
         <CardBody>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-danger-50 text-danger text-sm p-3 rounded-lg text-center">
                 {error}
               </div>
             )}
             <Input
+              isRequired
+              autoComplete="current-password"
               label={t("password")}
+              size="lg"
               type="password"
               value={password}
               onValueChange={setPassword}
-              isRequired
-              autoComplete="current-password"
-              size="lg"
             />
             <Button
-              type="submit"
+              className="mt-2"
               color="primary"
               isLoading={loading}
-              className="mt-2"
               size="lg"
+              type="submit"
             >
               {t("login_button")}
             </Button>

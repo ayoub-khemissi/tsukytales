@@ -1,8 +1,10 @@
+import type { ProductRow } from "@/types/db.types";
+
 import { ResultSetHeader } from "mysql2";
 
-import { pool } from "@/lib/db/connection";
 import { BaseRepository } from "./base.repository";
-import type { ProductRow } from "@/types/db.types";
+
+import { pool } from "@/lib/db/connection";
 
 class ProductRepository extends BaseRepository<ProductRow> {
   constructor() {
@@ -14,11 +16,22 @@ class ProductRepository extends BaseRepository<ProductRow> {
       "SELECT * FROM products WHERE slug = ? LIMIT 1",
       [slug],
     );
+
     return rows[0] ?? null;
   }
 
-  async search(query: string, page?: number, size?: number): Promise<{ items: ProductRow[]; totalItems: number; totalPages: number; currentPage: number }> {
+  async search(
+    query: string,
+    page?: number,
+    size?: number,
+  ): Promise<{
+    items: ProductRow[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
     const like = `%${query}%`;
+
     return this.findAndCountAll({
       where: "name LIKE ? OR description LIKE ?",
       params: [like, like],
@@ -41,6 +54,7 @@ class ProductRepository extends BaseRepository<ProductRow> {
       "UPDATE products SET stock = GREATEST(0, stock - ?) WHERE id = ? AND stock > 0",
       [amount, id],
     );
+
     return result.affectedRows > 0;
   }
 }

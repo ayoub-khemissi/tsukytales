@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ResultSetHeader } from "mysql2";
 
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireCustomer } from "@/lib/auth/helpers";
@@ -6,7 +7,6 @@ import { validate } from "@/lib/middleware/validate";
 import { createAddressSchema } from "@/lib/validators/address.schema";
 import { addressRepository } from "@/lib/repositories/address.repository";
 import { withTransaction } from "@/lib/db/connection";
-import { ResultSetHeader } from "mysql2";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await requireCustomer();

@@ -10,10 +10,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const { id, notes } = await req.json();
   const order = await orderRepository.findById(id);
+
   if (!order) throw new AppError("Commande introuvable", 404);
 
   await orderRepository.update(order.id, {
-    metadata: JSON.stringify({ ...(order.metadata || {}), internal_notes: notes }),
+    metadata: JSON.stringify({
+      ...(order.metadata || {}),
+      internal_notes: notes,
+    }),
   });
 
   return NextResponse.json({ success: true });

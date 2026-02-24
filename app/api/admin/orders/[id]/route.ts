@@ -10,6 +10,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, context) => {
 
   const { id } = await context.params;
   const order = await orderRepository.findById(parseInt(id));
+
   if (!order) throw new AppError("Commande introuvable", 404);
 
   return NextResponse.json(order);
