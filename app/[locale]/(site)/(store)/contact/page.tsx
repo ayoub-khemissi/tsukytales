@@ -1,14 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Input, Textarea } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { useTranslations } from "next-intl";
+import { useSession } from "next-auth/react";
 
 export default function ContactPage() {
   const t = useTranslations("contact");
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const { data: session } = useSession();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+
+  useEffect(() => {
+    if (session?.user) {
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || session.user.name || "",
+        email: prev.email || session.user.email || "",
+      }));
+    }
+  }, [session]);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
@@ -26,6 +43,7 @@ export default function ContactPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+
       if (res.ok) {
         setStatus("success");
         setForm({ name: "", email: "", subject: "", message: "" });
@@ -48,18 +66,50 @@ export default function ContactPage() {
 
       <Card className="border border-divider">
         <CardBody className="p-8">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             {status === "success" && (
-              <div className="bg-success-50 text-success p-3 rounded-lg text-sm">{t("success")}</div>
+              <div className="bg-success-50 text-success p-3 rounded-lg text-sm">
+                {t("success")}
+              </div>
             )}
             {status === "error" && (
-              <div className="bg-danger-50 text-danger p-3 rounded-lg text-sm">{t("error")}</div>
+              <div className="bg-danger-50 text-danger p-3 rounded-lg text-sm">
+                {t("error")}
+              </div>
             )}
-            <Input label={t("name")} value={form.name} onValueChange={update("name")} isRequired />
-            <Input label={t("email")} type="email" value={form.email} onValueChange={update("email")} isRequired />
-            <Input label={t("subject")} value={form.subject} onValueChange={update("subject")} isRequired />
-            <Textarea label={t("message")} value={form.message} onValueChange={update("message")} minRows={5} isRequired />
-            <Button type="submit" color="primary" size="lg" isLoading={loading} className="mt-2">
+            <Input
+              isRequired
+              label={t("name")}
+              value={form.name}
+              onValueChange={update("name")}
+            />
+            <Input
+              isRequired
+              label={t("email")}
+              type="email"
+              value={form.email}
+              onValueChange={update("email")}
+            />
+            <Input
+              isRequired
+              label={t("subject")}
+              value={form.subject}
+              onValueChange={update("subject")}
+            />
+            <Textarea
+              isRequired
+              label={t("message")}
+              minRows={5}
+              value={form.message}
+              onValueChange={update("message")}
+            />
+            <Button
+              className="mt-2"
+              color="primary"
+              isLoading={loading}
+              size="lg"
+              type="submit"
+            >
               {t("send")}
             </Button>
           </form>
