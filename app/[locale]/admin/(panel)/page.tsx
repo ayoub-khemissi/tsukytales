@@ -299,28 +299,36 @@ export default function AdminDashboardPage() {
                 {t("orders_empty")}
               </p>
             ) : (
-              <div className="flex items-end gap-1 h-48">
+              <div className="flex items-end gap-2" style={{ height: 220 }}>
                 {stats.dailySales.map((day) => {
-                  const height = Math.max((day.total / maxSale) * 100, 2);
+                  const barH = Math.max(
+                    Math.round((day.total / maxSale) * 140),
+                    4,
+                  );
+                  const amount =
+                    day.total >= 1000
+                      ? `${(day.total / 1000).toFixed(1)}k`
+                      : `${Math.round(day.total)}`;
 
                   return (
                     <div
                       key={day.date}
-                      className="flex-1 flex flex-col items-center justify-end gap-1 group relative"
+                      className="flex-1 flex flex-col items-center justify-end group h-full min-w-0"
                     >
-                      {/* Tooltip */}
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-default-100 text-xs px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                        {day.total.toFixed(2)} {currency}
-                      </div>
+                      {/* Amount label */}
+                      <span className="text-[10px] font-medium text-default-600 mb-1 truncate max-w-full">
+                        {amount}
+                        {currency}
+                      </span>
                       {/* Bar */}
                       <div
-                        className="w-full rounded-t bg-gradient-to-t from-primary to-secondary transition-all duration-300 min-w-[4px]"
-                        style={{ height: `${height}%` }}
+                        className="w-full rounded-t bg-gradient-to-t from-primary to-secondary transition-all duration-300 min-w-[6px] group-hover:from-primary/80 group-hover:to-secondary/80"
+                        style={{ height: barH }}
                       />
                       {/* Date label */}
-                      <span className="text-[9px] text-default-400 leading-none mt-1 hidden sm:block">
+                      <span className="text-[9px] text-default-400 leading-none mt-1.5 hidden sm:block">
                         {new Date(day.date).toLocaleDateString(undefined, {
-                          month: "short",
+                          weekday: "short",
                           day: "numeric",
                         })}
                       </span>
