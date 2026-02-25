@@ -595,3 +595,33 @@ INSERT INTO `carts` (`id`, `customer_id`, `email`, `items`, `context`, `complete
   DATE_SUB(@now, INTERVAL 5 MONTH),
   DATE_SUB(@now, INTERVAL 5 MONTH)
 );
+
+-- ============================================================
+-- Contact Messages
+-- ============================================================
+INSERT INTO `contact_messages` (`name`, `email`, `subject`, `message`, `status`, `createdAt`) VALUES
+('Marie Dupont', 'marie.dupont@test.com',
+  'Question sur ma commande TSK-1001',
+  'Bonjour,\n\nJe souhaiterais savoir si ma commande TSK-1001 a bien été expédiée. Je n''ai pas encore reçu de numéro de suivi.\n\nMerci d''avance,\nMarie',
+  'replied', DATE_SUB(@now, INTERVAL 4 MONTH)
+),
+('Lucas Martin', 'lucas.martin@test.com',
+  'Disponibilité édition collector',
+  'Bonjour,\n\nJ''aimerais savoir si l''édition collector du Voyage de Tsuky sera de nouveau disponible prochainement ?\n\nCordialement,\nLucas',
+  'read', DATE_SUB(@now, INTERVAL 2 MONTH)
+),
+('Sophie Durand', 'sophie.durand@example.com',
+  'Partenariat librairie indépendante',
+  'Bonjour l''équipe Tsuky Tales,\n\nJe suis gérante d''une librairie indépendante à Toulouse et je serais intéressée par la vente de vos ouvrages dans ma boutique.\n\nPourriez-vous me communiquer vos conditions de distribution ?\n\nCordialement,\nSophie Durand\nLibrairie Les Mots Enchantés',
+  'unread', DATE_SUB(@now, INTERVAL 3 DAY)
+),
+('Antoine Petit', 'antoine.petit@test.com',
+  'Problème avec le paiement',
+  'Bonjour,\n\nJ''ai essayé de passer une commande mais le paiement a été refusé alors que ma carte fonctionne très bien par ailleurs. Pouvez-vous m''aider ?\n\nMerci,\nAntoine',
+  'unread', DATE_SUB(@now, INTERVAL 1 DAY)
+),
+('Emma Bernard', 'emma.bernard@test.com',
+  'Résiliation abonnement box littéraire',
+  'Bonjour,\n\nJe souhaiterais résilier mon abonnement à la box littéraire à partir du prochain trimestre. Pourriez-vous me confirmer la procédure ?\n\nMerci,\nEmma',
+  'read', DATE_SUB(@now, INTERVAL 1 MONTH)
+);
