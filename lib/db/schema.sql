@@ -190,7 +190,23 @@ CREATE TABLE IF NOT EXISTS `verification_tokens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+-- Contact Messages
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `contact_messages` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `subject` VARCHAR(500) NOT NULL,
+  `message` TEXT NOT NULL,
+  `status` ENUM('unread','read','replied') NOT NULL DEFAULT 'unread',
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_contact_status` (`status`),
+  INDEX `idx_contact_created` (`createdAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 -- Seed: Default admin (password: admin)
 -- ============================================================
 INSERT IGNORE INTO `admins` (`username`, `password`)
-VALUES ('admin', '$2a$12$LJ3m4ys4Xz0G8QpLsKEZyOQx0Nv3I1h2wMy5hJ6kY8xR3ZqL9oHW');
+VALUES ('admin', '$2b$12$2ubOasFt6dRw95KkGof9L.0dOkdy/hrJzG5dJs5s4pDPX4lHfUbja');

@@ -8,6 +8,7 @@ import { rateLimit } from "@/lib/middleware/rate-limit";
 import { contactSchema } from "@/lib/validators/contact.schema";
 import * as mailService from "@/lib/services/mail.service";
 import { AppError } from "@/lib/errors/app-error";
+import { contactMessageRepository } from "@/lib/repositories/contact-message.repository";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   await rateLimit(req, { windowMs: 60_000, max: 5 });
@@ -41,6 +42,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       400,
     );
   }
+
+  // Store in database
+  await contactMessageRepository.create({
+    name: data.name,
+    email: data.email,
+    subject: data.subject,
+    message: data.message,
+  });
 
   await mailService.sendContactEmail(data);
 

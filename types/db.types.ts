@@ -160,6 +160,20 @@ export interface OrderRow extends RowDataPacket {
   updatedAt: Date;
 }
 
+// --- Contact Messages ---
+export type ContactMessageStatus = "unread" | "read" | "replied";
+
+export interface ContactMessageRow extends RowDataPacket {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: ContactMessageStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // --- Carts ---
 export interface CartItem {
   variant_id: number;
