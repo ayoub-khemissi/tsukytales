@@ -108,9 +108,11 @@ export default function ProductsPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : products.length === 0 ? (
-        <p className="text-center text-default-500 py-20">
-          {t("products_empty")}
-        </p>
+        <Card className="border border-divider">
+          <CardBody className="py-16 text-center">
+            <p className="text-default-500">{t("products_empty")}</p>
+          </CardBody>
+        </Card>
       ) : (
         <>
           {/* Desktop table */}

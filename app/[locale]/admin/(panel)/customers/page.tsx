@@ -88,9 +88,11 @@ export default function CustomersPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : customers.length === 0 ? (
-        <p className="text-center text-default-500 py-20">
-          {t("customers_empty")}
-        </p>
+        <Card className="border border-divider">
+          <CardBody className="py-16 text-center">
+            <p className="text-default-500">{t("customers_empty")}</p>
+          </CardBody>
+        </Card>
       ) : (
         <>
           {/* Table header */}

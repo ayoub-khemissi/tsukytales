@@ -164,9 +164,11 @@ export default function DiscountsPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : discounts.length === 0 ? (
-        <p className="text-center text-default-500 py-20">
-          {t("discounts_empty")}
-        </p>
+        <Card className="border border-divider">
+          <CardBody className="py-16 text-center">
+            <p className="text-default-500">{t("discounts_empty")}</p>
+          </CardBody>
+        </Card>
       ) : (
         <>
           {/* Table header */}

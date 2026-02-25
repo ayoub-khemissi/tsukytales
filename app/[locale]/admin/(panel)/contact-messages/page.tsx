@@ -156,9 +156,11 @@ export default function ContactMessagesPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : messages.length === 0 ? (
-        <p className="text-center text-default-500 py-20">
-          {t("messages_empty")}
-        </p>
+        <Card className="border border-divider">
+          <CardBody className="py-16 text-center">
+            <p className="text-default-500">{t("messages_empty")}</p>
+          </CardBody>
+        </Card>
       ) : (
         <>
           {/* Desktop table */}
