@@ -16,122 +16,293 @@ import {
 } from "@heroui/table";
 import { useTranslations } from "next-intl";
 
+import { AdminTableFilters } from "@/components/admin/AdminTableFilters";
+import {
+  SortableColumn,
+  type SortDirection,
+} from "@/components/admin/SortableColumn";
+import { downloadCSV } from "@/lib/utils/export-csv";
+
 interface Subscription {
   id: string;
   customer_email: string;
+  customer_name: string | null;
   plan_name: string;
-  status: "active" | "canceled" | "past_due";
-  next_billing_date: string;
+  status: string;
+  stripe_status: string | null;
+  stripe_dashboard_url: string | null;
+  next_billing_date: string | null;
+  cancel_at_period_end: boolean;
+  orders_count: number;
+  last_order_date: string;
+  amount: number;
 }
 
-const statusColorMap: Record<string, "success" | "danger" | "warning"> = {
+const statusColorMap: Record<
+  string,
+  "success" | "danger" | "warning" | "default"
+> = {
   active: "success",
   canceled: "danger",
   past_due: "warning",
+  unpaid: "danger",
+  incomplete: "warning",
 };
 
 export default function SubscriptionsPage() {
   const t = useTranslations("admin");
+  const common = useTranslations("common");
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const limit = 20;
 
-  const fetchSubscriptions = useCallback(() => {
+  const fetchSubscriptions = useCallback(async () => {
     setLoading(true);
-    fetch(`/api/admin/subscriptions?page=${page}&limit=${limit}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setSubscriptions(data.items || []);
-        setTotal(data.total || 0);
-      })
-      .finally(() => setLoading(false));
-  }, [page]);
+    try {
+      const params = new URLSearchParams();
+
+      params.set("page", String(page));
+      params.set("limit", String(limit));
+      if (search) params.set("search", search);
+      if (statusFilter !== "all") params.set("status", statusFilter);
+      if (sortBy && sortDirection) {
+        params.set("sortBy", sortBy);
+        params.set("sortOrder", sortDirection);
+      }
+
+      const res = await fetch(`/api/admin/subscriptions?${params}`);
+      const data = await res.json();
+
+      setSubscriptions(data.items || []);
+      setTotal(data.total || 0);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, statusFilter, sortBy, sortDirection]);
 
   useEffect(() => {
     fetchSubscriptions();
   }, [fetchSubscriptions]);
 
-  const handleCancel = async (id: string) => {
-    setCancelingId(id);
-    try {
-      const res = await fetch(`/api/admin/subscriptions/${id}/cancel`, {
-        method: "POST",
-      });
+  const handleSort = (column: string, direction: SortDirection) => {
+    setSortBy(direction ? column : null);
+    setSortDirection(direction);
+    setPage(1);
+  };
 
-      if (res.ok) {
-        fetchSubscriptions();
-      }
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const params = new URLSearchParams();
+
+      params.set("limit", "10000");
+      if (search) params.set("search", search);
+      if (statusFilter !== "all") params.set("status", statusFilter);
+
+      const res = await fetch(`/api/admin/subscriptions?${params}`);
+      const data = await res.json();
+      const items: Subscription[] = data.items || [];
+
+      const headers = [
+        t("subscriptions_email"),
+        t("subscriptions_customer"),
+        t("subscriptions_plan"),
+        common("total"),
+        t("subscriptions_status"),
+        "Stripe",
+        t("subscriptions_next_billing"),
+        t("subscriptions_deliveries"),
+      ];
+
+      const rows = items.map((s) => [
+        s.customer_email,
+        s.customer_name || "—",
+        s.plan_name,
+        `${s.amount.toFixed(2)}${common("currency")}`,
+        t(`subscriptions_status_${s.status}` as any),
+        s.stripe_status || "—",
+        s.next_billing_date
+          ? new Date(s.next_billing_date).toLocaleDateString()
+          : "—",
+        String(s.orders_count),
+      ]);
+
+      downloadCSV(
+        `abonnements-${new Date().toISOString().slice(0, 10)}.csv`,
+        headers,
+        rows,
+      );
     } finally {
-      setCancelingId(null);
+      setExporting(false);
     }
   };
 
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">{t("subscriptions_title")}</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
+          {t("subscriptions_title")}
+        </h1>
+        <Button
+          color="primary"
+          isLoading={exporting}
+          size="sm"
+          variant="flat"
+          onPress={handleExportCSV}
+        >
+          {t("export_csv")}
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <AdminTableFilters
+        filters={[
+          {
+            key: "status",
+            label: t("subscriptions_filter_status"),
+            options: [
+              { key: "all", label: t("filter_all") },
+              { key: "active", label: t("subscriptions_status_active") },
+              { key: "canceled", label: t("subscriptions_status_canceled") },
+              { key: "past_due", label: t("subscriptions_status_past_due") },
+            ],
+            value: statusFilter,
+            onChange: (v) => {
+              setStatusFilter(v);
+              setPage(1);
+            },
+          },
+        ]}
+        search={{
+          value: search,
+          placeholder: t("subscriptions_search"),
+          onChange: (v) => {
+            setSearch(v);
+            setPage(1);
+          },
+        }}
+      />
 
       {loading ? (
         <div className="flex justify-center py-20">
           <Spinner color="primary" size="lg" />
         </div>
       ) : subscriptions.length === 0 ? (
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardBody className="py-16 text-center">
             <p className="text-default-500">{t("subscriptions_empty")}</p>
           </CardBody>
         </Card>
       ) : (
         <>
-          <Table aria-label={t("subscriptions_title")} className="mb-6">
-            <TableHeader>
-              <TableColumn>{t("subscriptions_email")}</TableColumn>
-              <TableColumn>{t("subscriptions_plan")}</TableColumn>
-              <TableColumn>{t("subscriptions_status")}</TableColumn>
-              <TableColumn>{t("subscriptions_next_billing")}</TableColumn>
-              <TableColumn>{t("subscriptions_actions")}</TableColumn>
-            </TableHeader>
-            <TableBody>
-              {subscriptions.map((sub) => (
-                <TableRow key={sub.id}>
-                  <TableCell>{sub.customer_email}</TableCell>
-                  <TableCell>{sub.plan_name}</TableCell>
-                  <TableCell>
-                    <Chip
-                      color={statusColorMap[sub.status] || "default"}
-                      size="sm"
-                      variant="flat"
-                    >
-                      {t(`subscriptions_status_${sub.status}`)}
-                    </Chip>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(sub.next_billing_date).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    {sub.status === "active" && (
-                      <Button
-                        color="danger"
-                        isLoading={cancelingId === sub.id}
+          <div className="overflow-x-auto">
+            <Table aria-label={t("subscriptions_title")}>
+              <TableHeader>
+                <TableColumn>
+                  <SortableColumn
+                    column="customer_email"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("subscriptions_email")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>{t("subscriptions_plan")}</TableColumn>
+                <TableColumn>{t("subscriptions_status")}</TableColumn>
+                <TableColumn>Stripe</TableColumn>
+                <TableColumn>{t("subscriptions_next_billing")}</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {subscriptions.map((sub) => (
+                  <TableRow key={sub.id}>
+                    <TableCell>
+                      <div>
+                        <span className="font-medium">
+                          {sub.customer_email}
+                        </span>
+                        {sub.customer_name && (
+                          <p className="text-sm text-default-500">
+                            {sub.customer_name}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <span>{sub.plan_name}</span>
+                        <p className="text-sm text-default-500">
+                          {sub.amount.toFixed(2)}
+                          {common("currency")} &middot; {sub.orders_count}{" "}
+                          {t("subscriptions_deliveries")}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        color={statusColorMap[sub.status] || "default"}
                         size="sm"
                         variant="flat"
-                        onPress={() => handleCancel(sub.id)}
                       >
-                        {t("subscriptions_cancel")}
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                        {t(`subscriptions_status_${sub.status}`)}
+                      </Chip>
+                    </TableCell>
+                    <TableCell>
+                      {sub.stripe_status ? (
+                        sub.stripe_dashboard_url ? (
+                          <a
+                            href={sub.stripe_dashboard_url}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            <Chip
+                              className="cursor-pointer hover:opacity-80"
+                              color={
+                                statusColorMap[sub.stripe_status] || "default"
+                              }
+                              size="sm"
+                              variant="dot"
+                            >
+                              {sub.stripe_status} ↗
+                            </Chip>
+                          </a>
+                        ) : (
+                          <Chip
+                            color={
+                              statusColorMap[sub.stripe_status] || "default"
+                            }
+                            size="sm"
+                            variant="dot"
+                          >
+                            {sub.stripe_status}
+                          </Chip>
+                        )
+                      ) : (
+                        <span className="text-default-400 text-sm">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-default-500">
+                      {sub.next_billing_date
+                        ? new Date(sub.next_billing_date).toLocaleDateString()
+                        : "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center">
+            <div className="flex justify-center mt-6">
               <Pagination
                 showControls
                 color="primary"

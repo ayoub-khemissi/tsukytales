@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 export function useScrollReveal(
   selector: string = ".section-reveal, .step-card-reveal",
+  deps: unknown[] = [],
 ) {
   useEffect(() => {
     const elements = document.querySelectorAll(selector);
@@ -28,5 +29,5 @@ export function useScrollReveal(
     elements.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [selector]);
+  }, [selector, ...deps]);
 }

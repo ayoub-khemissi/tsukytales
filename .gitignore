@@ -41,3 +41,9 @@ pnpm-lock.yaml
 yarn.lock
 package-lock.json
 bun.lockb
+
+# uploaded assets
+/public/assets/uploads/
+
+# claude code
+.claude

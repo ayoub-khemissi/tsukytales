@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
+import { Button } from "@heroui/button";
 
 import { Link, usePathname } from "@/i18n/navigation";
 
@@ -263,13 +264,15 @@ export function AdminSidebar() {
   const sidebar = (
     <aside className="flex flex-col h-screen w-64 bg-[#1a0a1f] text-white shrink-0 overflow-y-auto">
       {/* Branding */}
-      <div className="flex items-center gap-3 px-5 py-6 border-b border-white/10">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#581668] to-[#7a218f] flex items-center justify-center text-sm font-bold">
+      <div className="flex items-center gap-3 px-5 py-6 border-b border-[#D4AF37]/20">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#F2D479] flex items-center justify-center text-sm font-bold text-[#1a0a1f]">
           T
         </div>
         <div>
-          <p className="text-sm font-semibold tracking-wide">TSUKY TALES</p>
-          <p className="text-[10px] text-white/50 uppercase tracking-widest">
+          <p className="font-heading italic text-sm tracking-wide">
+            Tsuky Tales
+          </p>
+          <p className="text-[10px] text-[#D4AF37]/70 uppercase tracking-[3px]">
             Admin
           </p>
         </div>
@@ -285,7 +288,7 @@ export function AdminSidebar() {
               key={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 active
-                  ? "bg-white/10 text-white font-medium"
+                  ? "admin-nav-active bg-[#D4AF37]/10 text-[#F2D479] font-medium"
                   : "text-white/60 hover:text-white hover:bg-white/5"
               }`}
               href={item.href}
@@ -299,7 +302,7 @@ export function AdminSidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="px-3 pb-4 space-y-1 border-t border-white/10 pt-3">
+      <div className="px-3 pb-4 space-y-1 border-t border-[#D4AF37]/20 pt-3">
         <Link
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
           href="/"
@@ -320,9 +323,10 @@ export function AdminSidebar() {
           </svg>
           <span>{t("nav_back_to_site")}</span>
         </Link>
-        <button
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/60 hover:text-red-400 hover:bg-white/5 transition-colors w-full text-left cursor-pointer"
-          onClick={() => signOut({ callbackUrl: "/" })}
+        <Button
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/60 hover:text-red-400 hover:bg-white/5 transition-colors w-full justify-start cursor-pointer"
+          variant="light"
+          onPress={() => signOut({ callbackUrl: "/" })}
         >
           <svg
             fill="none"
@@ -339,7 +343,7 @@ export function AdminSidebar() {
             <line x1="21" x2="9" y1="12" y2="12" />
           </svg>
           <span>{t("nav_logout")}</span>
-        </button>
+        </Button>
       </div>
     </aside>
   );
@@ -347,10 +351,13 @@ export function AdminSidebar() {
   return (
     <>
       {/* Mobile hamburger toggle */}
-      <button
+      <Button
+        isIconOnly
         aria-label="Toggle sidebar"
-        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-[#1a0a1f] text-white shadow-lg"
-        onClick={() => setMobileOpen(!mobileOpen)}
+        className="fixed top-4 left-4 z-50 md:hidden bg-[#1a0a1f] text-[#D4AF37] border border-[#D4AF37]/30 shadow-lg"
+        radius="lg"
+        variant="solid"
+        onPress={() => setMobileOpen(!mobileOpen)}
       >
         {mobileOpen ? (
           <svg
@@ -382,7 +389,7 @@ export function AdminSidebar() {
             <line x1="3" x2="21" y1="18" y2="18" />
           </svg>
         )}
-      </button>
+      </Button>
 
       {/* Desktop sidebar — always visible */}
       <div className="hidden md:block">{sidebar}</div>

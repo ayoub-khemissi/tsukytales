@@ -22,13 +22,6 @@ export const updateCustomerSchema = z.object({
     })
     .passthrough()
     .optional(),
-  preferences: z
-    .object({
-      literary_genres: z.array(z.string()).optional(),
-      favorite_authors: z.array(z.string()).optional(),
-      reading_pace: z.enum(["lent", "normal", "rapide"]).optional(),
-    })
-    .optional(),
 });
 
 export const loginCustomerSchema = z.object({

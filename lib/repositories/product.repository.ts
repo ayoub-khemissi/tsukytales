@@ -5,6 +5,7 @@ import { ResultSetHeader } from "mysql2";
 import { BaseRepository } from "./base.repository";
 
 import { pool } from "@/lib/db/connection";
+import { cached, cacheKey } from "@/lib/cache";
 
 class ProductRepository extends BaseRepository<ProductRow> {
   constructor() {
@@ -12,12 +13,14 @@ class ProductRepository extends BaseRepository<ProductRow> {
   }
 
   async findBySlug(slug: string): Promise<ProductRow | null> {
-    const [rows] = await pool.execute<ProductRow[]>(
-      "SELECT * FROM products WHERE slug = ? LIMIT 1",
-      [slug],
-    );
+    return cached(cacheKey("product:slug", slug), 1800, async () => {
+      const [rows] = await pool.execute<ProductRow[]>(
+        "SELECT * FROM products WHERE slug = ? LIMIT 1",
+        [slug],
+      );
 
-    return rows[0] ?? null;
+      return rows[0] ?? null;
+    });
   }
 
   async search(
@@ -33,7 +36,8 @@ class ProductRepository extends BaseRepository<ProductRow> {
     const like = `%${query}%`;
 
     return this.findAndCountAll({
-      where: "name LIKE ? OR description LIKE ?",
+      where:
+        "(name LIKE ? OR description LIKE ?) AND (is_deleted = 0 OR is_deleted IS NULL)",
       params: [like, like],
       orderBy: "createdAt DESC",
       page,
@@ -47,6 +51,10 @@ class ProductRepository extends BaseRepository<ProductRow> {
 
   async countLowStock(threshold: number = 10): Promise<number> {
     return this.count("stock < ?", [threshold]);
+  }
+
+  async deactivateAll(): Promise<void> {
+    await pool.execute("UPDATE products SET is_active = 0 WHERE is_active = 1");
   }
 
   async decrementStock(id: number, amount: number = 1): Promise<boolean> {

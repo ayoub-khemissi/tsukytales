@@ -16,13 +16,14 @@ function createPool(): Pool {
     password: env.DB_PASS,
     database: env.DB_NAME,
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: env.DB_POOL_LIMIT,
+    queueLimit: env.DB_QUEUE_LIMIT,
     charset: "utf8mb4",
     timezone: "+00:00",
     decimalNumbers: true,
     typeCast(field, next) {
       if (field.type === "JSON") {
-        const val = field.string();
+        const val = field.string("utf8");
 
         if (val === null) return null;
         try {

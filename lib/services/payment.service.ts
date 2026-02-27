@@ -2,12 +2,11 @@ import Stripe from "stripe";
 
 import { logger } from "@/lib/utils/logger";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_missing");
 
 interface OrderData {
   id: number;
-  items: { price: number; quantity?: number }[];
-  metadata?: Record<string, unknown> | null;
+  total: number;
   stripe_customer_id?: string;
   email?: string;
   order_number?: string;
@@ -16,22 +15,7 @@ interface OrderData {
 export async function createPaymentIntent(orderData: OrderData) {
   logger.info(`Creating Stripe PaymentIntent for order: ${orderData.id}`);
 
-  if (!orderData.items || orderData.items.length === 0) {
-    throw new Error("Le panier est vide");
-  }
-
-  const itemsTotal = orderData.items.reduce(
-    (sum, item) => sum + item.price * (item.quantity || 1),
-    0,
-  );
-  const meta = orderData.metadata as Record<string, unknown> | undefined;
-  const discountAmount = (meta?.discount_amount as number) || 0;
-  const shippingCost =
-    (meta?.shipping_cost as number) ||
-    (meta?.shipping_method === "home" ? 7.5 : 4.9);
-  const totalAmount = Math.round(
-    (itemsTotal + shippingCost - discountAmount) * 100,
-  );
+  const totalAmount = Math.round(orderData.total * 100);
 
   const intentOptions: Stripe.PaymentIntentCreateParams = {
     amount: totalAmount,

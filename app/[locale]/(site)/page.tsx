@@ -25,16 +25,13 @@ export default function HomePage() {
   return (
     <>
       {/* ========== HERO ========== */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Bottom fade gradient */}
-        <div className="absolute bottom-0 left-0 right-0 h-[200px] bg-gradient-to-t from-bg-brand dark:from-bg-dark to-transparent pointer-events-none z-[5]" />
+        <div className="absolute bottom-0 left-0 right-0 h-[200px] bg-gradient-to-t from-bg-brand/60 dark:from-bg-dark/60 to-transparent pointer-events-none z-[5]" />
         <div className="relative z-10 container mx-auto max-w-6xl px-6 py-20 text-center">
-          <div
-            className="glass rounded-[40px]"
-            style={{ padding: "2.5rem 4rem" }}
-          >
+          <div className="glass rounded-[24px] sm:rounded-[40px] px-5 py-8 sm:px-10 sm:py-10 md:px-16 md:py-10">
             {/* Subtitle */}
-            <p className="text-[0.9rem] font-medium uppercase tracking-[8px] mb-6">
+            <p className="text-[0.75rem] sm:text-[0.9rem] font-medium uppercase tracking-[3px] sm:tracking-[8px] mb-4 sm:mb-6">
               <span className="magic-text">{t("hero_subtitle_art")}</span>
             </p>
 
@@ -45,7 +42,7 @@ export default function HomePage() {
                 alt="Tsuky Tales"
                 className="object-contain"
                 height={200}
-                src="/assets/img/hero_logo.png"
+                src="/assets/img/hero_logo.svg"
                 style={{
                   animation: "float 6s ease-in-out infinite",
                   transformOrigin: "center bottom",
@@ -66,20 +63,17 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 as={Link}
-                className="btn-brand bg-primary font-semibold px-8"
+                className="btn-brand bg-primary w-full sm:w-auto font-semibold"
                 href="/subscription"
-                radius="none"
                 size="lg"
               >
                 {t("hero_cta_subscribe")}
               </Button>
               <Button
                 as={Link}
-                className="border-primary text-primary hover:bg-primary hover:text-white font-semibold px-8 transition-colors !rounded-[14px]"
+                className="btn-brand-outline w-full sm:w-auto font-semibold"
                 href="/about"
-                radius="none"
                 size="lg"
-                variant="bordered"
               >
                 {t("hero_cta_story")}
               </Button>
@@ -107,9 +101,11 @@ export default function HomePage() {
 
       {/* ========== HOW IT WORKS ========== */}
       <section
-        className="section-reveal py-16 md:py-24 bg-bg-brand dark:bg-bg-dark"
+        className="section-reveal relative min-h-screen flex flex-col items-center justify-center py-16 bg-bg-brand dark:bg-bg-dark"
         id="how-it-works"
       >
+        {/* Bottom fade to blend with next section */}
+        <div className="absolute left-0 right-0 -bottom-[100px] h-[100px] bg-gradient-to-b from-bg-brand/60 dark:from-bg-dark/60 to-transparent pointer-events-none z-[1]" />
         <div className="container mx-auto max-w-7xl px-6">
           <div className="text-center mb-14">
             <h2 className="font-heading italic text-3xl md:text-4xl font-bold text-text-brand dark:text-white">
@@ -148,7 +144,7 @@ export default function HomePage() {
                     </h3>
 
                     {/* Bubble */}
-                    <div className="mx-6 mt-4 p-5 bg-bg-brand dark:bg-gray-800 rounded-[30px] min-h-[180px] flex items-center justify-center border border-primary/5">
+                    <div className="mx-4 sm:mx-6 mt-4 p-4 sm:p-5 bg-bg-brand dark:bg-gray-800 rounded-[20px] sm:rounded-[30px] min-h-[140px] sm:min-h-[180px] flex items-center justify-center border border-primary/5">
                       <p className="text-xs text-text-light dark:text-gray-300 text-center leading-relaxed uppercase tracking-[1px]">
                         {t(`how_step${step}_bubble`)}
                       </p>
@@ -170,22 +166,43 @@ export default function HomePage() {
           </div>
 
           {/* CTA */}
-          <div className="text-center mt-12">
+          <div className="text-center mt-12 px-4 sm:px-0">
             <Button
               as={Link}
-              className="btn-brand bg-primary font-semibold px-8"
+              className="btn-brand bg-primary w-full sm:w-auto font-semibold"
               href="/subscription"
-              radius="full"
               size="lg"
             >
               {t("how_cta")}
             </Button>
           </div>
+
+          {/* Scroll indicator */}
+          <button
+            aria-label="Scroll to next section"
+            className="mt-10 mx-auto block cursor-pointer bg-transparent border-none"
+            style={{ animation: "bounce 2s infinite" }}
+            onClick={() =>
+              document
+                .getElementById("instagram")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            <ChevronDownIcon
+              className="mx-auto text-text-brand/50 dark:text-white/50"
+              size={24}
+            />
+          </button>
         </div>
       </section>
 
       {/* ========== INSTAGRAM ========== */}
-      <InstagramCarousel />
+      <div
+        className="min-h-screen flex flex-col items-center justify-center py-16"
+        id="instagram"
+      >
+        <InstagramCarousel />
+      </div>
     </>
   );
 }

@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
+import { RowDataPacket } from "mysql2";
 
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireCustomer } from "@/lib/auth/helpers";
 import { customerRepository } from "@/lib/repositories/customer.repository";
 import { productRepository } from "@/lib/repositories/product.repository";
 import { stripe } from "@/lib/services/payment.service";
+import { pool } from "@/lib/db/connection";
+import { settingsRepository } from "@/lib/repositories/settings.repository";
 
 export const GET = withErrorHandler(async () => {
   const session = await requireCustomer();
@@ -16,6 +19,12 @@ export const GET = withErrorHandler(async () => {
 
   if (!scheduleId) return NextResponse.json({ active: false });
 
+  const shippingInfo = (customer.metadata?.subscription_shipping ||
+    {}) as Record<string, unknown>;
+  const skippedPhases = (customer.metadata?.subscription_skipped ||
+    []) as string[];
+
+  // Try Stripe first
   try {
     const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId);
     const productId = customer.metadata?.subscription_product_id;
@@ -23,7 +32,6 @@ export const GET = withErrorHandler(async () => {
       ? await productRepository.findById(parseInt(productId as string))
       : null;
 
-    // Get price from Stripe
     const priceId = schedule.phases?.[0]?.items?.[0]?.price;
     let totalPerQuarter = product ? Number(product.subscription_price) : 35;
     let shippingCost = 0;
@@ -40,15 +48,6 @@ export const GET = withErrorHandler(async () => {
       }
     }
 
-    const shippingInfo = (customer.metadata?.subscription_shipping ||
-      {}) as Record<string, unknown>;
-    const skippedPhases = (customer.metadata?.subscription_skipped ||
-      []) as string[];
-    const currentYear = new Date().getFullYear();
-    const skipsThisYear = skippedPhases.filter((s: string) =>
-      s.startsWith(String(currentYear)),
-    ).length;
-
     return NextResponse.json({
       active: schedule.status === "active" || schedule.status === "not_started",
       status: schedule.status,
@@ -57,7 +56,6 @@ export const GET = withErrorHandler(async () => {
       shipping_cost: shippingCost,
       total_per_quarter: totalPerQuarter,
       shipping_method: shippingInfo.method,
-      skips_remaining: Math.max(0, 1 - skipsThisYear),
       skipped_phases: skippedPhases,
       phases: schedule.phases.map((p) => ({
         start: new Date(p.start_date * 1000).toISOString().split("T")[0],
@@ -68,6 +66,41 @@ export const GET = withErrorHandler(async () => {
       })),
     });
   } catch {
-    return NextResponse.json({ active: false });
+    // Stripe unavailable — fallback to local DB data
   }
+
+  // Fallback: build response from local orders + subscription product
+  const [subOrders] = await pool.execute<
+    (RowDataPacket & { createdAt: Date })[]
+  >(
+    `SELECT createdAt FROM orders WHERE customer_id = ? AND is_subscription_order = 1 ORDER BY createdAt DESC LIMIT 1`,
+    [customer.id],
+  );
+
+  if (subOrders.length === 0) return NextResponse.json({ active: false });
+
+  // Find subscription product
+  const [subProducts] = await pool.execute<RowDataPacket[]>(
+    `SELECT id, name, subscription_price FROM products WHERE is_subscription = 1 LIMIT 1`,
+  );
+  const product = subProducts[0] ?? null;
+  const subscriptionPrice = product ? Number(product.subscription_price) : null;
+  const dates: string[] =
+    (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
+
+  return NextResponse.json({
+    active: true,
+    status: "active",
+    product_name: product?.name ?? null,
+    product_price: subscriptionPrice,
+    shipping_cost: 0,
+    total_per_quarter: subscriptionPrice,
+    shipping_method: shippingInfo.method ?? null,
+    skipped_phases: skippedPhases,
+    phases: dates.map((d) => ({
+      start: d,
+      end: d,
+      skipped: skippedPhases.includes(d),
+    })),
+  });
 });

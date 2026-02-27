@@ -8,7 +8,7 @@ const addressSchema = z.object({
   zip_code: z.string().min(1).optional(),
   city: z.string().min(1).optional(),
   country: z.string().max(2).optional(),
-  phone: z.string().optional(),
+  phone: z.string().min(1).optional(),
 });
 
 export const createOrderSchema = z.object({
@@ -26,6 +26,7 @@ export const createOrderSchema = z.object({
   shipping_method: z.enum(["relay", "home"]),
   relay_code: z.string().optional(),
   discount_code: z.string().optional(),
+  guest_email: z.string().email("Email invalide").optional(),
 });
 
 export const confirmOrderSchema = z.object({

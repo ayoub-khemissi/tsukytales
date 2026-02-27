@@ -23,6 +23,8 @@ const envSchema = z.object({
     .preprocess((val) => (val === "" ? undefined : val), z.string().optional())
     .default(""),
   DB_NAME: z.string().min(1),
+  DB_POOL_LIMIT: z.coerce.number().default(10),
+  DB_QUEUE_LIMIT: z.coerce.number().default(0),
 
   // NextAuth
   NEXTAUTH_URL: z.string().url(),
@@ -36,6 +38,7 @@ const envSchema = z.object({
   STRIPE_PUBLISHABLE_KEY: z.string().min(1),
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: optStr,
+  STRIPE_ACCOUNT_ID: optStr,
 
   // Boxtal
   BOXTAL_CLIENT_ID: optStr,
@@ -55,12 +58,16 @@ const envSchema = z.object({
   BOXTAL_SENDER_CITY: optStr,
   BOXTAL_SENDER_COUNTRY: optStr,
 
-  // Resend
-  RESEND_API_KEY: optStr,
+  // Mail (SMTP)
+  MAILER_DSN: optStr,
+  MAIL_FROM: optStr,
 
   // App
   BASE_URL: optUrl,
   CONTACT_EMAIL: optEmail,
+
+  // Redis (optional — app works without it)
+  REDIS_URL: optUrl,
 
   // Instagram
   BEHOLD_FEED_URL: optUrl,

@@ -44,6 +44,10 @@ class OrderRepository extends BaseRepository<OrderRow> {
     size?: number | string;
     search?: string;
     status?: string;
+    fulfillment_status?: string;
+    payment_status?: string;
+    sortBy?: string;
+    sortOrder?: string;
   }) {
     const { limit, offset } = getPagination(options.page, options.size);
     const conditions: string[] = [];
@@ -53,22 +57,43 @@ class OrderRepository extends BaseRepository<OrderRow> {
       conditions.push("status = ?");
       params.push(options.status);
     }
+    if (options.fulfillment_status && options.fulfillment_status !== "all") {
+      conditions.push("fulfillment_status = ?");
+      params.push(options.fulfillment_status);
+    }
+    if (options.payment_status && options.payment_status !== "all") {
+      conditions.push("payment_status = ?");
+      params.push(options.payment_status);
+    }
     if (options.search) {
-      conditions.push("(email LIKE ? OR CAST(id AS CHAR) LIKE ?)");
-      const search = `%${options.search}%`;
-      const idSearch = `%${options.search.replace(/[^0-9]/g, "")}%`;
+      const numericId = parseInt(options.search.replace(/[^0-9]/g, ""), 10);
 
-      params.push(search, idSearch);
+      if (!isNaN(numericId) && numericId > 0) {
+        conditions.push("(email LIKE ? OR id = ?)");
+        params.push(`%${options.search}%`, numericId);
+      } else {
+        conditions.push("email LIKE ?");
+        params.push(`%${options.search}%`);
+      }
     }
 
     const where = conditions.length ? conditions.join(" AND ") : "1=1";
+
+    const allowedSort = ["id", "total", "createdAt"];
+    let orderClause = "createdAt DESC";
+
+    if (options.sortBy && allowedSort.includes(options.sortBy)) {
+      const dir = options.sortOrder === "asc" ? "ASC" : "DESC";
+
+      orderClause = `${options.sortBy} ${dir}`;
+    }
 
     const [[countRow]] = await pool.execute<
       (RowDataPacket & { total: number })[]
     >(`SELECT COUNT(*) as total FROM orders WHERE ${where}`, params);
     const [rows] = await pool.execute<OrderRow[]>(
-      `SELECT * FROM orders WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
-      [...params, limit, offset],
+      `SELECT * FROM orders WHERE ${where} ORDER BY ${orderClause} LIMIT ? OFFSET ?`,
+      [...params, String(limit), String(offset)],
     );
 
     return {
@@ -123,7 +148,7 @@ class OrderRepository extends BaseRepository<OrderRow> {
     >(`SELECT COUNT(*) as total FROM orders WHERE ${where}`, params);
     const [rows] = await pool.execute<OrderRow[]>(
       `SELECT * FROM orders WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
-      [...params, limit, offset],
+      [...params, String(limit), String(offset)],
     );
 
     return getPagingData(rows, countRow.total, options?.page, limit);
@@ -163,11 +188,31 @@ class OrderRepository extends BaseRepository<OrderRow> {
     return this.getSalesHistory(months);
   }
 
+  async findByInvoiceId(invoiceId: string): Promise<OrderRow | null> {
+    const [rows] = await pool.execute<OrderRow[]>(
+      "SELECT * FROM orders WHERE stripe_invoice_id = ? LIMIT 1",
+      [invoiceId],
+    );
+
+    return rows[0] ?? null;
+  }
+
+  async findByPaymentIntentId(
+    paymentIntentId: string,
+  ): Promise<OrderRow | null> {
+    const [rows] = await pool.execute<OrderRow[]>(
+      "SELECT * FROM orders WHERE payment_intent_id = ? LIMIT 1",
+      [paymentIntentId],
+    );
+
+    return rows[0] ?? null;
+  }
+
   async findByShippingOrderId(
     shippingOrderId: string,
   ): Promise<OrderRow | null> {
     const [rows] = await pool.execute<OrderRow[]>(
-      "SELECT * FROM orders WHERE JSON_EXTRACT(metadata, '$.shipping_order_id') = ? LIMIT 1",
+      "SELECT * FROM orders WHERE shipping_order_id = ? LIMIT 1",
       [shippingOrderId],
     );
 

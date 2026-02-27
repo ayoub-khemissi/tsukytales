@@ -6,14 +6,59 @@ import { withErrorHandler } from "@/lib/errors/handler";
 import { validate } from "@/lib/middleware/validate";
 import { rateLimit } from "@/lib/middleware/rate-limit";
 import { contactSchema } from "@/lib/validators/contact.schema";
-import * as mailService from "@/lib/services/mail.service";
+import * as mailService from "@/lib/mail";
 import { AppError } from "@/lib/errors/app-error";
 import { contactMessageRepository } from "@/lib/repositories/contact-message.repository";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_EXTENSIONS = new Set([
+  ".pdf",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".doc",
+  ".docx",
+  ".txt",
+  ".zip",
+]);
+
 export const POST = withErrorHandler(async (req: NextRequest) => {
   await rateLimit(req, { windowMs: 60_000, max: 5 });
-  const body = await req.json();
+
+  const formData = await req.formData();
+
+  const body = {
+    name: formData.get("name") as string,
+    email: formData.get("email") as string,
+    subject: formData.get("subject") as string,
+    message: formData.get("message") as string,
+  };
   const data = validate(contactSchema, body);
+
+  // Handle attachment
+  const file = formData.get("attachment") as File | null;
+  let attachment: { filename: string; content: Buffer } | undefined;
+
+  if (file && file.size > 0) {
+    if (file.size > MAX_FILE_SIZE) {
+      throw new AppError(
+        "La pièce jointe dépasse la taille maximale de 10 Mo.",
+        400,
+      );
+    }
+
+    const ext = "." + file.name.split(".").pop()?.toLowerCase();
+
+    if (!ALLOWED_EXTENSIONS.has(ext)) {
+      throw new AppError("Type de fichier non autorisé.", 400);
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    attachment = { filename: file.name, content: buffer };
+  }
 
   const domain = data.email.split("@")[1];
 
@@ -51,7 +96,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     message: data.message,
   });
 
-  await mailService.sendContactEmail(data);
+  await mailService.sendContactEmail(data, attachment);
 
   return NextResponse.json({
     success: true,

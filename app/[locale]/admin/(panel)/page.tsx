@@ -214,16 +214,16 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Title */}
-      <h1 className="text-2xl font-bold">{t("dashboard_title")}</h1>
+      <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
+        {t("dashboard_title")}
+      </h1>
 
       {/* Stat cards grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {statCards.map((card) => (
-          <Card key={card.label} className="border border-divider">
+          <Card key={card.label} className="admin-glass rounded-xl">
             <CardBody className="flex flex-row items-center gap-4 py-5">
-              <div
-                className={`${card.bg} ${card.color} p-3 rounded-xl shrink-0`}
-              >
+              <div className="admin-icon-gold p-3 rounded-xl shrink-0">
                 {card.icon}
               </div>
               <div className="min-w-0">
@@ -238,9 +238,9 @@ export default function AdminDashboardPage() {
       {/* Bottom section: Recent Orders + Sales Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Orders */}
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardHeader className="pb-2">
-            <h2 className="text-lg font-semibold">
+            <h2 className="font-heading text-lg font-semibold">
               {t("dashboard_recent_orders")}
             </h2>
           </CardHeader>
@@ -287,9 +287,9 @@ export default function AdminDashboardPage() {
         </Card>
 
         {/* Sales Chart */}
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardHeader className="pb-2">
-            <h2 className="text-lg font-semibold">
+            <h2 className="font-heading text-lg font-semibold">
               {t("dashboard_sales_chart")}
             </h2>
           </CardHeader>

@@ -57,7 +57,9 @@ export default function FinancesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">{t("finances_title")}</h1>
+        <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
+          {t("finances_title")}
+        </h1>
         <Button
           as={Link}
           color="primary"
@@ -73,7 +75,7 @@ export default function FinancesPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : !report ? (
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardBody className="py-16 text-center">
             <p className="text-default-500">{t("finances_no_data")}</p>
           </CardBody>
@@ -81,7 +83,7 @@ export default function FinancesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {statCards.map((stat) => (
-            <Card key={stat.label} className="border border-divider">
+            <Card key={stat.label} className="admin-glass rounded-xl">
               <CardBody className="p-6">
                 <p className="text-sm text-default-500 mb-1">{stat.label}</p>
                 <p className="text-3xl font-bold">{stat.value}</p>

@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
+import { Form } from "@heroui/form";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -47,7 +48,11 @@ export default function LoginPage() {
           <p className="text-sm text-default-500">{t("login_subtitle")}</p>
         </CardHeader>
         <CardBody>
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <Form
+            className="flex flex-col gap-4"
+            validationBehavior="native"
+            onSubmit={handleSubmit}
+          >
             {error && (
               <div className="bg-danger-50 text-danger text-sm p-3 rounded-lg">
                 {error}
@@ -70,20 +75,18 @@ export default function LoginPage() {
               onValueChange={setPassword}
             />
             <Button
-              className="mt-2"
-              color="primary"
+              className="btn-brand bg-primary mt-2 w-full font-semibold"
               isLoading={loading}
               type="submit"
             >
               {t("login_button")}
             </Button>
-          </form>
+          </Form>
 
           <Divider className="my-6" />
 
           <Button
-            className="w-full"
-            variant="bordered"
+            className="btn-brand-outline w-full font-semibold"
             onPress={() => signIn("google", { callbackUrl })}
           >
             {t("or_continue_with")} {t("google")}

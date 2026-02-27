@@ -6,7 +6,6 @@ import type {
   OrderItem,
   OrderMetadata,
   CustomerMetadata,
-  CustomerPreferences,
   DiscountRule,
 } from "./db.types";
 
@@ -42,7 +41,6 @@ export interface ProductResponse {
   weight: number;
   is_subscription: boolean;
   subscription_price: number | null;
-  subscription_dates: string[] | null;
 }
 
 // --- Orders ---
@@ -79,7 +77,6 @@ export interface CustomerResponse {
   email: string;
   has_account: boolean;
   metadata: CustomerMetadata | null;
-  preferences: CustomerPreferences | null;
 }
 
 export interface UpdateCustomerRequest {
@@ -87,7 +84,6 @@ export interface UpdateCustomerRequest {
   last_name?: string;
   email?: string;
   metadata?: CustomerMetadata;
-  preferences?: CustomerPreferences;
 }
 
 // --- Addresses ---

@@ -20,13 +20,18 @@ export default function AdminPanelLayout({
 
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex items-center justify-end gap-3 px-6 py-3 border-b border-divider bg-background/80 backdrop-blur-md shrink-0">
-          <LocaleSwitcher />
-          <ThemeSwitch />
+        <header className="shrink-0">
+          <div className="flex items-center justify-end gap-3 px-6 py-3 bg-background/80 backdrop-blur-md">
+            <LocaleSwitcher />
+            <ThemeSwitch />
+          </div>
+          <div className="gold-accent-line" />
         </header>
 
         {/* Content area */}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="admin-bg-pattern flex-1 overflow-y-auto p-6">
+          {children}
+        </main>
       </div>
     </div>
   );

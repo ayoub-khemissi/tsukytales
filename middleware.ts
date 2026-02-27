@@ -30,43 +30,42 @@ export default async function middleware(req: NextRequest) {
     ? "/" + pathname.split("/").slice(2).join("/")
     : pathname;
 
-  // Auth protection for /account/* and /admin/* (except /admin/login)
-  if (
-    strippedPath.startsWith("/account") ||
-    strippedPath.startsWith("/admin")
-  ) {
-    const session = await auth();
+  const needsAuth =
+    strippedPath.startsWith("/account") || strippedPath.startsWith("/admin");
+  const isGuestOnly = strippedPath === "/login" || strippedPath === "/register";
 
-    if (strippedPath.startsWith("/account") && !session?.user) {
-      const locale = pathnameHasLocale
-        ? pathname.split("/")[1]
-        : routing.defaultLocale;
-      const loginUrl = new URL(
-        locale === routing.defaultLocale ? "/login" : `/${locale}/login`,
+  if (needsAuth || isGuestOnly) {
+    const session = await auth();
+    const locale = pathnameHasLocale
+      ? pathname.split("/")[1]
+      : routing.defaultLocale;
+    const buildUrl = (path: string) =>
+      new URL(
+        locale === routing.defaultLocale ? path : `/${locale}${path}`,
         req.url,
       );
+
+    // Logged-in users cannot access login/register → redirect to account
+    if (isGuestOnly && session?.user) {
+      return Response.redirect(buildUrl("/account"));
+    }
+
+    // Non-logged-in users cannot access /account → redirect to login
+    if (strippedPath.startsWith("/account") && !session?.user) {
+      const loginUrl = buildUrl("/login");
 
       loginUrl.searchParams.set("callbackUrl", pathname);
 
       return Response.redirect(loginUrl);
     }
 
+    // Non-admin users cannot access /admin (except /admin/login)
     if (
       strippedPath.startsWith("/admin") &&
       !strippedPath.startsWith("/admin/login") &&
       session?.user?.role !== "admin"
     ) {
-      const locale = pathnameHasLocale
-        ? pathname.split("/")[1]
-        : routing.defaultLocale;
-      const adminLoginUrl = new URL(
-        locale === routing.defaultLocale
-          ? "/admin/login"
-          : `/${locale}/admin/login`,
-        req.url,
-      );
-
-      return Response.redirect(adminLoginUrl);
+      return Response.redirect(buildUrl("/admin/login"));
     }
   }
 

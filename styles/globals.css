@@ -106,49 +106,64 @@ body {
   transform: scaleX(1);
 }
 
-/* ========== Brand Button ========== */
+/* ========== Brand Button — Primary (violet bg, white text) ========== */
 .btn-brand {
-  position: relative;
-  overflow: hidden;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.3s ease;
-  border: 2px solid #581668 !important;
+  border: 1px solid #581668 !important;
   border-radius: 14px !important;
   padding: 0.85rem 2.2rem !important;
   font-size: 0.9rem !important;
   color: white !important;
   -webkit-text-fill-color: white !important;
+  background: linear-gradient(to right, white 50%, #581668 50%) !important;
+  background-size: 200% 100% !important;
+  background-position: 100% 0 !important;
+  background-origin: border-box !important;
+  transition: background-position 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease, color 0.4s ease, -webkit-text-fill-color 0.4s ease, opacity 0.3s ease !important;
 }
 
-.btn-brand::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: white;
-  transform: translateX(-100%);
-  transition: transform 0.4s ease;
-  z-index: 0;
-}
-
-.btn-brand:hover::before {
-  transform: translateX(0);
-}
-
-.btn-brand:hover {
+.btn-brand:hover,
+.btn-brand[data-hover="true"] {
+  background-position: 0% 0 !important;
   transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(88, 22, 104, 0.3);
   color: #581668 !important;
   -webkit-text-fill-color: #581668 !important;
-  box-shadow: 0 8px 25px rgba(88, 22, 104, 0.3);
 }
 
 .btn-brand:active {
   transform: scale(0.98);
 }
 
-.btn-brand > * {
-  position: relative;
-  z-index: 1;
+/* ========== Brand Button — Outline / Secondary (transparent bg, violet text) ========== */
+.btn-brand-outline {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid #581668 !important;
+  border-radius: 14px !important;
+  padding: 0.85rem 2.2rem !important;
+  font-size: 0.9rem !important;
+  color: #581668 !important;
+  -webkit-text-fill-color: #581668 !important;
+  background: linear-gradient(to right, #581668 50%, white 50%) !important;
+  background-size: 200% 100% !important;
+  background-position: 100% 0 !important;
+  background-origin: border-box !important;
+  transition: background-position 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease, color 0.4s ease, -webkit-text-fill-color 0.4s ease, opacity 0.3s ease !important;
+}
+
+.btn-brand-outline:hover,
+.btn-brand-outline[data-hover="true"] {
+  background-position: 0% 0 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(88, 22, 104, 0.3);
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+}
+
+.btn-brand-outline:active {
+  transform: scale(0.98);
 }
 
 /* ========== Scroll Reveal Animations ========== */
@@ -239,9 +254,6 @@ body {
 }
 
 /* ========== Navbar Shrink ========== */
-.navbar-shrink {
-  transition: all 0.3s ease;
-}
 
 /* ========== Social Link Hover ========== */
 .social-link-hover {
@@ -315,7 +327,71 @@ body {
   to { background-position: 1000px 1000px; }
 }
 
+/* ========== Hide Scrollbar ========== */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ========== Font Utility Classes ========== */
 .font-heading {
   font-family: var(--font-serif), "Playfair Display", serif;
+}
+
+/* ========== Admin Design System ========== */
+
+/* Glassmorphism card for admin panels */
+.admin-glass {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(88, 22, 104, 0.08);
+  box-shadow: 0 4px 24px rgba(88, 22, 104, 0.06);
+}
+
+:is(.dark) .admin-glass {
+  background: rgba(45, 18, 54, 0.92);
+  border-color: rgba(212, 175, 55, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Gold accent horizontal line */
+.gold-accent-line {
+  height: 2px;
+  background: linear-gradient(90deg, #D4AF37, #F2D479, #D4AF37);
+}
+
+/* Active nav item in admin sidebar */
+.admin-nav-active {
+  background: rgba(212, 175, 55, 0.10);
+  border-left: 3px solid #D4AF37;
+}
+
+/* Subtle cloud pattern background for admin content area */
+.admin-bg-pattern {
+  background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url("/assets/img/bg.png");
+  background-size: auto, 300px;
+}
+
+:is(.dark) .admin-bg-pattern {
+  background: linear-gradient(rgba(15, 5, 18, 0.97), rgba(15, 5, 18, 0.97)), url("/assets/img/bg.png");
+  background-size: auto, 300px;
+}
+
+/* Gold icon background for stat cards */
+.admin-icon-gold {
+  background: rgba(212, 175, 55, 0.12);
+  color: #D4AF37;
+}
+
+:is(.dark) .admin-icon-gold {
+  background: rgba(242, 212, 121, 0.15);
+  color: #F2D479;
+}
+
+/* Gold text color */
+.text-gold {
+  color: #D4AF37;
+}
+
+:is(.dark) .text-gold {
+  color: #F2D479;
 }

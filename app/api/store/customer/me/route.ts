@@ -45,12 +45,6 @@ export const PUT = withErrorHandler(async (req: NextRequest) => {
       ...(customer.metadata || {}),
       ...data.metadata,
     });
-  if (data.preferences)
-    updateData.preferences = JSON.stringify({
-      ...(customer.preferences || {}),
-      ...data.preferences,
-    });
-
   await customerRepository.update(session.user.customerId!, updateData);
 
   return NextResponse.json({

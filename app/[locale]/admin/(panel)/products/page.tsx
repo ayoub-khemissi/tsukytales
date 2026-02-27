@@ -2,15 +2,27 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
-import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
-import { SearchIcon, TrashIcon } from "@/components/icons";
+import { TrashIcon } from "@/components/icons";
+import { AdminTableFilters } from "@/components/admin/AdminTableFilters";
+import {
+  SortableColumn,
+  type SortDirection,
+} from "@/components/admin/SortableColumn";
 
 interface Product {
   id: number;
@@ -28,9 +40,12 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const limit = 20;
 
   const fetchProducts = useCallback(async () => {
@@ -41,6 +56,11 @@ export default function ProductsPage() {
       params.set("page", String(page));
       params.set("limit", String(limit));
       if (search) params.set("search", search);
+      if (typeFilter !== "all") params.set("type", typeFilter);
+      if (sortBy && sortDirection) {
+        params.set("sortBy", sortBy);
+        params.set("sortOrder", sortDirection);
+      }
 
       const res = await fetch(`/api/admin/products?${params}`);
       const data = await res.json();
@@ -50,7 +70,7 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, typeFilter, sortBy, sortDirection]);
 
   useEffect(() => {
     fetchProducts();
@@ -72,11 +92,19 @@ export default function ProductsPage() {
     }
   };
 
+  const handleSort = (column: string, direction: SortDirection) => {
+    setSortBy(direction ? column : null);
+    setSortDirection(direction);
+    setPage(1);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">{t("products_title")}</h1>
+        <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
+          {t("products_title")}
+        </h1>
         <Button
           as={Link}
           color="primary"
@@ -88,17 +116,32 @@ export default function ProductsPage() {
         </Button>
       </div>
 
-      {/* Search */}
-      <Input
-        isClearable
-        className="max-w-md"
-        placeholder={t("products_search")}
-        startContent={<SearchIcon className="text-default-400" />}
-        value={search}
-        onClear={() => setSearch("")}
-        onValueChange={(v) => {
-          setSearch(v);
-          setPage(1);
+      {/* Filters */}
+      <AdminTableFilters
+        filters={[
+          {
+            key: "type",
+            label: t("products_filter_type"),
+            options: [
+              { key: "all", label: t("filter_all") },
+              { key: "standard", label: t("products_type_standard") },
+              { key: "preorder", label: t("products_type_preorder") },
+              { key: "subscription", label: t("products_type_subscription") },
+            ],
+            value: typeFilter,
+            onChange: (v) => {
+              setTypeFilter(v);
+              setPage(1);
+            },
+          },
+        ]}
+        search={{
+          value: search,
+          placeholder: t("products_search"),
+          onChange: (v) => {
+            setSearch(v);
+            setPage(1);
+          },
         }}
       />
 
@@ -108,54 +151,62 @@ export default function ProductsPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : products.length === 0 ? (
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardBody className="py-16 text-center">
             <p className="text-default-500">{t("products_empty")}</p>
           </CardBody>
         </Card>
       ) : (
         <>
-          {/* Desktop table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-divider text-left text-default-500">
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("products_col_name")}
-                  </th>
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("products_col_price")}
-                  </th>
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("products_col_stock")}
-                  </th>
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("products_col_status")}
-                  </th>
-                  <th className="pb-3 font-medium">
-                    {t("products_col_actions")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="overflow-x-auto">
+            <Table aria-label={t("products_title")}>
+              <TableHeader>
+                <TableColumn>
+                  <SortableColumn
+                    column="name"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("products_col_name")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="price"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("products_col_price")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="stock"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("products_col_stock")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>{t("products_col_status")}</TableColumn>
+                <TableColumn>{t("products_col_actions")}</TableColumn>
+              </TableHeader>
+              <TableBody>
                 {products.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="border-b border-divider/50 hover:bg-default-50 transition-colors"
-                  >
-                    <td className="py-3 pr-4">
+                  <TableRow key={product.id}>
+                    <TableCell>
                       <Link
                         className="text-primary font-medium hover:underline"
                         href={`/admin/products/${product.id}`}
                       >
                         {product.name}
                       </Link>
-                    </td>
-                    <td className="py-3 pr-4 font-medium">
+                    </TableCell>
+                    <TableCell className="font-medium">
                       {Number(product.price).toFixed(2)}
                       {common("currency")}
-                    </td>
-                    <td className="py-3 pr-4">
+                    </TableCell>
+                    <TableCell>
                       <Chip
                         color={product.stock > 0 ? "success" : "danger"}
                         size="sm"
@@ -163,8 +214,8 @@ export default function ProductsPage() {
                       >
                         {product.stock}
                       </Chip>
-                    </td>
-                    <td className="py-3 pr-4">
+                    </TableCell>
+                    <TableCell>
                       <Chip
                         color={
                           product.status === "active" ? "success" : "default"
@@ -178,15 +229,15 @@ export default function ProductsPage() {
                             : "products_status_draft",
                         )}
                       </Chip>
-                    </td>
-                    <td className="py-3">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex gap-2">
                         <Button
                           as={Link}
                           color="primary"
                           href={`/admin/products/${product.id}`}
                           size="sm"
-                          variant="light"
+                          variant="flat"
                         >
                           {t("products_edit")}
                         </Button>
@@ -199,78 +250,17 @@ export default function ProductsPage() {
                               <TrashIcon size={14} />
                             ) : undefined
                           }
-                          variant="light"
+                          variant="flat"
                           onPress={() => handleDelete(product.id)}
                         >
                           {common("delete")}
                         </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile cards */}
-          <div className="md:hidden space-y-3">
-            {products.map((product) => (
-              <Card key={product.id} className="border border-divider">
-                <CardBody className="p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Link
-                      className="font-semibold text-primary hover:underline"
-                      href={`/admin/products/${product.id}`}
-                    >
-                      {product.name}
-                    </Link>
-                    <Chip
-                      color={
-                        product.status === "active" ? "success" : "default"
-                      }
-                      size="sm"
-                      variant="flat"
-                    >
-                      {t(
-                        product.status === "active"
-                          ? "products_status_active"
-                          : "products_status_draft",
-                      )}
-                    </Chip>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-bold">
-                      {Number(product.price).toFixed(2)}
-                      {common("currency")}
-                    </span>
-                    <span className="text-default-500">
-                      {t("products_col_stock")}: {product.stock}
-                    </span>
-                  </div>
-                  <div className="flex gap-2 pt-1">
-                    <Button
-                      as={Link}
-                      className="flex-1"
-                      color="primary"
-                      href={`/admin/products/${product.id}`}
-                      size="sm"
-                      variant="flat"
-                    >
-                      {t("products_edit")}
-                    </Button>
-                    <Button
-                      color="danger"
-                      isLoading={deletingId === product.id}
-                      size="sm"
-                      variant="flat"
-                      onPress={() => handleDelete(product.id)}
-                    >
-                      <TrashIcon size={14} />
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
+              </TableBody>
+            </Table>
           </div>
 
           {/* Pagination */}

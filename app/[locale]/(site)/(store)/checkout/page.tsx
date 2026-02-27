@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import type { RelayPoint } from "@/components/store/relay-picker";
+
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Radio, RadioGroup } from "@heroui/radio";
 import { Divider } from "@heroui/divider";
+import { Form } from "@heroui/form";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
 import { loadStripe } from "@stripe/stripe-js";
@@ -15,9 +18,28 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import { Chip } from "@heroui/chip";
+import dynamic from "next/dynamic";
 
 import { Link } from "@/i18n/navigation";
 import { useCart } from "@/lib/store/cart-context";
+
+const RelayPicker = dynamic(() => import("@/components/store/relay-picker"), {
+  ssr: false,
+});
+
+interface SavedAddress {
+  id: number;
+  label: string;
+  first_name: string;
+  last_name: string;
+  street: string;
+  zip_code: string;
+  city: string;
+  country: string;
+  phone: string;
+  is_default: boolean;
+}
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "",
@@ -25,9 +47,11 @@ const stripePromise = loadStripe(
 
 function PaymentForm({
   amount,
+  orderId,
 }: {
-  clientSecret: string; // provided by parent, used by Stripe Elements wrapper
+  clientSecret: string;
   amount: number;
+  orderId: number | null;
 }) {
   const t = useTranslations("checkout");
   const stripe = useStripe();
@@ -41,10 +65,16 @@ function PaymentForm({
     setLoading(true);
     setError("");
 
+    const returnUrl = new URL(
+      `${window.location.origin}/checkout?success=true`,
+    );
+
+    if (orderId) returnUrl.searchParams.set("order_id", String(orderId));
+
     const { error: stripeError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/checkout?success=true`,
+        return_url: returnUrl.toString(),
       },
     });
 
@@ -55,12 +85,15 @@ function PaymentForm({
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <Form
+      className="space-y-4"
+      validationBehavior="native"
+      onSubmit={handleSubmit}
+    >
       <PaymentElement />
       {error && <p className="text-danger text-sm">{error}</p>}
       <Button
-        className="w-full font-semibold"
-        color="primary"
+        className="btn-brand bg-primary w-full font-semibold"
         isDisabled={!stripe}
         isLoading={loading}
         size="lg"
@@ -68,7 +101,7 @@ function PaymentForm({
       >
         {t("pay_button", { amount: amount.toFixed(2) })}
       </Button>
-    </form>
+    </Form>
   );
 }
 
@@ -78,10 +111,12 @@ export default function CheckoutPage() {
   const { data: session } = useSession();
   const { items, total, clearCart } = useCart();
   const [shippingMethod, setShippingMethod] = useState("relay");
+  const [selectedRelay, setSelectedRelay] = useState<RelayPoint | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [orderError, setOrderError] = useState("");
   const [email, setEmail] = useState(session?.user?.email || "");
   const [address, setAddress] = useState({
     first_name: "",
@@ -92,18 +127,101 @@ export default function CheckoutPage() {
     country: "FR",
     phone: "",
   });
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [addressMode, setAddressMode] = useState<string>("new");
+
+  // Fetch saved addresses for logged-in users
+  useEffect(() => {
+    if (!session?.user) return;
+    fetch("/api/store/addresses/me")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: SavedAddress[]) => {
+        setSavedAddresses(data);
+        const defaultAddr = data.find((a) => a.is_default) || data[0];
+
+        if (defaultAddr) {
+          setAddressMode(String(defaultAddr.id));
+          setAddress({
+            first_name: defaultAddr.first_name,
+            last_name: defaultAddr.last_name,
+            street: defaultAddr.street,
+            zip_code: defaultAddr.zip_code,
+            city: defaultAddr.city,
+            country: defaultAddr.country,
+            phone: defaultAddr.phone || "",
+          });
+        }
+      })
+      .catch(() => {});
+  }, [session?.user]);
+
+  const selectSavedAddress = (addrId: string) => {
+    setAddressMode(addrId);
+    if (addrId === "new") {
+      setAddress({
+        first_name: "",
+        last_name: "",
+        street: "",
+        zip_code: "",
+        city: "",
+        country: "FR",
+        phone: "",
+      });
+
+      return;
+    }
+    const addr = savedAddresses.find((a) => a.id === Number(addrId));
+
+    if (addr) {
+      setAddress({
+        first_name: addr.first_name,
+        last_name: addr.last_name,
+        street: addr.street,
+        zip_code: addr.zip_code,
+        city: addr.city,
+        country: addr.country,
+        phone: addr.phone || "",
+      });
+    }
+  };
+
+  // Confirm order after Stripe redirect (belt-and-suspenders, webhook is primary)
+  const confirmAfterRedirect = useCallback(
+    async (oid: string) => {
+      try {
+        await fetch(`/api/store/orders/${oid}/confirm`, { method: "POST" });
+      } catch {
+        // Webhook will handle confirmation if this fails
+      }
+      setSuccess(true);
+      clearCart();
+    },
+    [clearCart],
+  );
 
   // Check for success redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("success") === "true") {
+      const oid = params.get("order_id");
+      const redirectStatus = params.get("redirect_status");
+
+      if (oid) {
+        setOrderId(parseInt(oid));
+        if (redirectStatus === "succeeded" || !redirectStatus) {
+          confirmAfterRedirect(oid);
+
+          return;
+        }
+      }
       setSuccess(true);
       clearCart();
     }
-  }, [clearCart]);
+  }, [clearCart, confirmAfterRedirect]);
 
-  const [shippingCost, setShippingCost] = useState(4.9);
+  const [relayPrice, setRelayPrice] = useState(4.9);
+  const [homePrice, setHomePrice] = useState(7.5);
 
   useEffect(() => {
     const weight = items.reduce(
@@ -116,36 +234,57 @@ export default function CheckoutPage() {
     )
       .then((r) => r.json())
       .then((data) => {
-        setShippingCost(
-          shippingMethod === "relay"
-            ? data.relay?.price || 4.9
-            : data.home?.price || 7.5,
-        );
+        setRelayPrice(data.relay?.price || 4.9);
+        setHomePrice(data.home?.price || 7.5);
       })
       .catch(() => {});
-  }, [items, address.country, shippingMethod]);
+  }, [items, address.country]);
 
+  const handleShippingMethodChange = (value: string) => {
+    setShippingMethod(value);
+    if (value !== "relay") setSelectedRelay(null);
+  };
+
+  const shippingCost = shippingMethod === "relay" ? relayPrice : homePrice;
   const grandTotal = total + shippingCost;
 
   const createOrder = async () => {
+    if (shippingMethod === "relay" && !selectedRelay) {
+      setOrderError(t("relay_required"));
+
+      return;
+    }
     setLoading(true);
+    setOrderError("");
     try {
       const orderEmail = session?.user?.email || email;
+
+      const shippingAddress =
+        shippingMethod === "relay" && selectedRelay
+          ? {
+              ...address,
+              relay: {
+                code: selectedRelay.code,
+                name: selectedRelay.name,
+                network: "MONR_NETWORK",
+                address: selectedRelay.address,
+              },
+            }
+          : address;
+
       const res = await fetch("/api/store/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: orderEmail,
           items: items.map((i) => ({
             product_id: i.id,
             variant_id: i.variantId,
-            name: i.name,
             quantity: i.quantity,
-            price: i.price,
-            weight: i.weight,
           })),
-          shipping_address: address,
+          shipping_address: shippingAddress,
           shipping_method: shippingMethod,
+          relay_code: selectedRelay?.code,
+          guest_email: !session?.user ? orderEmail : undefined,
         }),
       });
       const data = await res.json();
@@ -153,8 +292,8 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error(data.error || "Order failed");
       setOrderId(data.order?.id || data.id);
       setClientSecret(data.client_secret);
-    } catch (err) {
-      void err;
+    } catch {
+      setOrderError(t("error_order"));
     } finally {
       setLoading(false);
     }
@@ -175,10 +314,9 @@ export default function CheckoutPage() {
         )}
         <Button
           as={Link}
-          color="primary"
-          href="/shop"
-          radius="full"
-          variant="shadow"
+          className="btn-brand bg-primary w-full sm:w-auto font-semibold"
+          href="/subscription"
+          size="lg"
         >
           {common("see_all")}
         </Button>
@@ -190,7 +328,12 @@ export default function CheckoutPage() {
     return (
       <div className="container mx-auto max-w-lg px-6 py-20 text-center">
         <p className="text-default-500 mb-4">{common("no_results")}</p>
-        <Button as={Link} color="primary" href="/shop">
+        <Button
+          as={Link}
+          className="btn-brand bg-primary w-full sm:w-auto font-semibold"
+          href="/subscription"
+          size="lg"
+        >
           {common("see_all")}
         </Button>
       </div>
@@ -227,81 +370,147 @@ export default function CheckoutPage() {
               <h3 className="font-semibold mb-4">{t("shipping_method")}</h3>
               <RadioGroup
                 value={shippingMethod}
-                onValueChange={setShippingMethod}
+                onValueChange={handleShippingMethodChange}
               >
                 <Radio value="relay">
                   {t("shipping_relay")} —{" "}
-                  {shippingCost === 4.9
-                    ? "4,90"
-                    : shippingCost.toFixed(2).replace(".", ",")}
+                  {relayPrice.toFixed(2).replace(".", ",")}
                   {common("currency")}
                 </Radio>
                 <Radio value="home">
                   {t("shipping_home")} —{" "}
-                  {shippingMethod === "home"
-                    ? shippingCost.toFixed(2).replace(".", ",")
-                    : "7,50"}
+                  {homePrice.toFixed(2).replace(".", ",")}
                   {common("currency")}
                 </Radio>
               </RadioGroup>
+
+              {shippingMethod === "relay" && (
+                <>
+                  <RelayPicker
+                    country={address.country}
+                    selectedRelay={selectedRelay}
+                    onSelect={setSelectedRelay}
+                  />
+                  {selectedRelay && (
+                    <div className="mt-3 p-3 rounded-lg bg-success/10 border border-success/30">
+                      <p className="text-sm font-medium text-success">
+                        {t("relay_select")} : {selectedRelay.name}
+                      </p>
+                      <p className="text-xs text-default-500">
+                        {selectedRelay.address.street},{" "}
+                        {selectedRelay.address.zipCode}{" "}
+                        {selectedRelay.address.city}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
             </CardBody>
           </Card>
 
-          {/* Shipping address */}
-          <Card className="border border-divider">
-            <CardBody className="p-6 space-y-4">
-              <h3 className="font-semibold">{t("shipping_address")}</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  isRequired
-                  label={
-                    common("quantity") === "Quantité" ? "Prénom" : "First name"
-                  }
-                  value={address.first_name}
-                  onValueChange={updateAddress("first_name")}
-                />
-                <Input
-                  isRequired
-                  label={
-                    common("quantity") === "Quantité" ? "Nom" : "Last name"
-                  }
-                  value={address.last_name}
-                  onValueChange={updateAddress("last_name")}
-                />
-              </div>
-              <Input
-                isRequired
-                label={common("quantity") === "Quantité" ? "Adresse" : "Street"}
-                value={address.street}
-                onValueChange={updateAddress("street")}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  isRequired
-                  label={
-                    common("quantity") === "Quantité"
-                      ? "Code postal"
-                      : "Zip code"
-                  }
-                  value={address.zip_code}
-                  onValueChange={updateAddress("zip_code")}
-                />
-                <Input
-                  isRequired
-                  label={common("quantity") === "Quantité" ? "Ville" : "City"}
-                  value={address.city}
-                  onValueChange={updateAddress("city")}
-                />
-              </div>
-              <Input
-                label={
-                  common("quantity") === "Quantité" ? "Téléphone" : "Phone"
-                }
-                value={address.phone}
-                onValueChange={updateAddress("phone")}
-              />
-            </CardBody>
-          </Card>
+          {/* Shipping address (only for home delivery) */}
+          {shippingMethod === "home" && (
+            <Card className="border border-divider">
+              <CardBody className="p-6 space-y-4">
+                <h3 className="font-semibold">{t("shipping_address")}</h3>
+
+                {/* Saved addresses picker (logged-in users only) */}
+                {session?.user && savedAddresses.length > 0 && (
+                  <RadioGroup
+                    label={t("saved_addresses")}
+                    value={addressMode}
+                    onValueChange={selectSavedAddress}
+                  >
+                    {savedAddresses.map((addr) => (
+                      <Radio key={addr.id} value={String(addr.id)}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{addr.label}</span>
+                          {!!addr.is_default && (
+                            <Chip color="primary" size="sm" variant="flat">
+                              {t("default_badge")}
+                            </Chip>
+                          )}
+                        </div>
+                        <span className="text-sm text-default-500">
+                          {addr.first_name} {addr.last_name} — {addr.street},{" "}
+                          {addr.zip_code} {addr.city}
+                        </span>
+                      </Radio>
+                    ))}
+                    <Radio value="new">{t("new_address")}</Radio>
+                  </RadioGroup>
+                )}
+
+                {/* Address form (always shown for guests, shown when "new" selected for logged-in) */}
+                {(!session?.user ||
+                  savedAddresses.length === 0 ||
+                  addressMode === "new") && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Input
+                        isRequired
+                        label={
+                          common("quantity") === "Quantité"
+                            ? "Prénom"
+                            : "First name"
+                        }
+                        value={address.first_name}
+                        onValueChange={updateAddress("first_name")}
+                      />
+                      <Input
+                        isRequired
+                        label={
+                          common("quantity") === "Quantité"
+                            ? "Nom"
+                            : "Last name"
+                        }
+                        value={address.last_name}
+                        onValueChange={updateAddress("last_name")}
+                      />
+                    </div>
+                    <Input
+                      isRequired
+                      label={
+                        common("quantity") === "Quantité" ? "Adresse" : "Street"
+                      }
+                      value={address.street}
+                      onValueChange={updateAddress("street")}
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Input
+                        isRequired
+                        label={
+                          common("quantity") === "Quantité"
+                            ? "Code postal"
+                            : "Zip code"
+                        }
+                        value={address.zip_code}
+                        onValueChange={updateAddress("zip_code")}
+                      />
+                      <Input
+                        isRequired
+                        label={
+                          common("quantity") === "Quantité" ? "Ville" : "City"
+                        }
+                        value={address.city}
+                        onValueChange={updateAddress("city")}
+                      />
+                    </div>
+                    <Input
+                      isRequired
+                      label={
+                        common("quantity") === "Quantité"
+                          ? "Téléphone"
+                          : "Phone"
+                      }
+                      value={address.phone}
+                      onValueChange={updateAddress("phone")}
+                    />
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+          )}
 
           {/* Payment */}
           {clientSecret ? (
@@ -312,20 +521,25 @@ export default function CheckoutPage() {
                   <PaymentForm
                     amount={grandTotal}
                     clientSecret={clientSecret}
+                    orderId={orderId}
                   />
                 </Elements>
               </CardBody>
             </Card>
           ) : (
-            <Button
-              className="w-full font-semibold"
-              color="primary"
-              isLoading={loading}
-              size="lg"
-              onPress={createOrder}
-            >
-              {t("step_payment")}
-            </Button>
+            <>
+              <Button
+                className="btn-brand bg-primary w-full font-semibold"
+                isLoading={loading}
+                size="lg"
+                onPress={createOrder}
+              >
+                {t("step_payment")}
+              </Button>
+              {orderError && (
+                <p className="text-danger text-sm mt-2">{orderError}</p>
+              )}
+            </>
           )}
         </div>
 
@@ -363,6 +577,11 @@ export default function CheckoutPage() {
                   {common("currency")}
                 </span>
               </div>
+              {selectedRelay && (
+                <div className="text-xs text-default-500">
+                  {selectedRelay.name} — {selectedRelay.address.city}
+                </div>
+              )}
               <Divider />
               <div className="flex justify-between text-xl font-bold">
                 <span>{common("total")}</span>

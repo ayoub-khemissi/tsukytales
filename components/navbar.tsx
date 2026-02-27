@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Navbar as HeroUINavbar,
+  NavbarBrand,
   NavbarContent,
   NavbarMenu,
   NavbarMenuToggle,
@@ -11,8 +12,16 @@ import {
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
 import { Badge } from "@heroui/badge";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  DropdownSection,
+} from "@heroui/dropdown";
+import { Divider } from "@heroui/divider";
 import { useTranslations } from "next-intl";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 
 import { Link } from "@/i18n/navigation";
@@ -21,80 +30,64 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { useCart } from "@/lib/store/cart-context";
 import { CartIcon, UserIcon } from "@/components/icons";
 
+const NAV_LINK_CLASS =
+  "text-[0.95rem] font-medium uppercase tracking-[0.5px] text-primary hover:text-primary/60 transition-colors";
+
 export const Navbar = () => {
   const t = useTranslations("nav");
+  const account = useTranslations("account");
   const { itemCount } = useCart();
   const { data: session } = useSession();
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    function handleScroll() {
-      setScrolled(window.scrollY > 50);
-    }
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const logoSize = scrolled ? 90 : 130;
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <HeroUINavbar
       shouldHideOnScroll
       classNames={{
-        base: `navbar-shrink bg-background/90 backdrop-blur-[15px] border-b border-[rgba(88,22,104,0.05)] transition-all duration-300 ${scrolled ? "py-1 shadow-md bg-background/95" : "py-2"}`,
+        base: "bg-background/90 backdrop-blur-[15px] border-b border-[rgba(88,22,104,0.05)] h-[80px] lg:h-[100px]",
       }}
+      isMenuOpen={isMenuOpen}
       maxWidth="xl"
+      onMenuOpenChange={setIsMenuOpen}
     >
-      {/* Left nav */}
-      <NavbarContent className="hidden lg:flex basis-1/3" justify="start">
+      {/* Left: nav links (desktop) */}
+      <NavbarContent className="hidden lg:flex" justify="start">
         <NavbarItem>
-          <Link
-            className="text-[0.95rem] font-medium uppercase tracking-[0.5px] text-foreground hover:text-primary transition-colors"
-            href="/"
-          >
+          <Link className={NAV_LINK_CLASS} href="/">
             {t("home")}
           </Link>
         </NavbarItem>
         <NavbarItem>
-          <Link
-            className="text-[0.95rem] font-medium uppercase tracking-[0.5px] text-foreground hover:text-primary transition-colors"
-            href="/about"
-          >
+          <Link className={NAV_LINK_CLASS} href="/about">
             {t("about")}
           </Link>
         </NavbarItem>
       </NavbarContent>
 
-      {/* Center logo */}
-      <NavbarContent className="basis-1/3" justify="center">
-        <Link className="flex items-center" href="/">
+      {/* Center: Logo */}
+      <NavbarBrand className="flex justify-center">
+        <Link className="flex items-center" href="/" onClick={closeMenu}>
           <Image
             priority
             alt="Tsuky Tales"
-            className="transition-all duration-300 object-contain"
-            height={logoSize}
-            src="/assets/img/logo.png"
-            width={logoSize}
+            className="object-contain"
+            height={185}
+            src="/assets/img/logo.svg"
+            width={185}
           />
         </Link>
-      </NavbarContent>
+      </NavbarBrand>
 
-      {/* Right nav */}
-      <NavbarContent className="hidden lg:flex basis-1/3" justify="end">
+      {/* Right: nav links + utilities (desktop) */}
+      <NavbarContent className="hidden lg:flex" justify="end">
         <NavbarItem>
-          <Link
-            className="text-[0.95rem] font-medium uppercase tracking-[0.5px] text-foreground hover:text-primary transition-colors"
-            href="/contact"
-          >
+          <Link className={NAV_LINK_CLASS} href="/contact">
             {t("contact")}
           </Link>
         </NavbarItem>
         <NavbarItem>
-          <Link
-            className="text-[0.95rem] font-medium uppercase tracking-[0.5px] text-foreground hover:text-primary transition-colors"
-            href="/subscription"
-          >
+          <Link className={NAV_LINK_CLASS} href="/subscription">
             {t("subscription")}
           </Link>
         </NavbarItem>
@@ -114,21 +107,74 @@ export const Navbar = () => {
                 size="sm"
                 variant="light"
               >
-                <CartIcon className="text-default-500" />
+                <CartIcon className="text-primary" />
               </Button>
             </Badge>
           </Link>
           {session?.user ? (
-            <Link href="/account">
-              <Button
-                isIconOnly
-                aria-label={t("account")}
-                size="sm"
-                variant="light"
-              >
-                <UserIcon className="text-default-500" />
-              </Button>
-            </Link>
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <Button
+                  aria-label={t("account")}
+                  size="sm"
+                  startContent={<UserIcon className="text-primary" />}
+                  variant="light"
+                >
+                  <span className="text-sm font-medium text-primary">
+                    {session.user.name?.split(" ")[0]}
+                  </span>
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label={t("account")}>
+                <DropdownSection showDivider>
+                  <DropdownItem
+                    key="profile"
+                    as={Link}
+                    href="/account?tab=profile"
+                  >
+                    {account("tab_profile")}
+                  </DropdownItem>
+                  <DropdownItem
+                    key="orders"
+                    as={Link}
+                    href="/account?tab=orders"
+                  >
+                    {account("tab_orders")}
+                  </DropdownItem>
+                  <DropdownItem
+                    key="subscription"
+                    as={Link}
+                    href="/account?tab=subscription"
+                  >
+                    {account("tab_subscription")}
+                  </DropdownItem>
+                  <DropdownItem
+                    key="payments"
+                    as={Link}
+                    href="/account?tab=payments"
+                  >
+                    {account("tab_payments")}
+                  </DropdownItem>
+                  <DropdownItem
+                    key="addresses"
+                    as={Link}
+                    href="/account?tab=addresses"
+                  >
+                    {account("tab_addresses")}
+                  </DropdownItem>
+                </DropdownSection>
+                <DropdownSection>
+                  <DropdownItem
+                    key="logout"
+                    className="text-danger"
+                    color="danger"
+                    onPress={() => signOut()}
+                  >
+                    {t("logout")}
+                  </DropdownItem>
+                </DropdownSection>
+              </DropdownMenu>
+            </Dropdown>
           ) : (
             <Link href="/login">
               <Button
@@ -137,15 +183,15 @@ export const Navbar = () => {
                 size="sm"
                 variant="light"
               >
-                <UserIcon className="text-default-500" />
+                <UserIcon className="text-primary" />
               </Button>
             </Link>
           )}
         </NavbarItem>
       </NavbarContent>
 
-      {/* Mobile */}
-      <NavbarContent className="lg:hidden basis-1 pl-4" justify="end">
+      {/* Right: utilities (mobile) */}
+      <NavbarContent className="lg:hidden" justify="end">
         <Link href="/cart">
           <Badge
             color="primary"
@@ -153,64 +199,136 @@ export const Navbar = () => {
             shape="circle"
             size="sm"
           >
-            <CartIcon className="text-default-500" size={20} />
+            <CartIcon className="text-primary" size={20} />
           </Badge>
         </Link>
         <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>
 
+      {/* Mobile menu */}
       <NavbarMenu>
         <div className="mx-4 mt-2 flex flex-col gap-2">
+          {session?.user ? (
+            <>
+              <NavbarMenuItem>
+                <Link
+                  className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+                  href="/account?tab=profile"
+                  onClick={closeMenu}
+                >
+                  {account("tab_profile")}
+                </Link>
+              </NavbarMenuItem>
+              <NavbarMenuItem>
+                <Link
+                  className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+                  href="/account?tab=orders"
+                  onClick={closeMenu}
+                >
+                  {account("tab_orders")}
+                </Link>
+              </NavbarMenuItem>
+              <NavbarMenuItem>
+                <Link
+                  className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+                  href="/account?tab=subscription"
+                  onClick={closeMenu}
+                >
+                  {account("tab_subscription")}
+                </Link>
+              </NavbarMenuItem>
+              <NavbarMenuItem>
+                <Link
+                  className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+                  href="/account?tab=payments"
+                  onClick={closeMenu}
+                >
+                  {account("tab_payments")}
+                </Link>
+              </NavbarMenuItem>
+              <NavbarMenuItem>
+                <Link
+                  className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+                  href="/account?tab=addresses"
+                  onClick={closeMenu}
+                >
+                  {account("tab_addresses")}
+                </Link>
+              </NavbarMenuItem>
+              <Divider className="my-2" />
+            </>
+          ) : null}
           <NavbarMenuItem>
-            <Link className="w-full text-lg text-foreground" href="/">
+            <Link
+              className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+              href="/"
+              onClick={closeMenu}
+            >
               {t("home")}
             </Link>
           </NavbarMenuItem>
           <NavbarMenuItem>
-            <Link className="w-full text-lg text-foreground" href="/shop">
-              {t("shop")}
-            </Link>
-          </NavbarMenuItem>
-          <NavbarMenuItem>
             <Link
-              className="w-full text-lg text-foreground"
-              href="/subscription"
+              className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+              href="/about"
+              onClick={closeMenu}
             >
-              {t("subscription")}
-            </Link>
-          </NavbarMenuItem>
-          <NavbarMenuItem>
-            <Link className="w-full text-lg text-foreground" href="/about">
               {t("about")}
             </Link>
           </NavbarMenuItem>
           <NavbarMenuItem>
-            <Link className="w-full text-lg text-foreground" href="/contact">
+            <Link
+              className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+              href="/contact"
+              onClick={closeMenu}
+            >
               {t("contact")}
             </Link>
           </NavbarMenuItem>
           <NavbarMenuItem>
-            <Link className="w-full text-lg text-foreground" href="/cart">
-              {t("cart")}
+            <Link
+              className="w-full text-lg text-primary hover:text-primary/60 transition-colors"
+              href="/subscription"
+              onClick={closeMenu}
+            >
+              {t("subscription")}
             </Link>
           </NavbarMenuItem>
           {session?.user ? (
-            <NavbarMenuItem>
-              <Link className="w-full text-lg text-primary" href="/account">
-                {t("account")}
-              </Link>
-            </NavbarMenuItem>
+            <>
+              <Divider className="my-2" />
+              <NavbarMenuItem>
+                <div className="flex items-center justify-between">
+                  <button
+                    className="text-lg text-danger text-left"
+                    onClick={() => {
+                      closeMenu();
+                      signOut();
+                    }}
+                  >
+                    {t("logout")}
+                  </button>
+                  <LocaleSwitcher />
+                </div>
+              </NavbarMenuItem>
+            </>
           ) : (
-            <NavbarMenuItem>
-              <Link className="w-full text-lg text-primary" href="/login">
-                {t("login")}
-              </Link>
-            </NavbarMenuItem>
+            <>
+              <NavbarMenuItem>
+                <div className="flex items-center justify-between">
+                  <Link
+                    className="text-lg text-primary"
+                    href="/login"
+                    onClick={closeMenu}
+                  >
+                    {t("login")}
+                  </Link>
+                  <LocaleSwitcher />
+                </div>
+              </NavbarMenuItem>
+            </>
           )}
-          <NavbarMenuItem className="mt-2">
-            <LocaleSwitcher />
-          </NavbarMenuItem>
         </div>
       </NavbarMenu>
     </HeroUINavbar>

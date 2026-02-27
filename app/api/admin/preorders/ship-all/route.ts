@@ -1,24 +1,35 @@
 import { NextResponse } from "next/server";
+import { RowDataPacket } from "mysql2";
 
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
 import { orderRepository } from "@/lib/repositories/order.repository";
+import { pool } from "@/lib/db/connection";
 import * as shippingService from "@/lib/services/shipping.service";
 import { logger } from "@/lib/utils/logger";
 
 export const POST = withErrorHandler(async () => {
   await requireAdmin();
 
+  const [preorderProducts] = await pool.execute<
+    (RowDataPacket & { id: number })[]
+  >("SELECT id FROM products WHERE is_preorder = 1");
+  const preorderProductIds = new Set(preorderProducts.map((p) => p.id));
+
   const orders = await orderRepository.findAll({
     where: "status = ? AND fulfillment_status = ?",
     params: ["completed", "not_fulfilled"],
   });
 
-  const preorders = orders.filter(
-    (o) =>
-      !(o.metadata as any)?.subscription &&
-      o.items?.some((i: any) => i.is_preorder),
-  );
+  const preorders = orders.filter((o) => {
+    if ((o.metadata as any)?.subscription) return false;
+    const orderItems =
+      (typeof o.items === "string" ? JSON.parse(o.items) : o.items) || [];
+
+    return orderItems.some(
+      (i: any) => i.is_preorder || preorderProductIds.has(i.product_id),
+    );
+  });
 
   const results: {
     id: number;

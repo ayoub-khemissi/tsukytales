@@ -7,7 +7,10 @@ import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
 import { AppError } from "@/lib/errors/app-error";
 
-const productsImgDir = path.join(process.cwd(), "public/assets/img/products");
+const productsImgDir = path.join(
+  process.cwd(),
+  "public/assets/uploads/img/products",
+);
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   await requireAdmin();
@@ -38,6 +41,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   return NextResponse.json({
     success: true,
-    url: `assets/img/products/${filename}`,
+    url: `assets/uploads/img/products/${filename}`,
   });
 });

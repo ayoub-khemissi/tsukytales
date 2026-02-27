@@ -20,12 +20,6 @@ export interface CustomerMetadata {
   [key: string]: unknown;
 }
 
-export interface CustomerPreferences {
-  literary_genres?: string[];
-  favorite_authors?: string[];
-  reading_pace?: "lent" | "normal" | "rapide";
-}
-
 export interface CustomerRow extends RowDataPacket {
   id: number;
   first_name: string | null;
@@ -34,12 +28,20 @@ export interface CustomerRow extends RowDataPacket {
   password: string;
   has_account: boolean;
   metadata: CustomerMetadata | null;
-  preferences: CustomerPreferences | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 // --- Products ---
+export interface ProductTranslation {
+  name?: string;
+  description?: string;
+}
+
+export type ProductTranslations = Partial<
+  Record<"en" | "es" | "de" | "it", ProductTranslation>
+>;
+
 export interface ProductRow extends RowDataPacket {
   id: number;
   name: string;
@@ -54,8 +56,11 @@ export interface ProductRow extends RowDataPacket {
   width: number;
   height: number;
   is_subscription: boolean;
+  is_active: boolean;
+  is_deleted: boolean;
   subscription_price: number | null;
-  subscription_dates: string[] | null;
+  images: string[] | null;
+  translations: ProductTranslations | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -130,6 +135,8 @@ export interface OrderItem {
 
 export interface OrderMetadata {
   payment_intent_id?: string;
+  stripe_invoice_id?: string;
+  stripe_subscription_id?: string;
   tracking_number?: string;
   label_url?: string;
   shipping_method?: string;
@@ -215,6 +222,13 @@ export interface DiscountRow extends RowDataPacket {
   usage_limit: number | null;
   usage_count: number;
   createdAt: Date;
+  updatedAt: Date;
+}
+
+// --- Settings ---
+export interface SettingsRow extends RowDataPacket {
+  key: string;
+  value: any;
   updatedAt: Date;
 }
 

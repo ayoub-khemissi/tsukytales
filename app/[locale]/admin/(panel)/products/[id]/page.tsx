@@ -1,24 +1,19 @@
 "use client";
 
+import type { ProductTranslations } from "@/types/db.types";
+
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Input, Textarea } from "@heroui/input";
 import { Button } from "@heroui/button";
-import { Select, SelectItem } from "@heroui/select";
-import { Divider } from "@heroui/divider";
+import { Switch } from "@heroui/switch";
 import { Spinner } from "@heroui/spinner";
+import { Chip } from "@heroui/chip";
+import { Tabs, Tab } from "@heroui/tabs";
 import { useTranslations } from "next-intl";
 
 import { Link, useRouter } from "@/i18n/navigation";
-import { TrashIcon } from "@/components/icons";
-
-interface Variant {
-  id?: number;
-  name: string;
-  price: number;
-  stock: number;
-}
 
 interface ProductForm {
   name: string;
@@ -26,11 +21,18 @@ interface ProductForm {
   description: string;
   price: number;
   weight: number;
-  status: string;
-  variants: Variant[];
+  is_active: boolean;
+  is_preorder: boolean;
 }
 
-const EMPTY_VARIANT: Variant = { name: "", price: 0, stock: 0 };
+const LOCALES = ["fr", "en", "es", "de", "it"] as const;
+const LOCALE_LABELS: Record<string, string> = {
+  fr: "Français",
+  en: "English",
+  es: "Español",
+  de: "Deutsch",
+  it: "Italiano",
+};
 
 const INITIAL_FORM: ProductForm = {
   name: "",
@@ -38,8 +40,8 @@ const INITIAL_FORM: ProductForm = {
   description: "",
   price: 0,
   weight: 0,
-  status: "draft",
-  variants: [],
+  is_active: false,
+  is_preorder: false,
 };
 
 export default function ProductEditPage() {
@@ -50,10 +52,16 @@ export default function ProductEditPage() {
   const common = useTranslations("common");
   const router = useRouter();
   const [form, setForm] = useState<ProductForm>(INITIAL_FORM);
+  const [translations, setTranslations] = useState<ProductTranslations>({});
+  const [langTab, setLangTab] = useState<string>("fr");
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [subDates, setSubDates] = useState<string[]>([]);
+  const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(
+    null,
+  );
 
   const fetchProduct = useCallback(async () => {
     try {
@@ -68,9 +76,10 @@ export default function ProductEditPage() {
           description: data.description || "",
           price: data.price || 0,
           weight: data.weight || 0,
-          status: data.status || "draft",
-          variants: data.variants || [],
+          is_active: !!data.is_active,
+          is_preorder: !!data.is_preorder,
         });
+        setTranslations(data.translations || {});
         setImages(data.images || []);
       }
     } finally {
@@ -78,9 +87,27 @@ export default function ProductEditPage() {
     }
   }, [id]);
 
+  const fetchSubDates = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/settings/subscription-dates");
+
+      if (res.ok) {
+        const data = await res.json();
+
+        setSubDates(data.dates || []);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   useEffect(() => {
     if (!isNew) fetchProduct();
   }, [isNew, fetchProduct]);
+
+  useEffect(() => {
+    if (!form.is_preorder) fetchSubDates();
+  }, [form.is_preorder, fetchSubDates]);
 
   const updateField = <K extends keyof ProductForm>(
     key: K,
@@ -89,67 +116,43 @@ export default function ProductEditPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const updateVariant = (
-    index: number,
-    field: keyof Variant,
-    value: string | number,
-  ) => {
-    setForm((prev) => {
-      const variants = [...prev.variants];
-
-      variants[index] = { ...variants[index], [field]: value };
-
-      return { ...prev, variants };
-    });
-  };
-
-  const addVariant = () => {
-    setForm((prev) => ({
-      ...prev,
-      variants: [...prev.variants, { ...EMPTY_VARIANT }],
-    }));
-  };
-
-  const removeVariant = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      variants: prev.variants.filter((_, i) => i !== index),
-    }));
-  };
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const files = e.target.files;
 
-    if (!file) return;
+    if (!files || files.length === 0) return;
     setUploading(true);
     try {
-      const formData = new FormData();
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
 
-      formData.append("image", file);
-      const res = await fetch("/api/admin/products/upload-image", {
-        method: "POST",
-        body: formData,
-      });
+        formData.append("image", file);
+        const res = await fetch("/api/admin/products/upload-image", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (res.ok) {
-        const data = await res.json();
+        if (res.ok) {
+          const data = await res.json();
 
-        setImages((prev) => [...prev, data.url || data.path]);
+          setImages((prev) => [...prev, data.url || data.path]);
+        }
       }
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveStatus(null);
     try {
       const url = isNew ? "/api/admin/products" : `/api/admin/products/${id}`;
       const method = isNew ? "POST" : "PUT";
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, images }),
+        body: JSON.stringify({ ...form, images, translations }),
       });
 
       if (res.ok) {
@@ -157,8 +160,14 @@ export default function ProductEditPage() {
 
         if (isNew && data.id) {
           router.push(`/admin/products/${data.id}`);
+        } else {
+          setSaveStatus("success");
         }
+      } else {
+        setSaveStatus("error");
       }
+    } catch {
+      setSaveStatus("error");
     } finally {
       setSaving(false);
     }
@@ -180,35 +189,89 @@ export default function ProductEditPage() {
       </Button>
 
       {/* Header */}
-      <h1 className="text-2xl font-bold">
+      <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
         {isNew ? t("products_create_title") : t("products_edit_title")}
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main form */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border border-divider">
+          <Card className="admin-glass rounded-xl">
             <CardHeader>
-              <h2 className="font-semibold text-lg">{t("products_general")}</h2>
+              <h2 className="font-heading font-semibold text-lg">
+                {t("products_general")}
+              </h2>
             </CardHeader>
             <CardBody className="space-y-4">
-              <Input
-                isRequired
-                label={t("products_field_name")}
-                value={form.name}
-                onValueChange={(v) => updateField("name", v)}
-              />
+              <Tabs
+                selectedKey={langTab}
+                size="sm"
+                variant="underlined"
+                onSelectionChange={(key) => setLangTab(key as string)}
+              >
+                {LOCALES.map((loc) => (
+                  <Tab key={loc} title={LOCALE_LABELS[loc]} />
+                ))}
+              </Tabs>
+
+              {langTab === "fr" ? (
+                <>
+                  <Input
+                    isRequired
+                    label={t("products_field_name")}
+                    value={form.name}
+                    onValueChange={(v) => updateField("name", v)}
+                  />
+                  <Textarea
+                    label={t("products_field_description")}
+                    minRows={4}
+                    value={form.description}
+                    onValueChange={(v) => updateField("description", v)}
+                  />
+                </>
+              ) : (
+                <>
+                  <Input
+                    label={`${t("products_field_name")} (${LOCALE_LABELS[langTab]})`}
+                    value={
+                      translations[langTab as keyof ProductTranslations]
+                        ?.name ?? ""
+                    }
+                    onValueChange={(v) =>
+                      setTranslations((prev) => ({
+                        ...prev,
+                        [langTab]: {
+                          ...prev[langTab as keyof ProductTranslations],
+                          name: v,
+                        },
+                      }))
+                    }
+                  />
+                  <Textarea
+                    label={`${t("products_field_description")} (${LOCALE_LABELS[langTab]})`}
+                    minRows={4}
+                    value={
+                      translations[langTab as keyof ProductTranslations]
+                        ?.description ?? ""
+                    }
+                    onValueChange={(v) =>
+                      setTranslations((prev) => ({
+                        ...prev,
+                        [langTab]: {
+                          ...prev[langTab as keyof ProductTranslations],
+                          description: v,
+                        },
+                      }))
+                    }
+                  />
+                </>
+              )}
+
               <Input
                 description={t("products_slug_hint")}
                 label={t("products_field_slug")}
                 value={form.slug}
                 onValueChange={(v) => updateField("slug", v)}
-              />
-              <Textarea
-                label={t("products_field_description")}
-                minRows={4}
-                value={form.description}
-                onValueChange={(v) => updateField("description", v)}
               />
               <div className="grid grid-cols-2 gap-4">
                 <Input
@@ -237,9 +300,11 @@ export default function ProductEditPage() {
           </Card>
 
           {/* Images */}
-          <Card className="border border-divider">
+          <Card className="admin-glass rounded-xl">
             <CardHeader>
-              <h2 className="font-semibold text-lg">{t("products_images")}</h2>
+              <h2 className="font-heading font-semibold text-lg">
+                {t("products_images")}
+              </h2>
             </CardHeader>
             <CardBody className="space-y-4">
               {images.length > 0 && (
@@ -252,22 +317,28 @@ export default function ProductEditPage() {
                         className="w-24 h-24 object-cover rounded-lg border border-divider"
                         src={img.startsWith("http") ? img : `/${img}`}
                       />
-                      <button
-                        className="absolute -top-2 -right-2 w-5 h-5 bg-danger text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() =>
+                      <Button
+                        isIconOnly
+                        className="absolute -top-2 -right-2 min-w-5 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        color="danger"
+                        radius="full"
+                        size="sm"
+                        variant="solid"
+                        onPress={() =>
                           setImages((prev) =>
                             prev.filter((_, idx) => idx !== i),
                           )
                         }
                       >
                         x
-                      </button>
+                      </Button>
                     </div>
                   ))}
                 </div>
               )}
               <div>
                 <input
+                  multiple
                   accept="image/*"
                   className="hidden"
                   id="image-upload"
@@ -288,107 +359,67 @@ export default function ProductEditPage() {
               </div>
             </CardBody>
           </Card>
-
-          {/* Variants */}
-          <Card className="border border-divider">
-            <CardHeader className="flex items-center justify-between">
-              <h2 className="font-semibold text-lg">
-                {t("products_variants")}
-              </h2>
-              <Button
-                color="primary"
-                size="sm"
-                variant="flat"
-                onPress={addVariant}
-              >
-                {t("products_add_variant")}
-              </Button>
-            </CardHeader>
-            <CardBody className="space-y-4">
-              {form.variants.length === 0 ? (
-                <p className="text-default-500 text-sm text-center py-4">
-                  {t("products_no_variants")}
-                </p>
-              ) : (
-                form.variants.map((variant, i) => (
-                  <div key={i}>
-                    {i > 0 && <Divider className="mb-4" />}
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1 grid grid-cols-3 gap-3">
-                        <Input
-                          label={t("products_variant_name")}
-                          size="sm"
-                          value={variant.name}
-                          onValueChange={(v) => updateVariant(i, "name", v)}
-                        />
-                        <Input
-                          endContent={
-                            <span className="text-default-400 text-xs">
-                              {common("currency")}
-                            </span>
-                          }
-                          label={t("products_variant_price")}
-                          size="sm"
-                          type="number"
-                          value={String(variant.price)}
-                          onValueChange={(v) =>
-                            updateVariant(i, "price", Number(v))
-                          }
-                        />
-                        <Input
-                          label={t("products_variant_stock")}
-                          size="sm"
-                          type="number"
-                          value={String(variant.stock)}
-                          onValueChange={(v) =>
-                            updateVariant(i, "stock", Number(v))
-                          }
-                        />
-                      </div>
-                      <Button
-                        isIconOnly
-                        className="mt-6"
-                        color="danger"
-                        size="sm"
-                        variant="light"
-                        onPress={() => removeVariant(i)}
-                      >
-                        <TrashIcon size={16} />
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardBody>
-          </Card>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status */}
-          <Card className="border border-divider">
+          <Card className="admin-glass rounded-xl">
             <CardHeader>
-              <h2 className="font-semibold text-lg">{t("products_status")}</h2>
+              <h2 className="font-heading font-semibold text-lg">
+                {t("products_status")}
+              </h2>
             </CardHeader>
-            <CardBody>
-              <Select
-                label={t("products_field_status")}
-                selectedKeys={[form.status]}
-                onSelectionChange={(keys) => {
-                  const value = Array.from(keys)[0] as string;
-
-                  if (value) updateField("status", value);
-                }}
+            <CardBody className="space-y-4">
+              <Switch
+                isSelected={form.is_active}
+                onValueChange={(v) => updateField("is_active", v)}
               >
-                <SelectItem key="active">
-                  {t("products_status_active")}
-                </SelectItem>
-                <SelectItem key="draft">
-                  {t("products_status_draft")}
-                </SelectItem>
-              </Select>
+                {t("products_is_active")}
+              </Switch>
+              <Switch
+                isSelected={form.is_preorder}
+                onValueChange={(v) => updateField("is_preorder", v)}
+              >
+                {t("products_is_preorder")}
+              </Switch>
             </CardBody>
           </Card>
+
+          {/* Subscription dates — read-only info */}
+          {!form.is_preorder && (
+            <Card className="admin-glass rounded-xl">
+              <CardHeader>
+                <h2 className="font-heading font-semibold text-lg">
+                  {t("sub_dates_title")}
+                </h2>
+              </CardHeader>
+              <CardBody className="space-y-3">
+                {subDates.length > 0 ? (
+                  <ul className="space-y-1">
+                    {subDates.map((d) => (
+                      <li key={d} className="text-sm text-default-600">
+                        {new Date(d + "T00:00:00").toLocaleDateString("fr-FR")}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-default-400">
+                    {t("sub_dates_empty")}
+                  </p>
+                )}
+                <Button
+                  as={Link}
+                  color="primary"
+                  href="/admin/settings"
+                  size="sm"
+                  variant="flat"
+                >
+                  {t("sub_dates_go_settings")}
+                </Button>
+              </CardBody>
+            </Card>
+          )}
 
           {/* Save */}
           <Button
@@ -401,6 +432,24 @@ export default function ProductEditPage() {
           >
             {isNew ? t("products_create") : t("products_save")}
           </Button>
+          {saveStatus === "success" && (
+            <Chip
+              className="w-full max-w-full py-4 text-center"
+              color="success"
+              variant="flat"
+            >
+              {t("products_saved")}
+            </Chip>
+          )}
+          {saveStatus === "error" && (
+            <Chip
+              className="w-full max-w-full py-4 text-center"
+              color="danger"
+              variant="flat"
+            >
+              {t("products_save_error")}
+            </Chip>
+          )}
         </div>
       </div>
     </div>

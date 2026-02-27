@@ -28,9 +28,8 @@ export function LocaleSwitcher() {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button className="min-w-0 px-2 gap-1" size="sm" variant="light">
+        <Button className="min-w-0 px-2 text-primary" size="sm" variant="light">
           <span>{current.flag}</span>
-          <span className="hidden sm:inline text-xs">{current.label}</span>
         </Button>
       </DropdownTrigger>
       <DropdownMenu

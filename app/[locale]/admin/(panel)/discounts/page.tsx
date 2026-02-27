@@ -9,6 +9,14 @@ import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
 import { Select, SelectItem } from "@heroui/select";
 import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
+import {
   Modal,
   ModalContent,
   ModalHeader,
@@ -17,6 +25,12 @@ import {
   useDisclosure,
 } from "@heroui/modal";
 import { useTranslations } from "next-intl";
+
+import { AdminTableFilters } from "@/components/admin/AdminTableFilters";
+import {
+  SortableColumn,
+  type SortDirection,
+} from "@/components/admin/SortableColumn";
 
 interface Discount {
   id: number;
@@ -42,8 +56,12 @@ export default function DiscountsPage() {
 
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const limit = 20;
 
   // Create form state
@@ -73,6 +91,12 @@ export default function DiscountsPage() {
 
       params.set("page", String(page));
       params.set("limit", String(limit));
+      if (search) params.set("search", search);
+      if (statusFilter !== "all") params.set("status", statusFilter);
+      if (sortBy && sortDirection) {
+        params.set("sortBy", sortBy);
+        params.set("sortOrder", sortDirection);
+      }
 
       const res = await fetch(`/api/admin/discounts?${params}`);
 
@@ -85,7 +109,7 @@ export default function DiscountsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, search, statusFilter, sortBy, sortDirection]);
 
   useEffect(() => {
     fetchDiscounts();
@@ -148,15 +172,51 @@ export default function DiscountsPage() {
     return `${Number(discount.value).toFixed(2)}${common("currency")}`;
   };
 
+  const handleSort = (column: string, direction: SortDirection) => {
+    setSortBy(direction ? column : null);
+    setSortDirection(direction);
+    setPage(1);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold">{t("discounts_title")}</h1>
+        <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
+          {t("discounts_title")}
+        </h1>
         <Button color="primary" onPress={onOpen}>
           {t("discounts_add")}
         </Button>
       </div>
+
+      {/* Filters */}
+      <AdminTableFilters
+        filters={[
+          {
+            key: "status",
+            label: t("discounts_filter_status"),
+            options: [
+              { key: "all", label: t("filter_all") },
+              { key: "active", label: t("discounts_active") },
+              { key: "inactive", label: t("discounts_inactive") },
+            ],
+            value: statusFilter,
+            onChange: (v) => {
+              setStatusFilter(v);
+              setPage(1);
+            },
+          },
+        ]}
+        search={{
+          value: search,
+          placeholder: t("discounts_search"),
+          onChange: (v) => {
+            setSearch(v);
+            setPage(1);
+          },
+        }}
+      />
 
       {/* Content */}
       {loading ? (
@@ -164,39 +224,57 @@ export default function DiscountsPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : discounts.length === 0 ? (
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardBody className="py-16 text-center">
             <p className="text-default-500">{t("discounts_empty")}</p>
           </CardBody>
         </Card>
       ) : (
         <>
-          {/* Table header */}
-          <div className="hidden lg:grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-4 px-4 py-2 text-sm font-semibold text-default-500 border-b border-divider">
-            <span>{t("discounts_code")}</span>
-            <span>{t("discounts_type")}</span>
-            <span>{t("discounts_value")}</span>
-            <span>{t("discounts_usage")}</span>
-            <span>{t("discounts_expires")}</span>
-            <span>{t("discounts_active")}</span>
-            <span className="text-right">{t("orders_actions")}</span>
-          </div>
-
-          {/* Discount rows */}
-          <div className="space-y-2">
-            {discounts.map((discount) => (
-              <Card key={discount.id} className="border border-divider">
-                <CardBody className="p-4">
-                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-3 lg:gap-4 items-center">
-                    {/* Code */}
-                    <div>
-                      <span className="font-mono font-bold text-foreground">
+          <div className="overflow-x-auto">
+            <Table aria-label={t("discounts_title")}>
+              <TableHeader>
+                <TableColumn>
+                  <SortableColumn
+                    column="code"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("discounts_code")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>{t("discounts_type")}</TableColumn>
+                <TableColumn>{t("discounts_value")}</TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="usage_count"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("discounts_usage")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="ends_at"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("discounts_expires")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>{t("discounts_active")}</TableColumn>
+                <TableColumn>{t("orders_actions")}</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {discounts.map((discount) => (
+                  <TableRow key={discount.id}>
+                    <TableCell>
+                      <span className="font-mono font-bold">
                         {discount.code}
                       </span>
-                    </div>
-
-                    {/* Type */}
-                    <div>
+                    </TableCell>
+                    <TableCell>
                       <Chip
                         color={
                           discount.type === "percentage"
@@ -210,25 +288,19 @@ export default function DiscountsPage() {
                           ? t("discounts_type_percentage")
                           : t("discounts_type_fixed")}
                       </Chip>
-                    </div>
-
-                    {/* Value */}
-                    <div className="font-semibold">{formatValue(discount)}</div>
-
-                    {/* Usage */}
-                    <div className="text-sm text-default-600">
+                    </TableCell>
+                    <TableCell className="font-semibold">
+                      {formatValue(discount)}
+                    </TableCell>
+                    <TableCell className="text-default-600">
                       {discount.usage_count} / {discount.max_usage ?? "∞"}
-                    </div>
-
-                    {/* Expires */}
-                    <div className="text-sm text-default-500">
+                    </TableCell>
+                    <TableCell className="text-default-500">
                       {discount.expires_at
                         ? new Date(discount.expires_at).toLocaleDateString()
                         : "—"}
-                    </div>
-
-                    {/* Active */}
-                    <div>
+                    </TableCell>
+                    <TableCell>
                       <Chip
                         color={discount.is_active ? "success" : "default"}
                         size="sm"
@@ -236,12 +308,10 @@ export default function DiscountsPage() {
                       >
                         {discount.is_active
                           ? t("discounts_active")
-                          : "Inactive"}
+                          : t("discounts_inactive")}
                       </Chip>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="lg:text-right">
+                    </TableCell>
+                    <TableCell>
                       <Button
                         color="danger"
                         size="sm"
@@ -253,11 +323,11 @@ export default function DiscountsPage() {
                       >
                         {common("delete")}
                       </Button>
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
 
           {/* Pagination */}

@@ -19,6 +19,8 @@ class ContactMessageRepository extends BaseRepository<ContactMessageRow> {
     size?: number | string;
     search?: string;
     status?: string;
+    sortBy?: string;
+    sortOrder?: string;
   }) {
     const { limit, offset } = getPagination(options.page, options.size);
     const conditions: string[] = [];
@@ -37,12 +39,21 @@ class ContactMessageRepository extends BaseRepository<ContactMessageRow> {
 
     const where = conditions.length ? conditions.join(" AND ") : "1=1";
 
+    const allowedSort = ["createdAt"];
+    let orderClause = "createdAt DESC";
+
+    if (options.sortBy && allowedSort.includes(options.sortBy)) {
+      const dir = options.sortOrder === "asc" ? "ASC" : "DESC";
+
+      orderClause = `${options.sortBy} ${dir}`;
+    }
+
     const [[countRow]] = await pool.execute<
       (RowDataPacket & { total: number })[]
     >(`SELECT COUNT(*) as total FROM contact_messages WHERE ${where}`, params);
     const [rows] = await pool.execute<ContactMessageRow[]>(
-      `SELECT * FROM contact_messages WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
-      [...params, limit, offset],
+      `SELECT * FROM contact_messages WHERE ${where} ORDER BY ${orderClause} LIMIT ? OFFSET ?`,
+      [...params, String(limit), String(offset)],
     );
 
     return {

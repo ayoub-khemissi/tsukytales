@@ -1,21 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardBody } from "@heroui/card";
+import { useEffect, useRef, useState } from "react";
 import { Input, Textarea } from "@heroui/input";
 import { Button } from "@heroui/button";
+import { Form } from "@heroui/form";
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelopeOpenText,
+  faPaperclip,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 export default function ContactPage() {
   const t = useTranslations("contact");
   const { data: session } = useSession();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
 
   useEffect(() => {
     if (session?.user) {
@@ -32,21 +43,49 @@ export default function ContactPage() {
   const update = (field: string) => (value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileError("");
+    const file = e.target.files?.[0] ?? null;
+
+    if (file && file.size > MAX_FILE_SIZE) {
+      setFileError(t("file_too_large"));
+      setAttachment(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+
+      return;
+    }
+    setAttachment(file);
+  };
+
+  const removeAttachment = () => {
+    setAttachment(null);
+    setFileError("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setStatus("idle");
 
     try {
+      const formData = new FormData();
+
+      formData.append("name", form.name);
+      formData.append("email", form.email);
+      formData.append("subject", form.subject);
+      formData.append("message", form.message);
+      if (attachment) formData.append("attachment", attachment);
+
       const res = await fetch("/api/store/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: formData,
       });
 
       if (res.ok) {
         setStatus("success");
         setForm({ name: "", email: "", subject: "", message: "" });
+        removeAttachment();
       } else {
         setStatus("error");
       }
@@ -58,34 +97,64 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-2xl px-6 py-16">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold">{t("title")}</h1>
-        <p className="mt-2 text-default-500">{t("subtitle")}</p>
-      </div>
+    <main className="min-h-screen flex items-center justify-center px-4 py-24">
+      <div
+        className="relative w-full max-w-[700px] bg-white dark:bg-gray-900 rounded-[40px] shadow-lg border border-[rgba(88,22,104,0.05)] px-6 py-10 sm:px-12 sm:py-14 overflow-hidden"
+        style={{ animation: "fadeInUp 0.8s ease both" }}
+      >
+        {/* Top gradient accent bar */}
+        <div className="absolute top-0 left-0 w-full h-[5px] bg-gradient-to-r from-primary to-accent-gold" />
 
-      <Card className="border border-divider">
-        <CardBody className="p-8">
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            {status === "success" && (
-              <div className="bg-success-50 text-success p-3 rounded-lg text-sm">
-                {t("success")}
-              </div>
-            )}
+        {/* Title */}
+        <h1
+          className="font-heading text-center font-bold text-primary dark:text-white mb-3"
+          style={{ fontSize: "clamp(2rem, 5vw, 3rem)" }}
+        >
+          {t("title")}
+          <span className="magic-text">{t("title_accent")}</span>
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-center text-text-light dark:text-gray-400 mb-10 text-[1.05rem]">
+          {t("subtitle")}
+        </p>
+
+        {/* Success message */}
+        {status === "success" ? (
+          <div className="bg-bg-brand dark:bg-gray-800 rounded-[20px] border border-primary/10 p-8 text-center">
+            <FontAwesomeIcon
+              className="text-primary text-3xl mb-4 block mx-auto"
+              icon={faEnvelopeOpenText}
+            />
+            <p className="font-semibold text-primary dark:text-white text-lg">
+              {t("success_title")}
+            </p>
+            <p className="text-text-light dark:text-gray-400 text-sm mt-1">
+              {t("success_desc")}
+            </p>
+          </div>
+        ) : (
+          <Form
+            className="flex flex-col gap-5"
+            validationBehavior="native"
+            onSubmit={handleSubmit}
+          >
             {status === "error" && (
-              <div className="bg-danger-50 text-danger p-3 rounded-lg text-sm">
+              <div className="bg-danger-50 text-danger p-4 rounded-2xl text-sm font-medium">
                 {t("error")}
               </div>
             )}
             <Input
               isRequired
               label={t("name")}
+              placeholder={t("name")}
               value={form.name}
               onValueChange={update("name")}
             />
             <Input
               isRequired
               label={t("email")}
+              placeholder={t("email")}
               type="email"
               value={form.email}
               onValueChange={update("email")}
@@ -93,6 +162,7 @@ export default function ContactPage() {
             <Input
               isRequired
               label={t("subject")}
+              placeholder={t("subject")}
               value={form.subject}
               onValueChange={update("subject")}
             />
@@ -100,21 +170,73 @@ export default function ContactPage() {
               isRequired
               label={t("message")}
               minRows={5}
+              placeholder={t("message")}
               value={form.message}
               onValueChange={update("message")}
             />
+
+            {/* Attachment */}
+            <div>
+              <label className="block text-sm font-medium text-text-light dark:text-gray-400 mb-1.5">
+                {t("attachment")}{" "}
+                <span className="text-xs">({t("attachment_hint")})</span>
+              </label>
+
+              {attachment ? (
+                <div className="flex items-center gap-3 bg-bg-brand dark:bg-gray-800 rounded-xl px-4 py-3 border border-primary/10">
+                  <FontAwesomeIcon
+                    className="text-primary text-sm"
+                    icon={faPaperclip}
+                  />
+                  <span className="text-sm text-text-light dark:text-gray-300 truncate flex-1">
+                    {attachment.name}{" "}
+                    <span className="text-xs opacity-60">
+                      ({(attachment.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
+                  </span>
+                  <button
+                    className="text-text-light hover:text-danger transition-colors"
+                    type="button"
+                    onClick={removeAttachment}
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-primary/20 hover:border-primary/40 rounded-xl px-4 py-3 text-sm text-text-light dark:text-gray-400 transition-colors cursor-pointer"
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <FontAwesomeIcon icon={faPaperclip} />
+                  {t("attachment_add")}
+                </button>
+              )}
+
+              <input
+                ref={fileInputRef}
+                accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.txt,.zip"
+                className="hidden"
+                type="file"
+                onChange={handleFileChange}
+              />
+
+              {fileError && (
+                <p className="text-danger text-xs mt-1">{fileError}</p>
+              )}
+            </div>
+
             <Button
-              className="mt-2"
-              color="primary"
+              className="btn-brand bg-primary mt-2 w-full font-semibold"
               isLoading={loading}
               size="lg"
               type="submit"
             >
               {t("send")}
             </Button>
-          </form>
-        </CardBody>
-      </Card>
-    </div>
+          </Form>
+        )}
+      </div>
+    </main>
   );
 }

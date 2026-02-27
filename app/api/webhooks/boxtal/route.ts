@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { orderRepository } from "@/lib/repositories/order.repository";
-import * as mailService from "@/lib/services/mail.service";
+import * as mailService from "@/lib/mail";
 import { logger } from "@/lib/utils/logger";
 
 export async function POST(req: NextRequest) {
@@ -13,34 +13,48 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("x-bxt-signature");
   const webhookSecret = process.env.BOXTAL_WEBHOOK_SECRET;
 
+  // Reject if webhook secret is not configured
+  if (!webhookSecret) {
+    logger.error(
+      "[Boxtal Webhook] BOXTAL_WEBHOOK_SECRET is not configured — rejecting",
+    );
+
+    return NextResponse.json(
+      { error: "Webhook not configured" },
+      { status: 500 },
+    );
+  }
+
   // HMAC SHA256 verification
-  if (webhookSecret) {
-    if (!signature) {
-      logger.warn("[Boxtal Webhook] Missing x-bxt-signature header");
+  if (!signature) {
+    logger.warn("[Boxtal Webhook] Missing x-bxt-signature header");
 
-      return NextResponse.json({ received: true });
+    return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+  }
+
+  const expected = crypto
+    .createHmac("sha256", webhookSecret)
+    .update(rawBody)
+    .digest("hex");
+
+  try {
+    if (
+      !crypto.timingSafeEqual(
+        new Uint8Array(Buffer.from(signature)),
+        new Uint8Array(Buffer.from(expected)),
+      )
+    ) {
+      logger.error("[Boxtal Webhook] Invalid signature - request rejected");
+
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
-    const expected = crypto
-      .createHmac("sha256", webhookSecret)
-      .update(rawBody)
-      .digest("hex");
+  } catch {
+    logger.error("[Boxtal Webhook] Signature comparison failed");
 
-    try {
-      if (
-        !crypto.timingSafeEqual(
-          new Uint8Array(Buffer.from(signature)),
-          new Uint8Array(Buffer.from(expected)),
-        )
-      ) {
-        logger.error("[Boxtal Webhook] Invalid signature - request rejected");
-
-        return NextResponse.json({ received: true });
-      }
-    } catch {
-      logger.error("[Boxtal Webhook] Signature comparison failed");
-
-      return NextResponse.json({ received: true });
-    }
+    return NextResponse.json(
+      { error: "Signature verification failed" },
+      { status: 401 },
+    );
   }
 
   try {
@@ -123,16 +137,12 @@ export async function POST(req: NextRequest) {
             metadata: JSON.stringify(meta),
           });
           mailService
-            .sendShippingNotification(
-              {
-                id: order.id,
-                email: order.email,
-                items: order.items || [],
-                total: Number(order.total),
-                metadata: meta,
-              },
+            .sendShippingNotification({
+              email: order.email,
+              orderId: order.id,
               trackingNumber,
-            )
+              labelUrl: meta.label_url as string | undefined,
+            })
             .catch((err) =>
               logger.error(
                 "Email error: " +

@@ -4,7 +4,7 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 config.autoAddCss = false;
 import { Metadata, Viewport } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import clsx from "clsx";
 
@@ -12,48 +12,55 @@ import { Providers } from "./providers";
 
 import { fontSans, fontSerif } from "@/config/fonts";
 import { routing } from "@/i18n/routing";
+import { buildAlternates, OG_IMAGE_URL } from "@/lib/seo/metadata";
+import { JsonLd } from "@/components/json-ld";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Tsuky Tales — Créateur d'imaginaires",
-    template: "%s | Tsuky Tales",
-  },
-  description:
-    "Livres illustrés uniques et abonnements littéraires. Tsuky Tales éveille l'imagination des petits et des grands.",
-  metadataBase: new URL("https://tsukytales.com"),
-  icons: {
-    icon: "/favicon.ico",
-  },
-  openGraph: {
-    type: "website",
-    siteName: "Tsuky Tales",
-    locale: "fr_FR",
-    alternateLocale: ["en_US", "es_ES", "de_DE", "it_IT"],
-    url: "https://tsukytales.com",
-    title: "Tsuky Tales — Créateur d'imaginaires",
-    description:
-      "Livres illustrés uniques et abonnements littéraires. Tsuky Tales éveille l'imagination des petits et des grands.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Tsuky Tales — Créateur d'imaginaires",
-    description: "Livres illustrés uniques et abonnements littéraires.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: "https://tsukytales.com",
-    languages: {
-      fr: "https://tsukytales.com",
-      en: "https://tsukytales.com/en",
-      es: "https://tsukytales.com/es",
-      de: "https://tsukytales.com/de",
-      it: "https://tsukytales.com/it",
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  const localeMap: Record<string, string> = {
+    fr: "fr_FR",
+    en: "en_US",
+    es: "es_ES",
+    de: "de_DE",
+    it: "it_IT",
+  };
+
+  return {
+    title: {
+      default: t("home_title"),
+      template: "%s | Tsuky Tales",
     },
-  },
-};
+    description: t("home_description"),
+    metadataBase: new URL("https://tsukytales.com"),
+    icons: { icon: "/favicon.ico" },
+    openGraph: {
+      type: "website",
+      siteName: "Tsuky Tales",
+      locale: localeMap[locale] ?? "fr_FR",
+      alternateLocale: Object.entries(localeMap)
+        .filter(([k]) => k !== locale)
+        .map(([, v]) => v),
+      url: "https://tsukytales.com",
+      title: t("home_title"),
+      description: t("home_description"),
+      images: [{ url: OG_IMAGE_URL, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("home_title"),
+      description: t("home_description"),
+      images: [OG_IMAGE_URL],
+    },
+    robots: { index: true, follow: true },
+    alternates: buildAlternates("/"),
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -77,9 +84,28 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
 
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Tsuky Tales",
+    url: "https://tsukytales.com",
+    logo: "https://tsukytales.com/favicon.ico",
+    sameAs: ["https://www.instagram.com/tsukytales"],
+  };
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Tsuky Tales",
+    url: "https://tsukytales.com",
+  };
+
   return (
     <html suppressHydrationWarning lang={locale}>
-      <head />
+      <head>
+        <JsonLd data={organizationJsonLd} />
+        <JsonLd data={websiteJsonLd} />
+      </head>
       <body
         className={clsx(
           "min-h-screen text-foreground bg-background font-sans antialiased",

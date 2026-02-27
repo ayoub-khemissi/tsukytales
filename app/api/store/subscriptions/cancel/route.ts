@@ -17,6 +17,7 @@ export const POST = withErrorHandler(async () => {
 
   if (!scheduleId) throw new AppError("Aucun abonnement actif.", 400);
 
+  // Cancel on Stripe — must succeed before updating local state
   await stripe.subscriptionSchedules.cancel(scheduleId);
 
   const meta = { ...(customer.metadata || {}) };

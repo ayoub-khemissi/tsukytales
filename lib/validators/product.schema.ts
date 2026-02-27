@@ -1,5 +1,19 @@
 import { z } from "zod/v4";
 
+const translationSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+});
+
+const translationsSchema = z
+  .object({
+    en: translationSchema.optional(),
+    es: translationSchema.optional(),
+    de: translationSchema.optional(),
+    it: translationSchema.optional(),
+  })
+  .optional();
+
 export const createProductSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
   description: z.string().optional(),
@@ -12,8 +26,10 @@ export const createProductSchema = z.object({
   width: z.number().positive().default(15.0),
   height: z.number().positive().default(3.0),
   is_subscription: z.boolean().default(false),
+  is_active: z.boolean().default(false),
   subscription_price: z.number().positive().optional(),
-  subscription_dates: z.array(z.string()).optional(),
+  images: z.array(z.string()).optional(),
+  translations: translationsSchema,
 });
 
 export const updateProductSchema = createProductSchema.partial();

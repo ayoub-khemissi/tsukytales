@@ -1,23 +1,101 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { RowDataPacket } from "mysql2";
 
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
-import { orderRepository } from "@/lib/repositories/order.repository";
+import { pool } from "@/lib/db/connection";
+import { getPagination } from "@/lib/utils/pagination";
 
-export const GET = withErrorHandler(async () => {
+export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireAdmin();
 
-  const orders = await orderRepository.findAll({
-    where: "status != ?",
-    params: ["canceled"],
-    orderBy: "createdAt DESC",
-  });
+  const { searchParams } = req.nextUrl;
+  const search = searchParams.get("search") || undefined;
+  const fulfillmentFilter = searchParams.get("fulfillment_status") || undefined;
+  const sortBy = searchParams.get("sortBy") || undefined;
+  const sortOrder = searchParams.get("sortOrder") || undefined;
+  const pageParam = Number(searchParams.get("page") || 1);
+  const limitParam = Number(searchParams.get("limit") || 20);
 
-  const preorders = orders.filter(
-    (o) =>
-      !(o.metadata as any)?.subscription &&
-      o.items?.some((i: any) => i.is_preorder),
+  const { limit, offset } = getPagination(pageParam, limitParam);
+
+  // Get preorder product IDs
+  const [preorderProducts] = await pool.execute<
+    (RowDataPacket & { id: number })[]
+  >("SELECT id FROM products WHERE is_preorder = 1");
+  const preorderProductIds = preorderProducts.map((p) => p.id);
+
+  if (preorderProductIds.length === 0) {
+    return NextResponse.json({ items: [], total: 0 });
+  }
+
+  // Build conditions
+  const conditions: string[] = ["status != ?", "is_subscription_order = 0"];
+  const params: any[] = ["canceled"];
+
+  if (search) {
+    const numericId = parseInt(search.replace(/[^0-9]/g, ""), 10);
+
+    if (!isNaN(numericId) && numericId > 0) {
+      conditions.push("(email LIKE ? OR id = ?)");
+      params.push(`%${search}%`, numericId);
+    } else {
+      conditions.push("email LIKE ?");
+      params.push(`%${search}%`);
+    }
+  }
+
+  if (fulfillmentFilter && fulfillmentFilter !== "all") {
+    conditions.push("fulfillment_status = ?");
+    params.push(fulfillmentFilter);
+  }
+
+  const where = conditions.join(" AND ");
+
+  // Sort
+  const allowedSort: Record<string, string> = {
+    order_number: "id",
+    created_at: "createdAt",
+  };
+  const col = (sortBy && allowedSort[sortBy]) || "createdAt";
+  const dir = sortOrder === "asc" ? "ASC" : "DESC";
+
+  // Count + fetch in parallel
+  const [[countRow]] = await pool.execute<
+    (RowDataPacket & { total: number })[]
+  >(`SELECT COUNT(*) as total FROM orders WHERE ${where}`, params);
+
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `SELECT id, display_id, email, items, fulfillment_status, createdAt
+     FROM orders WHERE ${where} ORDER BY ${col} ${dir} LIMIT ? OFFSET ?`,
+    [...params, String(limit), String(offset)],
   );
 
-  return NextResponse.json(preorders);
+  // Map to response shape, filtering items to preorder products only
+  const preorderIdSet = new Set(preorderProductIds);
+  const items = rows
+    .map((o) => {
+      const orderItems =
+        (typeof o.items === "string" ? JSON.parse(o.items) : o.items) || [];
+      const preorderItems = orderItems.filter(
+        (i: any) => i.is_preorder || preorderIdSet.has(i.product_id),
+      );
+
+      if (preorderItems.length === 0) return null;
+
+      return {
+        id: o.id,
+        order_number: o.display_id ? `TSK-${o.display_id}` : `#${o.id}`,
+        customer_email: o.email,
+        items: preorderItems.map((i: any) => ({
+          product_name: i.name,
+          quantity: i.quantity,
+        })),
+        status: o.fulfillment_status,
+        created_at: o.createdAt,
+      };
+    })
+    .filter(Boolean);
+
+  return NextResponse.json({ items, total: countRow.total });
 });

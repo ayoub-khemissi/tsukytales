@@ -2,11 +2,18 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
-import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
 import {
   Modal,
   ModalContent,
@@ -17,7 +24,11 @@ import {
 import { Select, SelectItem } from "@heroui/select";
 import { useTranslations } from "next-intl";
 
-import { SearchIcon } from "@/components/icons";
+import { AdminTableFilters } from "@/components/admin/AdminTableFilters";
+import {
+  SortableColumn,
+  type SortDirection,
+} from "@/components/admin/SortableColumn";
 
 interface ContactMessage {
   id: number;
@@ -45,6 +56,8 @@ export default function ContactMessagesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [selected, setSelected] = useState<ContactMessage | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const limit = 20;
 
   const fetchMessages = useCallback(async () => {
@@ -56,6 +69,10 @@ export default function ContactMessagesPage() {
       params.set("size", String(limit));
       if (search) params.set("search", search);
       if (statusFilter !== "all") params.set("status", statusFilter);
+      if (sortBy && sortDirection) {
+        params.set("sortBy", sortBy);
+        params.set("sortOrder", sortDirection);
+      }
 
       const res = await fetch(`/api/admin/contact-messages?${params}`);
       const data = await res.json();
@@ -65,7 +82,7 @@ export default function ContactMessagesPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, sortBy, sortDirection]);
 
   useEffect(() => {
     fetchMessages();
@@ -113,42 +130,47 @@ export default function ContactMessagesPage() {
     }
   };
 
+  const handleSort = (column: string, direction: SortDirection) => {
+    setSortBy(direction ? column : null);
+    setSortDirection(direction);
+    setPage(1);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <h1 className="text-2xl font-bold">{t("messages_title")}</h1>
+      <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
+        {t("messages_title")}
+      </h1>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          isClearable
-          className="max-w-md"
-          placeholder={t("messages_search")}
-          startContent={<SearchIcon className="text-default-400" />}
-          value={search}
-          onClear={() => setSearch("")}
-          onValueChange={(v) => {
+      <AdminTableFilters
+        filters={[
+          {
+            key: "status",
+            label: t("messages_col_status"),
+            options: [
+              { key: "all", label: t("messages_filter_all") },
+              { key: "unread", label: t("messages_status_unread") },
+              { key: "read", label: t("messages_status_read") },
+              { key: "replied", label: t("messages_status_replied") },
+            ],
+            value: statusFilter,
+            onChange: (v) => {
+              setStatusFilter(v);
+              setPage(1);
+            },
+          },
+        ]}
+        search={{
+          value: search,
+          placeholder: t("messages_search"),
+          onChange: (v) => {
             setSearch(v);
             setPage(1);
-          }}
-        />
-        <Select
-          className="max-w-[200px]"
-          selectedKeys={[statusFilter]}
-          size="md"
-          onSelectionChange={(keys) => {
-            const val = Array.from(keys)[0] as string;
-
-            setStatusFilter(val);
-            setPage(1);
-          }}
-        >
-          <SelectItem key="all">{t("messages_filter_all")}</SelectItem>
-          <SelectItem key="unread">{t("messages_status_unread")}</SelectItem>
-          <SelectItem key="read">{t("messages_status_read")}</SelectItem>
-          <SelectItem key="replied">{t("messages_status_replied")}</SelectItem>
-        </Select>
-      </div>
+          },
+        }}
+      />
 
       {/* Content */}
       {loading ? (
@@ -156,55 +178,50 @@ export default function ContactMessagesPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : messages.length === 0 ? (
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardBody className="py-16 text-center">
             <p className="text-default-500">{t("messages_empty")}</p>
           </CardBody>
         </Card>
       ) : (
         <>
-          {/* Desktop table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-divider text-left text-default-500">
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("messages_col_date")}
-                  </th>
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("messages_col_name")}
-                  </th>
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("messages_col_email")}
-                  </th>
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("messages_col_subject")}
-                  </th>
-                  <th className="pb-3 pr-4 font-medium">
-                    {t("messages_col_status")}
-                  </th>
-                  <th className="pb-3 font-medium">
-                    {t("messages_col_actions")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="overflow-x-auto">
+            <Table aria-label={t("messages_title")}>
+              <TableHeader>
+                <TableColumn>
+                  <SortableColumn
+                    column="createdAt"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("messages_col_date")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>{t("messages_col_name")}</TableColumn>
+                <TableColumn>{t("messages_col_email")}</TableColumn>
+                <TableColumn>{t("messages_col_subject")}</TableColumn>
+                <TableColumn>{t("messages_col_status")}</TableColumn>
+                <TableColumn>{t("messages_col_actions")}</TableColumn>
+              </TableHeader>
+              <TableBody>
                 {messages.map((msg) => (
-                  <tr
+                  <TableRow
                     key={msg.id}
-                    className={`border-b border-divider/50 hover:bg-default-50 transition-colors ${
-                      msg.status === "unread" ? "font-semibold" : ""
-                    }`}
+                    className={
+                      msg.status === "unread" ? "font-semibold" : undefined
+                    }
                   >
-                    <td className="py-3 pr-4 text-default-500">
+                    <TableCell className="text-default-500">
                       {new Date(msg.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 pr-4">{msg.name}</td>
-                    <td className="py-3 pr-4 text-default-600">{msg.email}</td>
-                    <td className="py-3 pr-4 max-w-[300px] truncate">
+                    </TableCell>
+                    <TableCell>{msg.name}</TableCell>
+                    <TableCell className="text-default-600">
+                      {msg.email}
+                    </TableCell>
+                    <TableCell className="max-w-[300px] truncate">
                       {msg.subject}
-                    </td>
-                    <td className="py-3 pr-4">
+                    </TableCell>
+                    <TableCell>
                       <Chip
                         color={STATUS_COLOR_MAP[msg.status] || "default"}
                         size="sm"
@@ -212,13 +229,13 @@ export default function ContactMessagesPage() {
                       >
                         {t(`messages_status_${msg.status}`)}
                       </Chip>
-                    </td>
-                    <td className="py-3">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex gap-1">
                         <Button
                           color="primary"
                           size="sm"
-                          variant="light"
+                          variant="flat"
                           onPress={() => handleView(msg)}
                         >
                           {t("messages_view")}
@@ -227,51 +244,17 @@ export default function ContactMessagesPage() {
                           color="danger"
                           isLoading={deleting === msg.id}
                           size="sm"
-                          variant="light"
+                          variant="flat"
                           onPress={() => handleDelete(msg.id)}
                         >
                           {t("messages_delete")}
                         </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile cards */}
-          <div className="md:hidden space-y-3">
-            {messages.map((msg) => (
-              <Card
-                key={msg.id}
-                isPressable
-                className={`border border-divider hover:border-primary/50 transition-colors ${
-                  msg.status === "unread" ? "border-warning/50" : ""
-                }`}
-                onPress={() => handleView(msg)}
-              >
-                <CardBody className="p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">{msg.name}</span>
-                    <Chip
-                      color={STATUS_COLOR_MAP[msg.status] || "default"}
-                      size="sm"
-                      variant="flat"
-                    >
-                      {t(`messages_status_${msg.status}`)}
-                    </Chip>
-                  </div>
-                  <p className="text-sm text-default-600">{msg.email}</p>
-                  <p className="text-sm font-medium truncate">{msg.subject}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-default-500">
-                      {new Date(msg.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </CardBody>
-              </Card>
-            ))}
+              </TableBody>
+            </Table>
           </div>
 
           {/* Pagination */}

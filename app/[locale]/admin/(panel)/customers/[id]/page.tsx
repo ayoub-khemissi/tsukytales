@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Chip } from "@heroui/chip";
-import { Divider } from "@heroui/divider";
 import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
 import { useTranslations } from "next-intl";
@@ -16,12 +15,7 @@ interface Customer {
   first_name: string | null;
   last_name: string | null;
   email: string;
-  created_at: string;
-  preferences: {
-    literary_genres?: string[];
-    favorite_authors?: string[];
-    reading_pace?: string;
-  } | null;
+  createdAt: string;
   metadata: Record<string, unknown> | null;
   orders?: Order[];
   addresses?: Address[];
@@ -134,12 +128,14 @@ export default function CustomerDetailPage() {
       </Link>
 
       {/* Title */}
-      <h1 className="text-2xl font-bold">{t("customers_detail_title")}</h1>
+      <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
+        {t("customers_detail_title")}
+      </h1>
 
       {/* Customer info card */}
-      <Card className="border border-divider">
+      <Card className="admin-glass rounded-xl">
         <CardHeader>
-          <h2 className="font-semibold text-lg">{fullName}</h2>
+          <h2 className="font-heading font-semibold text-lg">{fullName}</h2>
         </CardHeader>
         <CardBody className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -152,60 +148,17 @@ export default function CustomerDetailPage() {
                 {t("customers_created")}
               </p>
               <p className="font-medium">
-                {new Date(customer.created_at).toLocaleDateString()}
+                {new Date(customer.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
-
-          {/* Preferences */}
-          {customer.preferences && (
-            <>
-              <Divider />
-              <div className="space-y-2">
-                {customer.preferences.literary_genres &&
-                  customer.preferences.literary_genres.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      <span className="text-sm text-default-500 mr-2">
-                        Genres:
-                      </span>
-                      {customer.preferences.literary_genres.map((genre) => (
-                        <Chip key={genre} size="sm" variant="flat">
-                          {genre}
-                        </Chip>
-                      ))}
-                    </div>
-                  )}
-                {customer.preferences.favorite_authors &&
-                  customer.preferences.favorite_authors.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      <span className="text-sm text-default-500 mr-2">
-                        Authors:
-                      </span>
-                      {customer.preferences.favorite_authors.map((author) => (
-                        <Chip key={author} size="sm" variant="flat">
-                          {author}
-                        </Chip>
-                      ))}
-                    </div>
-                  )}
-                {customer.preferences.reading_pace && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-default-500">Pace:</span>
-                    <Chip color="primary" size="sm" variant="flat">
-                      {customer.preferences.reading_pace}
-                    </Chip>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
         </CardBody>
       </Card>
 
       {/* Orders */}
-      <Card className="border border-divider">
+      <Card className="admin-glass rounded-xl">
         <CardHeader>
-          <h2 className="font-semibold text-lg">
+          <h2 className="font-heading font-semibold text-lg">
             {t("customers_detail_orders")}
           </h2>
         </CardHeader>
@@ -218,7 +171,7 @@ export default function CustomerDetailPage() {
             <div className="space-y-3">
               {orders.map((order) => (
                 <Link key={order.id} href={`/admin/orders/${order.id}`}>
-                  <Card className="border border-divider hover:border-primary/50 transition-colors cursor-pointer">
+                  <Card className="admin-glass rounded-xl hover:shadow-lg transition-all cursor-pointer">
                     <CardBody className="p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div className="flex items-center gap-3">
@@ -280,9 +233,9 @@ export default function CustomerDetailPage() {
       </Card>
 
       {/* Addresses */}
-      <Card className="border border-divider">
+      <Card className="admin-glass rounded-xl">
         <CardHeader>
-          <h2 className="font-semibold text-lg">
+          <h2 className="font-heading font-semibold text-lg">
             {t("customers_detail_addresses")}
           </h2>
         </CardHeader>
@@ -294,7 +247,7 @@ export default function CustomerDetailPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {addresses.map((addr) => (
-                <Card key={addr.id} className="border border-divider">
+                <Card key={addr.id} className="admin-glass rounded-xl">
                   <CardBody className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="font-semibold">{addr.label}</span>

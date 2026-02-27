@@ -9,16 +9,42 @@ import { AppError } from "@/lib/errors/app-error";
 export const POST = withErrorHandler(async (req: NextRequest) => {
   await requireAdmin();
 
-  const { id } = await req.json();
-  const order = await orderRepository.findById(id);
+  const { orderId, force } = await req.json();
+  const order = await orderRepository.findById(orderId);
 
   if (!order) throw new AppError("Commande introuvable", 404);
 
-  // If relay point has no address, try Boxtal lookup
+  // Force re-ship: cancel old shipment and reset state
+  if (
+    force &&
+    (order.metadata?.shipping_order_id || order.metadata?.shipping_failed)
+  ) {
+    if (order.metadata?.shipping_order_id) {
+      await shippingService.cancelShipment(
+        order.metadata.shipping_order_id as string,
+      );
+    }
 
-  const addr = (order.shipping_address || {}) as any;
+    const cleanMeta = { ...(order.metadata || {}) } as Record<string, unknown>;
+
+    delete cleanMeta.shipping_order_id;
+    delete cleanMeta.shipping_failed;
+    delete cleanMeta.shipping_error;
+
+    await orderRepository.update(orderId, {
+      fulfillment_status: "not_fulfilled",
+      metadata: JSON.stringify(cleanMeta),
+    });
+  }
+
+  // If relay point has no address, try Boxtal lookup
+  // Re-fetch order after potential force reset
+  const freshOrder = force ? await orderRepository.findById(orderId) : order;
+  const addr = (freshOrder?.shipping_address || {}) as any;
   const relay = addr.relay;
-  const isRelay = !!(relay || order.metadata?.shipping_method === "relay");
+  const isRelay = !!(
+    relay || freshOrder?.metadata?.shipping_method === "relay"
+  );
 
   if (isRelay && relay && !relay.address) {
     const foundPoint = await shippingService.findRelayByCode(relay.code);
@@ -32,7 +58,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         { status: 400 },
       );
     }
-    await orderRepository.update(order.id, {
+    await orderRepository.update(orderId, {
       shipping_address: JSON.stringify({
         ...addr,
         relay: { ...relay, address: foundPoint.address },
@@ -40,19 +66,21 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     });
   }
 
-  const result = await shippingService.createShipment(id);
+  const result = await shippingService.createShipment(orderId);
 
-  // Add history entry
-
-  const meta = (order.metadata || {}) as any;
+  // Add history entry (re-fetch to get metadata updated by createShipment)
+  const updatedOrder = await orderRepository.findById(orderId);
+  const meta = (updatedOrder?.metadata || {}) as any;
   const history = meta.history || [];
 
   history.push({
     date: new Date().toISOString(),
     status: "shipped",
-    label: "Commande expédiée via Boxtal",
+    label: force
+      ? "Commande ré-expédiée via Boxtal"
+      : "Commande expédiée via Boxtal",
   });
-  await orderRepository.update(order.id, {
+  await orderRepository.update(orderId, {
     metadata: JSON.stringify({ ...meta, history }),
   });
 

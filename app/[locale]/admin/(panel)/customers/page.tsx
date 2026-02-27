@@ -2,21 +2,34 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
-import { Input } from "@heroui/input";
+import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
-import { SearchIcon } from "@/components/icons";
+import { AdminTableFilters } from "@/components/admin/AdminTableFilters";
+import {
+  SortableColumn,
+  type SortDirection,
+} from "@/components/admin/SortableColumn";
+import { downloadCSV } from "@/lib/utils/export-csv";
 
 interface Customer {
   id: number;
   first_name: string | null;
   last_name: string | null;
   email: string;
-  created_at: string;
+  createdAt: string;
   orders_count: number;
 }
 
@@ -32,8 +45,12 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [accountFilter, setAccountFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [exporting, setExporting] = useState(false);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const limit = 20;
 
   const fetchCustomers = useCallback(async () => {
@@ -44,6 +61,11 @@ export default function CustomersPage() {
       params.set("page", String(page));
       params.set("limit", String(limit));
       if (search) params.set("search", search);
+      if (accountFilter !== "all") params.set("has_account", accountFilter);
+      if (sortBy && sortDirection) {
+        params.set("sortBy", sortBy);
+        params.set("sortOrder", sortDirection);
+      }
 
       const res = await fetch(`/api/admin/customers?${params}`);
 
@@ -56,31 +78,100 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, accountFilter, sortBy, sortDirection]);
 
   useEffect(() => {
     fetchCustomers();
   }, [fetchCustomers]);
 
+  const handleSort = (column: string, direction: SortDirection) => {
+    setSortBy(direction ? column : null);
+    setSortDirection(direction);
+    setPage(1);
+  };
+
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const params = new URLSearchParams();
+
+      params.set("limit", "10000");
+      if (search) params.set("search", search);
+      if (accountFilter !== "all") params.set("has_account", accountFilter);
+
+      const res = await fetch(`/api/admin/customers?${params}`);
+      const data = await res.json();
+      const items: Customer[] = data.items || [];
+
+      const headers = [
+        t("customers_name"),
+        t("customers_email"),
+        t("customers_orders_count"),
+        t("customers_created"),
+      ];
+
+      const rows = items.map((c) => [
+        [c.first_name, c.last_name].filter(Boolean).join(" ") || "—",
+        c.email,
+        String(c.orders_count ?? 0),
+        new Date(c.createdAt).toLocaleDateString(),
+      ]);
+
+      downloadCSV(
+        `clients-${new Date().toISOString().slice(0, 10)}.csv`,
+        headers,
+        rows,
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold">{t("customers_title")}</h1>
-        <Input
-          isClearable
-          className="max-w-xs"
-          placeholder={t("customers_search")}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
+          {t("customers_title")}
+        </h1>
+        <Button
+          color="primary"
+          isLoading={exporting}
           size="sm"
-          startContent={<SearchIcon className="text-default-400" />}
-          value={search}
-          onClear={() => setSearch("")}
-          onValueChange={(v) => {
+          variant="flat"
+          onPress={handleExportCSV}
+        >
+          {t("export_csv")}
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <AdminTableFilters
+        filters={[
+          {
+            key: "has_account",
+            label: t("customers_filter_account"),
+            options: [
+              { key: "all", label: t("filter_all") },
+              { key: "yes", label: t("customers_account_yes") },
+              { key: "no", label: t("customers_account_no") },
+            ],
+            value: accountFilter,
+            onChange: (v) => {
+              setAccountFilter(v);
+              setPage(1);
+            },
+          },
+        ]}
+        search={{
+          value: search,
+          placeholder: t("customers_search"),
+          onChange: (v) => {
             setSearch(v);
             setPage(1);
-          }}
-        />
-      </div>
+          },
+        }}
+      />
 
       {/* Content */}
       {loading ? (
@@ -88,59 +179,65 @@ export default function CustomersPage() {
           <Spinner color="primary" size="lg" />
         </div>
       ) : customers.length === 0 ? (
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardBody className="py-16 text-center">
             <p className="text-default-500">{t("customers_empty")}</p>
           </CardBody>
         </Card>
       ) : (
         <>
-          {/* Table header */}
-          <div className="hidden md:grid grid-cols-[1fr_1fr_auto_auto] gap-4 px-4 py-2 text-sm font-semibold text-default-500 border-b border-divider">
-            <span>{t("customers_name")}</span>
-            <span>{t("customers_email")}</span>
-            <span className="text-center">{t("customers_orders_count")}</span>
-            <span className="text-right">{t("customers_created")}</span>
-          </div>
-
-          {/* Customer rows */}
-          <div className="space-y-2">
-            {customers.map((customer) => (
-              <Link key={customer.id} href={`/admin/customers/${customer.id}`}>
-                <Card className="border border-divider hover:border-primary/50 transition-colors cursor-pointer">
-                  <CardBody className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto_auto] gap-2 md:gap-4 items-center">
-                      {/* Name */}
-                      <div>
-                        <span className="font-semibold text-foreground">
-                          {[customer.first_name, customer.last_name]
-                            .filter(Boolean)
-                            .join(" ") || "—"}
-                        </span>
-                      </div>
-
-                      {/* Email */}
-                      <div className="text-sm text-default-600">
-                        {customer.email}
-                      </div>
-
-                      {/* Orders count */}
-                      <div className="md:text-center">
-                        <Chip color="primary" size="sm" variant="flat">
-                          {customer.orders_count ?? 0}{" "}
-                          {t("customers_orders_count").toLowerCase()}
-                        </Chip>
-                      </div>
-
-                      {/* Created date */}
-                      <div className="text-sm text-default-500 md:text-right">
-                        {new Date(customer.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-              </Link>
-            ))}
+          <div className="overflow-x-auto">
+            <Table aria-label={t("customers_title")}>
+              <TableHeader>
+                <TableColumn>{t("customers_name")}</TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="email"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("customers_email")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>{t("customers_orders_count")}</TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="createdAt"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("customers_created")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+              </TableHeader>
+              <TableBody>
+                {customers.map((customer) => (
+                  <TableRow key={customer.id}>
+                    <TableCell>
+                      <Link
+                        className="text-primary font-medium hover:underline"
+                        href={`/admin/customers/${customer.id}`}
+                      >
+                        {[customer.first_name, customer.last_name]
+                          .filter(Boolean)
+                          .join(" ") || "—"}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-default-600">
+                      {customer.email}
+                    </TableCell>
+                    <TableCell>
+                      <Chip color="primary" size="sm" variant="flat">
+                        {customer.orders_count ?? 0}
+                      </Chip>
+                    </TableCell>
+                    <TableCell className="text-default-500">
+                      {new Date(customer.createdAt).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
 
           {/* Pagination */}

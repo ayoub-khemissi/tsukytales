@@ -2,6 +2,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { ReadingProgress } from "@/components/reading-progress";
 import { Particles } from "@/components/particles";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 export default function SiteLayout({
   children,
@@ -10,6 +11,7 @@ export default function SiteLayout({
 }) {
   return (
     <div className="relative flex flex-col min-h-screen bg-pattern-overlay">
+      <ScrollToTop />
       <ReadingProgress />
       <Particles count={12} />
       <Navbar />

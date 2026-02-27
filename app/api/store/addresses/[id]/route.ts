@@ -1,3 +1,5 @@
+import type { AddressRow } from "@/types/db.types";
+
 import { NextRequest, NextResponse } from "next/server";
 import { ResultSetHeader } from "mysql2";
 
@@ -37,9 +39,23 @@ export const PUT = withErrorHandler(async (req: NextRequest, context) => {
       updateData.is_default = updateData.is_default ? 1 : 0;
     }
 
-    await addressRepository.update(parseInt(id), updateData);
+    const keys = Object.keys(updateData);
 
-    return addressRepository.findById(parseInt(id));
+    if (keys.length > 0) {
+      const setClause = keys.map((k) => `\`${k}\` = ?`).join(", ");
+
+      await connection.execute<ResultSetHeader>(
+        `UPDATE addresses SET ${setClause} WHERE id = ?`,
+        [...Object.values(updateData), id],
+      );
+    }
+
+    const [rows] = await connection.execute<AddressRow[]>(
+      "SELECT * FROM addresses WHERE id = ? LIMIT 1",
+      [parseInt(id)],
+    );
+
+    return rows[0] ?? null;
   });
 
   return NextResponse.json({ success: true, address });
@@ -58,14 +74,10 @@ export const DELETE = withErrorHandler(async (_req: NextRequest, context) => {
   if (!address) throw new AppError("Adresse introuvable", 404);
 
   if (address.is_default) {
-    const count = await addressRepository.countByCustomer(customerId);
-
-    if (count === 1) {
-      throw new AppError(
-        "Impossible de supprimer votre seule adresse. Ajoutez-en une autre d'abord.",
-        400,
-      );
-    }
+    throw new AppError(
+      "Impossible de supprimer l'adresse par défaut. Définissez une autre adresse par défaut d'abord.",
+      400,
+    );
   }
 
   await addressRepository.delete(parseInt(id));

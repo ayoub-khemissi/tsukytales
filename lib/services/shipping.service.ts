@@ -1,13 +1,23 @@
 import axios from "axios";
+import { ResultSetHeader } from "mysql2/promise";
 
-import * as mailService from "./mail.service";
-
+import * as mailService from "@/lib/mail";
+import { pool } from "@/lib/db/connection";
+import { cached, cacheKey } from "@/lib/cache";
 import { orderRepository } from "@/lib/repositories/order.repository";
+import { settingsRepository } from "@/lib/repositories/settings.repository";
 import { logger } from "@/lib/utils/logger";
 
 const BASE_URL = "https://api.boxtal.com";
 
+let cachedToken: { token: string; expiresAt: number } | null = null;
+
 async function getBoxtalToken(): Promise<string> {
+  // Return cached token if still valid (with 60s safety margin)
+  if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
+    return cachedToken.token;
+  }
+
   const clientId = process.env.BOXTAL_CLIENT_ID;
   const clientSecret = process.env.BOXTAL_CLIENT_SECRET;
   const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
@@ -22,6 +32,10 @@ async function getBoxtalToken(): Promise<string> {
   const token = response.data.accessToken || response.data.access_token;
 
   if (!token) throw new Error("Token missing in Boxtal response");
+
+  const expiresIn = response.data.expiresIn || 3600;
+
+  cachedToken = { token, expiresAt: Date.now() + expiresIn * 1000 };
 
   return token;
 }
@@ -60,29 +74,40 @@ export async function getRelayPoints(
   weight: number = 1.0,
   countryCode: string = "FR",
 ) {
-  logger.info(
-    `[Boxtal] Searching relays for ${zipCode}, country: ${countryCode}, weight: ${weight}kg`,
-  );
-  const token = await getBoxtalToken();
+  const cc = (countryCode || "FR").toUpperCase();
 
-  const response = await axios.get(
-    `${BASE_URL}/shipping/v3.2/parcel-point-by-network`,
-    {
-      params: {
-        postalCode: zipCode,
-        countryIsoCode: countryCode.toUpperCase(),
-        weight,
-        searchNetworks: "MONR_NETWORK",
-      },
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  return cached(
+    cacheKey("shipping:relays", cc, zipCode, weight),
+    86400,
+    async () => {
+      logger.info(
+        `[Boxtal] Searching relays for ${zipCode}, country: ${cc}, weight: ${weight}kg`,
+      );
+      const token = await getBoxtalToken();
+
+      const response = await axios.get(
+        `${BASE_URL}/shipping/v3.2/parcel-point-by-network`,
+        {
+          params: {
+            postalCode: zipCode,
+            countryIsoCode: cc,
+            weight,
+            searchNetworks: "MONR_NETWORK",
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        },
+      );
+
+      const points = extractPoints(response.data);
+
+      logger.info(`[Boxtal] Found ${points.length} points`);
+
+      return { items: points, totalItems: points.length };
     },
   );
-
-  const points = extractPoints(response.data);
-
-  logger.info(`[Boxtal] Found ${points.length} points`);
-
-  return { items: points, totalItems: points.length };
 }
 
 export async function findRelayByCode(code: string) {
@@ -149,12 +174,64 @@ export async function findRelayByCode(code: string) {
   return null;
 }
 
+export async function cancelShipment(
+  shippingOrderId: string,
+): Promise<boolean> {
+  try {
+    const token = await getBoxtalToken();
+
+    await axios.delete(
+      `${BASE_URL}/shipping/v3.1/shipping-order/${shippingOrderId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      },
+    );
+    logger.info(`[Shipping] Cancelled Boxtal order: ${shippingOrderId}`);
+
+    return true;
+  } catch (err) {
+    // 422 = order can't be cancelled (already shipped/delivered) — not a blocker for refund
+    logger.warn(
+      `[Shipping] Cancel failed for ${shippingOrderId}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+
+    return false;
+  }
+}
+
 export async function createShipment(orderId: number) {
   const order = await orderRepository.findById(orderId);
 
   if (!order) throw new Error("Order not found");
 
-  logger.info(`[Boxtal] Creating real shipment for order ${orderId}`);
+  // B1: Guard against double shipment
+  if (order.metadata?.shipping_order_id) {
+    logger.info(
+      `[Shipping] Order ${orderId} already shipped (${order.metadata.shipping_order_id}), skipping`,
+    );
+
+    return { shippingOrderId: order.metadata.shipping_order_id as string };
+  }
+
+  // Atomic claim: only proceed if order is still not_fulfilled
+  const [claimed] = await pool.execute<ResultSetHeader>(
+    "UPDATE orders SET fulfillment_status = 'fulfilled' WHERE id = ? AND fulfillment_status = 'not_fulfilled'",
+    [orderId],
+  );
+
+  if ((claimed as ResultSetHeader).affectedRows === 0) {
+    logger.info(`[Shipping] Order ${orderId}: fulfillment already in progress`);
+    const fresh = await orderRepository.findById(orderId);
+
+    return {
+      shippingOrderId: (fresh?.metadata?.shipping_order_id as string) || "",
+    };
+  }
+
+  logger.info(`[Shipping] Creating shipment for order ${orderId}`);
   const token = await getBoxtalToken();
 
   const addr: any = order.shipping_address || {};
@@ -180,9 +257,22 @@ export async function createShipment(orderId: number) {
     "FR"
   ).toUpperCase();
 
-  const nameParts = (order.email || "").split("@")[0].split(".");
-  const firstName = nameParts[0] || "Client";
-  const lastName = nameParts[1] || "Tsuky";
+  // A2: Use shipping address name, fallback to email only if absent
+  const firstName =
+    addr.first_name ||
+    (order.email || "").split("@")[0].split(".")[0] ||
+    "Client";
+  const lastName =
+    addr.last_name ||
+    (order.email || "").split("@")[0].split(".")[1] ||
+    "Tsuky";
+
+  // A3: Phone from shipping address with fallbacks
+  const phone =
+    addr.phone || order.shipping_address?.phone || order.metadata?.phone || "";
+
+  // A4: Relay code from metadata (saved at order creation) or address
+  const relayCode = dest.code || (order.metadata?.relay_code as string) || "";
 
   const totalWeight =
     (order.items || []).reduce(
@@ -228,7 +318,7 @@ export async function createShipment(orderId: number) {
           firstName,
           lastName,
           email: order.email,
-          phone: order.metadata?.phone || "0600000000",
+          phone: phone || "0600000000",
         },
         location: {
           street: destStreet,
@@ -237,34 +327,54 @@ export async function createShipment(orderId: number) {
           countryIsoCode: destCountry,
         },
       },
-      ...(isRelay && dest.code ? { dropOffPointCode: dest.code } : {}),
+      ...(isRelay && relayCode ? { dropOffPointCode: relayCode } : {}),
       ...(isRelay
         ? { pickupPointCode: process.env.BOXTAL_PICKUP_CODE || "17199" }
         : {}),
     },
   };
 
-  const response = await axios.post(
-    `${BASE_URL}/shipping/v3.1/shipping-order`,
-    body,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
+  let response;
+
+  try {
+    response = await axios.post(
+      `${BASE_URL}/shipping/v3.1/shipping-order`,
+      body,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       },
-    },
-  );
+    );
+  } catch (err) {
+    // Rollback: restore fulfillment_status and flag the failure
+    const msg = err instanceof Error ? err.message : String(err);
+
+    logger.error(`[Shipping] Boxtal API failed for order ${orderId}: ${msg}`);
+    await orderRepository.update(orderId, {
+      fulfillment_status: "not_fulfilled",
+      metadata: JSON.stringify({
+        ...(order.metadata || {}),
+        shipping_failed: true,
+        shipping_error: msg,
+      }),
+    });
+    throw err;
+  }
 
   const shippingOrderId = response.data?.content?.id;
 
-  logger.info(`[Boxtal] Shipping order created: ${shippingOrderId}`);
+  logger.info(`[Shipping] Shipping order created: ${shippingOrderId}`);
 
   await orderRepository.update(orderId, {
     fulfillment_status: "fulfilled",
     metadata: JSON.stringify({
       ...(order.metadata || {}),
       shipping_order_id: shippingOrderId,
+      shipping_failed: undefined,
+      shipping_error: undefined,
     }),
   });
 
@@ -272,31 +382,32 @@ export async function createShipment(orderId: number) {
 }
 
 export async function getTrackingInfo(trackingNumber: string) {
-  const steps = [
-    {
-      date: new Date(Date.now() - 86400000 * 2).toISOString(),
-      label: "Commande préparée par Tsuky Tales",
-      location: "Entrepôt",
-    },
-    {
-      date: new Date(Date.now() - 86400000).toISOString(),
-      label: "Colis remis au transporteur",
-      location: "Centre de tri",
-    },
-    {
-      date: new Date().toISOString(),
-      label: "En cours de livraison",
-      location: "Agence locale",
-    },
-  ];
+  // Look up order by shipping_order_id or tracking_number in metadata
+  const order =
+    (await orderRepository.findByShippingOrderId(trackingNumber)) ??
+    (await orderRepository
+      .findAll({
+        where: "tracking_number = ?",
+        params: [trackingNumber],
+      })
+      .then((rows) => rows[0] ?? null));
+
+  const meta = (order?.metadata || {}) as any;
+  const history = (meta.history || []) as Array<Record<string, string>>;
 
   return {
-    tracking_number: trackingNumber,
-    status: "in_transit",
-    status_label: "En cours de livraison",
-    carrier: "Mondial Relay",
-    estimated_delivery: new Date(Date.now() + 86400000 * 2).toISOString(),
-    steps,
+    tracking_number: meta.tracking_number || trackingNumber,
+    status: order?.fulfillment_status || "unknown",
+    status_label: order?.fulfillment_status || "Inconnu",
+    carrier: meta.carrier || null,
+    tracking_url: meta.tracking_url || null,
+    shipping_order_id: meta.shipping_order_id || null,
+    steps: history.filter(
+      (h) =>
+        h.status === "shipped" ||
+        h.status === "fulfilled" ||
+        h.status === "delivered",
+    ),
   };
 }
 
@@ -318,134 +429,167 @@ interface RateTier {
   price: number;
 }
 
-export function getShippingRates(
+// Default hardcoded rates (fallback when DB has no overrides)
+const DEFAULT_RATES: Record<string, RateTier[]> = {
+  shipping_rates_relay_fr: [
+    { maxWeight: 0.5, price: 3.9 },
+    { maxWeight: 1, price: 4.5 },
+    { maxWeight: 3, price: 5.5 },
+    { maxWeight: 5, price: 6.9 },
+    { maxWeight: 10, price: 8.9 },
+  ],
+  shipping_rates_relay_eu: [
+    { maxWeight: 0.5, price: 6.9 },
+    { maxWeight: 1, price: 7.9 },
+    { maxWeight: 3, price: 9.9 },
+    { maxWeight: 5, price: 12.9 },
+    { maxWeight: 10, price: 16.9 },
+  ],
+  shipping_rates_home_fr: [
+    { maxWeight: 0.5, price: 5.9 },
+    { maxWeight: 1, price: 6.9 },
+    { maxWeight: 2, price: 7.9 },
+    { maxWeight: 5, price: 9.9 },
+    { maxWeight: 10, price: 13.9 },
+  ],
+  shipping_rates_home_eu1: [
+    { maxWeight: 0.5, price: 9.9 },
+    { maxWeight: 1, price: 12.9 },
+    { maxWeight: 2, price: 15.9 },
+    { maxWeight: 5, price: 19.9 },
+    { maxWeight: 10, price: 26.9 },
+  ],
+  shipping_rates_home_eu2: [
+    { maxWeight: 0.5, price: 12.9 },
+    { maxWeight: 1, price: 15.9 },
+    { maxWeight: 2, price: 19.9 },
+    { maxWeight: 5, price: 25.9 },
+    { maxWeight: 10, price: 34.9 },
+  ],
+  shipping_rates_home_om: [
+    { maxWeight: 0.5, price: 9.9 },
+    { maxWeight: 1, price: 14.9 },
+    { maxWeight: 2, price: 19.9 },
+    { maxWeight: 5, price: 29.9 },
+    { maxWeight: 10, price: 44.9 },
+  ],
+  shipping_rates_home_world: [
+    { maxWeight: 0.5, price: 16.9 },
+    { maxWeight: 1, price: 22.9 },
+    { maxWeight: 2, price: 29.9 },
+    { maxWeight: 5, price: 42.9 },
+    { maxWeight: 10, price: 59.9 },
+  ],
+};
+
+export { DEFAULT_RATES as SHIPPING_DEFAULT_RATES };
+
+const HOME_EU1_COUNTRIES = ["BE", "LU", "NL", "DE", "AT"];
+const HOME_EU2_COUNTRIES = [
+  "ES",
+  "PT",
+  "IT",
+  "GB",
+  "IE",
+  "CH",
+  "PL",
+  "CZ",
+  "DK",
+  "SE",
+  "NO",
+  "FI",
+  "HU",
+  "RO",
+  "BG",
+  "HR",
+  "GR",
+  "SK",
+  "SI",
+  "EE",
+  "LV",
+  "LT",
+];
+const HOME_OM_COUNTRIES = ["GP", "MQ", "GF", "RE", "YT"];
+
+const SHIPPING_KEYS = Object.keys(DEFAULT_RATES);
+
+export async function getShippingRates(
   totalWeight: number,
   countryCode: string = "FR",
 ) {
   const weight = Math.max(totalWeight, 0.1);
   const cc = (countryCode || "FR").toUpperCase();
 
-  const findRate = (rates: RateTier[]) => {
-    const tier = rates.find((r) => weight <= r.maxWeight);
+  return cached(cacheKey("shipping:rates", cc, weight), 3600, async () => {
+    // Load rates from DB, fallback to defaults
+    let rates: Record<string, RateTier[]>;
 
-    return tier ? tier.price : rates[rates.length - 1].price;
-  };
+    try {
+      const dbRates = await settingsRepository.getMultiple(SHIPPING_KEYS);
 
-  // Mondial Relay
-  const relayAvailable = RELAY_COUNTRIES.includes(cc);
-  const relayRates: RateTier[] =
-    cc === "FR"
-      ? [
-          { maxWeight: 0.5, price: 3.9 },
-          { maxWeight: 1, price: 4.5 },
-          { maxWeight: 3, price: 5.5 },
-          { maxWeight: 5, price: 6.9 },
-          { maxWeight: 10, price: 8.9 },
-        ]
-      : [
-          { maxWeight: 0.5, price: 6.9 },
-          { maxWeight: 1, price: 7.9 },
-          { maxWeight: 3, price: 9.9 },
-          { maxWeight: 5, price: 12.9 },
-          { maxWeight: 10, price: 16.9 },
-        ];
+      rates = { ...DEFAULT_RATES };
+      for (const key of SHIPPING_KEYS) {
+        if (dbRates[key]) rates[key] = dbRates[key];
+      }
+    } catch {
+      rates = DEFAULT_RATES;
+    }
 
-  // Colissimo
-  let homeRates: RateTier[];
-  let homeCarrier: string;
+    const findRate = (tiers: RateTier[]) => {
+      const tier = tiers.find((r) => weight <= r.maxWeight);
 
-  if (cc === "FR") {
-    homeCarrier = "Colissimo";
-    homeRates = [
-      { maxWeight: 0.5, price: 5.9 },
-      { maxWeight: 1, price: 6.9 },
-      { maxWeight: 2, price: 7.9 },
-      { maxWeight: 5, price: 9.9 },
-      { maxWeight: 10, price: 13.9 },
-    ];
-  } else if (["BE", "LU", "NL", "DE", "AT"].includes(cc)) {
-    homeCarrier = "Colissimo International";
-    homeRates = [
-      { maxWeight: 0.5, price: 9.9 },
-      { maxWeight: 1, price: 12.9 },
-      { maxWeight: 2, price: 15.9 },
-      { maxWeight: 5, price: 19.9 },
-      { maxWeight: 10, price: 26.9 },
-    ];
-  } else if (
-    [
-      "ES",
-      "PT",
-      "IT",
-      "GB",
-      "IE",
-      "CH",
-      "PL",
-      "CZ",
-      "DK",
-      "SE",
-      "NO",
-      "FI",
-      "HU",
-      "RO",
-      "BG",
-      "HR",
-      "GR",
-      "SK",
-      "SI",
-      "EE",
-      "LV",
-      "LT",
-    ].includes(cc)
-  ) {
-    homeCarrier = "Colissimo International";
-    homeRates = [
-      { maxWeight: 0.5, price: 12.9 },
-      { maxWeight: 1, price: 15.9 },
-      { maxWeight: 2, price: 19.9 },
-      { maxWeight: 5, price: 25.9 },
-      { maxWeight: 10, price: 34.9 },
-    ];
-  } else if (["GP", "MQ", "GF", "RE", "YT"].includes(cc)) {
-    homeCarrier = "Colissimo Outre-Mer";
-    homeRates = [
-      { maxWeight: 0.5, price: 9.9 },
-      { maxWeight: 1, price: 14.9 },
-      { maxWeight: 2, price: 19.9 },
-      { maxWeight: 5, price: 29.9 },
-      { maxWeight: 10, price: 44.9 },
-    ];
-  } else {
-    homeCarrier = "Colissimo International";
-    homeRates = [
-      { maxWeight: 0.5, price: 16.9 },
-      { maxWeight: 1, price: 22.9 },
-      { maxWeight: 2, price: 29.9 },
-      { maxWeight: 5, price: 42.9 },
-      { maxWeight: 10, price: 59.9 },
-    ];
-  }
-
-  const result: any = {
-    home: {
-      price: findRate(homeRates),
-      carrier: homeCarrier,
-      label: "Domicile",
-    },
-    weight,
-    country: cc,
-    relay_available: relayAvailable,
-  };
-
-  if (relayAvailable) {
-    result.relay = {
-      price: findRate(relayRates),
-      carrier: "Mondial Relay",
-      label: "Point Relais",
+      return tier ? tier.price : tiers[tiers.length - 1].price;
     };
-  }
 
-  return result;
+    // Mondial Relay
+    const relayAvailable = RELAY_COUNTRIES.includes(cc);
+    const relayRates =
+      cc === "FR"
+        ? rates.shipping_rates_relay_fr
+        : rates.shipping_rates_relay_eu;
+
+    // Colissimo
+    let homeRates: RateTier[];
+    let homeCarrier: string;
+
+    if (cc === "FR") {
+      homeCarrier = "Colissimo";
+      homeRates = rates.shipping_rates_home_fr;
+    } else if (HOME_EU1_COUNTRIES.includes(cc)) {
+      homeCarrier = "Colissimo International";
+      homeRates = rates.shipping_rates_home_eu1;
+    } else if (HOME_EU2_COUNTRIES.includes(cc)) {
+      homeCarrier = "Colissimo International";
+      homeRates = rates.shipping_rates_home_eu2;
+    } else if (HOME_OM_COUNTRIES.includes(cc)) {
+      homeCarrier = "Colissimo Outre-Mer";
+      homeRates = rates.shipping_rates_home_om;
+    } else {
+      homeCarrier = "Colissimo International";
+      homeRates = rates.shipping_rates_home_world;
+    }
+
+    const result: any = {
+      home: {
+        price: findRate(homeRates),
+        carrier: homeCarrier,
+        label: "Domicile",
+      },
+      weight,
+      country: cc,
+      relay_available: relayAvailable,
+    };
+
+    if (relayAvailable) {
+      result.relay = {
+        price: findRate(relayRates),
+        carrier: "Mondial Relay",
+        label: "Point Relais",
+      };
+    }
+
+    return result;
+  });
 }
 
 export async function handleStatusUpdate(
@@ -459,7 +603,12 @@ export async function handleStatusUpdate(
   if (newStatus === "in_transit" && order.fulfillment_status !== "shipped") {
     await orderRepository.update(order.id, { fulfillment_status: "shipped" });
     mailService
-      .sendShippingNotification(order, trackingNumber)
+      .sendShippingNotification({
+        email: order.email,
+        orderId: order.id,
+        trackingNumber,
+        labelUrl: order.metadata?.label_url as string | undefined,
+      })
       .catch((err) =>
         logger.error(
           "Email error: " + (err instanceof Error ? err.message : String(err)),

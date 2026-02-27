@@ -1,15 +1,26 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Get in touch with the Tsuky Tales team. We'd love to hear from you.",
-  openGraph: {
-    title: "Contact | Tsuky Tales",
-    description:
-      "Get in touch with the Tsuky Tales team. We'd love to hear from you.",
-  },
-};
+import { buildAlternates } from "@/lib/seo/metadata";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  return {
+    title: t("contact_title"),
+    description: t("contact_description"),
+    openGraph: {
+      title: `${t("contact_title")} | Tsuky Tales`,
+      description: t("contact_description"),
+    },
+    alternates: buildAlternates("/contact"),
+  };
+}
 
 export default function ContactLayout({
   children,

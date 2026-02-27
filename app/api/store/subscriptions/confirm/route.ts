@@ -8,6 +8,7 @@ import * as stripeCustomerService from "@/lib/services/stripe-customer.service";
 import { stripe } from "@/lib/services/payment.service";
 import { AppError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
+import { settingsRepository } from "@/lib/repositories/settings.repository";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await requireCustomer();
@@ -35,7 +36,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const meta = setupIntent.metadata!;
   const priceId = meta.stripe_price_id;
-  const dates: string[] = JSON.parse(meta.subscription_dates);
+  const dates: string[] =
+    (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
 
   const timestamps = dates.map((d) =>
     Math.floor(new Date(d + "T00:00:00Z").getTime() / 1000),

@@ -30,14 +30,10 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
         method: req.method,
       });
 
-      const message =
-        process.env.NODE_ENV === "production"
-          ? "Erreur interne du serveur"
-          : error instanceof Error
-            ? error.message
-            : "Unknown error";
-
-      return NextResponse.json({ error: message }, { status: 500 });
+      return NextResponse.json(
+        { error: "Erreur interne du serveur" },
+        { status: 500 },
+      );
     }
   };
 }

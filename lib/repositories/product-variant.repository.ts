@@ -3,6 +3,7 @@ import type { ProductVariantRow } from "@/types/db.types";
 import { BaseRepository } from "./base.repository";
 
 import { pool } from "@/lib/db/connection";
+import { cached, cacheKey } from "@/lib/cache";
 
 class ProductVariantRepository extends BaseRepository<ProductVariantRow> {
   constructor() {
@@ -10,12 +11,14 @@ class ProductVariantRepository extends BaseRepository<ProductVariantRow> {
   }
 
   async findByProductId(productId: number): Promise<ProductVariantRow[]> {
-    const [rows] = await pool.execute<ProductVariantRow[]>(
-      "SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC",
-      [productId],
-    );
+    return cached(cacheKey("variants:product", productId), 900, async () => {
+      const [rows] = await pool.execute<ProductVariantRow[]>(
+        "SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC",
+        [productId],
+      );
 
-    return rows;
+      return rows;
+    });
   }
 
   async findBySku(sku: string): Promise<ProductVariantRow | null> {

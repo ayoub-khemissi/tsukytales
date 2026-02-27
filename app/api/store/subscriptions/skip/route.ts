@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireCustomer } from "@/lib/auth/helpers";
 import { customerRepository } from "@/lib/repositories/customer.repository";
-import { stripe } from "@/lib/services/payment.service";
 import { AppError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
 
@@ -18,77 +17,20 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!scheduleId) throw new AppError("Aucun abonnement actif.", 400);
 
-  // Check yearly quota
   const skippedPhases = (customer.metadata?.subscription_skipped ||
     []) as string[];
-  const currentYear = new Date().getFullYear();
-  const skipsThisYear = skippedPhases.filter((s: string) =>
-    s.startsWith(String(currentYear)),
-  ).length;
 
-  if (skipsThisYear >= 1) {
+  // Check phase is in future (> 24h)
+  const phaseTs = new Date(phase_date + "T00:00:00Z").getTime();
+
+  if (phaseTs <= Date.now() + 24 * 3600 * 1000) {
     throw new AppError(
-      "Vous avez déjà utilisé votre passe pour cette année.",
+      "Impossible de passer une échéance à moins de 24h.",
       400,
     );
   }
 
-  // Check phase is in future
-  const phaseTs = new Date(phase_date + "T00:00:00Z").getTime();
-
-  if (phaseTs <= Date.now()) {
-    throw new AppError("Impossible de passer une échéance déjà passée.", 400);
-  }
-
-  const schedule = await stripe.subscriptionSchedules.retrieve(scheduleId);
-  const now = Math.floor(Date.now() / 1000);
-
-  // Rebuild phases without the skipped one
-  const currentPhase = schedule.phases.find(
-    (p) => p.start_date <= now && p.end_date > now,
-  );
-  const remainingPhases = schedule.phases
-    .filter((p) => p.start_date > now)
-    .filter(
-      (p) =>
-        new Date(p.start_date * 1000).toISOString().split("T")[0] !==
-        phase_date,
-    )
-    .map((p) => ({
-      items: p.items.map((i) => ({
-        price:
-          typeof i.price === "string"
-            ? i.price
-            : (i.price as { id: string }).id,
-      })),
-      start_date: p.start_date,
-      end_date: p.end_date,
-    }));
-
-  const newPhases = [];
-
-  if (currentPhase) {
-    newPhases.push({
-      items: currentPhase.items.map((i) => ({
-        price:
-          typeof i.price === "string"
-            ? i.price
-            : (i.price as { id: string }).id,
-      })),
-      start_date: currentPhase.start_date,
-      end_date: currentPhase.end_date,
-    });
-  }
-  newPhases.push(...remainingPhases);
-
-  if (newPhases.length > 0) {
-    await stripe.subscriptionSchedules.update(scheduleId, {
-      phases: newPhases,
-      end_behavior: "cancel",
-    });
-  }
-
-  // Record the skip
+  // Record the skip in metadata
   await customerRepository.updateMetadata(customer.id, {
     ...(customer.metadata || {}),
     subscription_skipped: [...skippedPhases, phase_date],

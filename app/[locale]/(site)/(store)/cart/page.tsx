@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
-import { Input } from "@heroui/input";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
@@ -16,29 +14,6 @@ export default function CartPage() {
   const t = useTranslations("cart");
   const common = useTranslations("common");
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
-  const [promoCode, setPromoCode] = useState("");
-  const [discount, setDiscount] = useState(0);
-  const [promoError, setPromoError] = useState("");
-
-  const applyPromo = async () => {
-    setPromoError("");
-    try {
-      const res = await fetch("/api/store/promo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: promoCode, total }),
-      });
-      const data = await res.json();
-
-      if (res.ok && data.discount) {
-        setDiscount(data.discount);
-      } else {
-        setPromoError(t("discount_error"));
-      }
-    } catch {
-      setPromoError(t("discount_error"));
-    }
-  };
 
   if (items.length === 0) {
     return (
@@ -50,10 +25,9 @@ export default function CartPage() {
         <p className="text-default-500 mb-6">{t("empty")}</p>
         <Button
           as={Link}
-          color="primary"
-          href="/shop"
-          radius="full"
-          variant="shadow"
+          className="btn-brand bg-primary w-full sm:w-auto font-semibold"
+          href="/subscription"
+          size="lg"
         >
           {t("empty_cta")}
         </Button>
@@ -103,7 +77,7 @@ export default function CartPage() {
                         {common("currency")}
                       </p>
                     </div>
-                    <div className="flex items-center justify-between mt-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
                       <div className="flex items-center gap-2">
                         <Button
                           isIconOnly
@@ -159,11 +133,23 @@ export default function CartPage() {
             </Card>
           ))}
 
-          <div className="flex justify-between items-center pt-2">
-            <Button as={Link} href="/shop" size="sm" variant="light">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-2 pt-2">
+            <Button
+              as={Link}
+              className="w-full sm:w-auto"
+              href="/subscription"
+              size="sm"
+              variant="light"
+            >
               &larr; {t("continue_shopping")}
             </Button>
-            <Button color="danger" size="sm" variant="flat" onPress={clearCart}>
+            <Button
+              className="w-full sm:w-auto"
+              color="danger"
+              size="sm"
+              variant="flat"
+              onPress={clearCart}
+            >
               {t("clear")}
             </Button>
           </div>
@@ -181,51 +167,21 @@ export default function CartPage() {
                   {common("currency")}
                 </span>
               </div>
-              {discount > 0 && (
-                <div className="flex justify-between text-sm text-success">
-                  <span>
-                    {t("discount_applied", { amount: discount.toFixed(2) })}
-                  </span>
-                </div>
-              )}
               <p className="text-xs text-default-400">{t("shipping_info")}</p>
               <Divider />
               <div className="flex justify-between text-xl font-bold">
                 <span>{common("total")}</span>
                 <span className="text-primary">
-                  {(total - discount).toFixed(2)}
+                  {total.toFixed(2)}
                   {common("currency")}
                 </span>
               </div>
 
-              {/* Promo code */}
-              <div className="flex gap-2">
-                <Input
-                  placeholder={t("promo_code")}
-                  size="sm"
-                  value={promoCode}
-                  onValueChange={setPromoCode}
-                />
-                <Button
-                  color="primary"
-                  size="sm"
-                  variant="flat"
-                  onPress={applyPromo}
-                >
-                  {t("apply")}
-                </Button>
-              </div>
-              {promoError && (
-                <p className="text-danger text-xs">{promoError}</p>
-              )}
-
               <Button
                 as={Link}
-                className="w-full font-semibold"
-                color="primary"
+                className="btn-brand bg-primary w-full font-semibold"
                 href="/checkout"
                 size="lg"
-                variant="shadow"
               >
                 {t("checkout")}
               </Button>

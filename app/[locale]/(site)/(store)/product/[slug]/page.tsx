@@ -5,7 +5,7 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Divider } from "@heroui/divider";
 import { Spinner } from "@heroui/spinner";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 
@@ -32,6 +32,7 @@ interface Product {
 export default function ProductPage() {
   const t = useTranslations("product");
   const common = useTranslations("common");
+  const locale = useLocale();
   const params = useParams();
   const { addItem } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
@@ -39,13 +40,13 @@ export default function ProductPage() {
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/store/products?slug=${params.slug}`)
+    fetch(`/api/store/products?slug=${params.slug}&locale=${locale}`)
       .then((r) => r.json())
       .then((data) => {
         setProduct(data.items?.[0] || data || null);
       })
       .finally(() => setLoading(false));
-  }, [params.slug]);
+  }, [params.slug, locale]);
 
   if (loading) {
     return (
@@ -59,7 +60,11 @@ export default function ProductPage() {
     return (
       <div className="container mx-auto max-w-7xl px-6 py-20 text-center">
         <h1 className="text-2xl font-bold mb-4">{t("not_found")}</h1>
-        <Button as={Link} color="primary" href="/shop" variant="bordered">
+        <Button
+          as={Link}
+          className="btn-brand-outline w-full sm:w-auto font-semibold"
+          href="/subscription"
+        >
           {t("back_to_shop")}
         </Button>
       </div>
@@ -68,7 +73,13 @@ export default function ProductPage() {
 
   return (
     <div className="container mx-auto max-w-7xl px-6 py-12">
-      <Button as={Link} className="mb-6" href="/shop" size="sm" variant="light">
+      <Button
+        as={Link}
+        className="mb-6"
+        href="/subscription"
+        size="sm"
+        variant="light"
+      >
         &larr; {t("back_to_shop")}
       </Button>
 
@@ -119,7 +130,7 @@ export default function ProductPage() {
           </p>
 
           <Button
-            className="mb-8 font-semibold"
+            className="mb-8 w-full sm:w-auto font-semibold"
             color={added ? "success" : "primary"}
             isDisabled={product.stock <= 0}
             size="lg"

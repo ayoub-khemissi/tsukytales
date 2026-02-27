@@ -9,7 +9,7 @@ export const createAddressSchema = z.object({
   zip_code: z.string().min(1, "Le code postal est requis"),
   city: z.string().min(1, "La ville est requise"),
   country: z.string().length(2).default("FR"),
-  phone: z.string().optional(),
+  phone: z.string().min(1, "Le téléphone est requis"),
   is_default: z.boolean().default(false),
 });
 

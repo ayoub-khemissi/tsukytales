@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
 import { stripe } from "@/lib/services/payment.service";
+import { transport } from "@/lib/mail";
 
 interface IntegrationResult {
   status: "ok" | "error";
@@ -51,17 +52,12 @@ export const GET = withErrorHandler(async () => {
     };
   }
 
-  // Resend
+  // Mail (SMTP)
   try {
-    const resendRes = await fetch("https://api.resend.com/domains", {
-      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-    });
-
-    results.resend = resendRes.ok
-      ? { status: "ok", message: "Connecté" }
-      : { status: "error", message: `HTTP ${resendRes.status}` };
+    await transport.verify();
+    results.mail = { status: "ok", message: "Connecté" };
   } catch (e) {
-    results.resend = {
+    results.mail = {
       status: "error",
       message: (e instanceof Error ? e.message : String(e)).substring(0, 100),
     };

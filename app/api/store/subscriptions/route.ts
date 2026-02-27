@@ -8,6 +8,7 @@ import * as stripeCustomerService from "@/lib/services/stripe-customer.service";
 import { getShippingRates } from "@/lib/services/shipping.service";
 import { stripe } from "@/lib/services/payment.service";
 import { AppError } from "@/lib/errors/app-error";
+import { settingsRepository } from "@/lib/repositories/settings.repository";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await requireCustomer();
@@ -34,7 +35,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Calculate shipping
   const shipCountry = (shipping?.country || "FR").toUpperCase();
   const shipMethod = shipping?.method || "home";
-  const shippingRates = getShippingRates(
+  const shippingRates = await getShippingRates(
     Number(product.weight) || 1.0,
     shipCountry,
   );
@@ -56,6 +57,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     recurring: { interval: "month", interval_count: 3 },
   });
 
+  // Read subscription dates from global settings
+  const subscriptionDates =
+    (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
+
   // Create SetupIntent
   const setupIntent = await stripe.setupIntents.create({
     customer: stripeCustomerId,
@@ -63,7 +68,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     metadata: {
       product_id: String(product.id),
       stripe_price_id: stripePrice.id,
-      subscription_dates: JSON.stringify(product.subscription_dates),
+      subscription_dates: JSON.stringify(subscriptionDates),
       shipping: JSON.stringify(shipping || {}),
     },
   });
@@ -73,7 +78,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     client_secret: setupIntent.client_secret,
     setup_intent_id: setupIntent.id,
     price_id: stripePrice.id,
-    dates: product.subscription_dates,
+    dates: subscriptionDates,
     shipping_cost: shippingCost,
     total_per_quarter: totalPerQuarter,
   });

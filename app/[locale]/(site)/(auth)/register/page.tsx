@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
+import { Form } from "@heroui/form";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 
@@ -87,13 +88,17 @@ export default function RegisterPage() {
           <p className="text-sm text-default-500">{t("register_subtitle")}</p>
         </CardHeader>
         <CardBody>
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <Form
+            className="flex flex-col gap-4"
+            validationBehavior="native"
+            onSubmit={handleSubmit}
+          >
             {error && (
               <div className="bg-danger-50 text-danger text-sm p-3 rounded-lg">
                 {error}
               </div>
             )}
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Input
                 isRequired
                 label={t("first_name")}
@@ -131,18 +136,16 @@ export default function RegisterPage() {
               onValueChange={update("passwordConfirm")}
             />
             <Button
-              className="mt-2"
-              color="primary"
+              className="btn-brand bg-primary mt-2 w-full font-semibold"
               isLoading={loading}
               type="submit"
             >
               {t("register_button")}
             </Button>
-          </form>
+          </Form>
           <Divider className="my-6" />
           <Button
-            className="w-full"
-            variant="bordered"
+            className="btn-brand-outline w-full font-semibold"
             onPress={() => signIn("google", { callbackUrl: "/account" })}
           >
             {t("or_continue_with")} {t("google")}

@@ -19,7 +19,7 @@ const colors = {
 winston.addColors(colors);
 
 const consoleFormat = winston.format.combine(
-  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   winston.format.colorize({ all: true }),
   winston.format.printf(
     (info) => `${info.timestamp} ${info.level}: ${info.message}`,
@@ -36,9 +36,8 @@ const level = process.env.NODE_ENV === "production" ? "info" : "debug";
 export const logger = winston.createLogger({
   level,
   levels,
-  format: consoleFormat,
   transports: [
-    new winston.transports.Console(),
+    new winston.transports.Console({ format: consoleFormat }),
     new winston.transports.File({
       filename: "logs/errors.log",
       level: "error",

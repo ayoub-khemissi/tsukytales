@@ -26,9 +26,12 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `password` VARCHAR(255) NOT NULL,
   `has_account` TINYINT(1) NOT NULL DEFAULT 1,
   `metadata` JSON DEFAULT NULL COMMENT 'Données flexibles: stripe_customer_id, address, zip_code, city, phone',
-  `preferences` JSON DEFAULT NULL COMMENT 'Préférences: literary_genres, favorite_authors, reading_pace',
+  `subscription_schedule_id` VARCHAR(255) AS (JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.subscription_schedule_id'))) STORED,
+  `stripe_customer_id` VARCHAR(255) AS (JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.stripe_customer_id'))) STORED,
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_customers_subscription` (`subscription_schedule_id`),
+  INDEX `idx_customers_stripe` (`stripe_customer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -48,10 +51,18 @@ CREATE TABLE IF NOT EXISTS `products` (
   `width` DECIMAL(6,2) NOT NULL DEFAULT 15.00,
   `height` DECIMAL(6,2) NOT NULL DEFAULT 3.00,
   `is_subscription` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 0,
   `subscription_price` DECIMAL(10,2) DEFAULT NULL,
-  `subscription_dates` JSON DEFAULT NULL,
+  `is_deleted` TINYINT(1) NOT NULL DEFAULT 0,
+
+  `images` JSON DEFAULT NULL,
+  `translations` JSON DEFAULT NULL COMMENT '{ "en": { "name": "...", "description": "..." }, "es": { ... }, ... }',
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_products_preorder` (`is_preorder`),
+  INDEX `idx_products_active` (`is_active`),
+  INDEX `idx_products_deleted` (`is_deleted`),
+  FULLTEXT INDEX `idx_products_search` (`name`, `description`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -87,11 +98,27 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `total` DECIMAL(10,2) NOT NULL,
   `currency_code` VARCHAR(3) NOT NULL DEFAULT 'eur',
   `metadata` JSON DEFAULT NULL,
+
+  -- Generated columns for fast JSON lookups (avoid full table scans on webhooks)
+  `stripe_invoice_id` VARCHAR(255) AS (JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.stripe_invoice_id'))) STORED,
+  `payment_intent_id` VARCHAR(255) AS (JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.payment_intent_id'))) STORED,
+  `shipping_order_id` VARCHAR(255) AS (JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.shipping_order_id'))) STORED,
+  `tracking_number` VARCHAR(255) AS (JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.tracking_number'))) STORED,
+  `is_subscription_order` TINYINT(1) AS (CASE WHEN JSON_EXTRACT(`metadata`, '$.subscription') = true THEN 1 ELSE 0 END) STORED,
+
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_orders_customer` (`customer_id`),
   INDEX `idx_orders_email` (`email`),
-  INDEX `idx_orders_status` (`status`)
+  INDEX `idx_orders_status_created` (`status`, `createdAt` DESC),
+  INDEX `idx_orders_payment_status` (`payment_status`),
+  INDEX `idx_orders_fulfillment_status` (`fulfillment_status`),
+  INDEX `idx_orders_stripe_invoice` (`stripe_invoice_id`),
+  INDEX `idx_orders_payment_intent` (`payment_intent_id`),
+  INDEX `idx_orders_shipping_order` (`shipping_order_id`),
+  INDEX `idx_orders_tracking` (`tracking_number`),
+  INDEX `idx_orders_subscription` (`is_subscription_order`),
+  CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -105,8 +132,13 @@ CREATE TABLE IF NOT EXISTS `carts` (
   `context` JSON DEFAULT ('{}'),
   `completed_at` DATETIME DEFAULT NULL,
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_carts_customer_completed` (`customer_id`, `completed_at`),
+  CONSTRAINT `fk_carts_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- FK deferred: orders → carts (carts defined after orders)
+ALTER TABLE `orders` ADD CONSTRAINT `fk_orders_cart` FOREIGN KEY (`cart_id`) REFERENCES `carts`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- ============================================================
 -- Discounts
@@ -202,11 +234,34 @@ CREATE TABLE IF NOT EXISTS `contact_messages` (
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_contact_status` (`status`),
-  INDEX `idx_contact_created` (`createdAt`)
+  INDEX `idx_contact_created` (`createdAt`),
+  INDEX `idx_contact_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Settings (key-value store for configurable parameters)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `settings` (
+  `key` VARCHAR(255) PRIMARY KEY,
+  `value` JSON NOT NULL,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Seed: Default shipping rates
+-- ============================================================
+INSERT IGNORE INTO `settings` (`key`, `value`) VALUES
+('shipping_rates_relay_fr',  '[{"maxWeight":0.5,"price":3.9},{"maxWeight":1,"price":4.5},{"maxWeight":3,"price":5.5},{"maxWeight":5,"price":6.9},{"maxWeight":10,"price":8.9}]'),
+('shipping_rates_relay_eu',  '[{"maxWeight":0.5,"price":6.9},{"maxWeight":1,"price":7.9},{"maxWeight":3,"price":9.9},{"maxWeight":5,"price":12.9},{"maxWeight":10,"price":16.9}]'),
+('shipping_rates_home_fr',   '[{"maxWeight":0.5,"price":5.9},{"maxWeight":1,"price":6.9},{"maxWeight":2,"price":7.9},{"maxWeight":5,"price":9.9},{"maxWeight":10,"price":13.9}]'),
+('shipping_rates_home_eu1',  '[{"maxWeight":0.5,"price":9.9},{"maxWeight":1,"price":12.9},{"maxWeight":2,"price":15.9},{"maxWeight":5,"price":19.9},{"maxWeight":10,"price":26.9}]'),
+('shipping_rates_home_eu2',  '[{"maxWeight":0.5,"price":12.9},{"maxWeight":1,"price":15.9},{"maxWeight":2,"price":19.9},{"maxWeight":5,"price":25.9},{"maxWeight":10,"price":34.9}]'),
+('shipping_rates_home_om',   '[{"maxWeight":0.5,"price":9.9},{"maxWeight":1,"price":14.9},{"maxWeight":2,"price":19.9},{"maxWeight":5,"price":29.9},{"maxWeight":10,"price":44.9}]'),
+('shipping_rates_home_world','[{"maxWeight":0.5,"price":16.9},{"maxWeight":1,"price":22.9},{"maxWeight":2,"price":29.9},{"maxWeight":5,"price":42.9},{"maxWeight":10,"price":59.9}]'),
+('subscription_dates', '["2026-04-01","2026-07-01","2026-10-01","2027-01-01"]');
 
 -- ============================================================
 -- Seed: Default admin (password: admin)
 -- ============================================================
 INSERT IGNORE INTO `admins` (`username`, `password`)
-VALUES ('admin', '$2b$12$2ubOasFt6dRw95KkGof9L.0dOkdy/hrJzG5dJs5s4pDPX4lHfUbja');
+VALUES ('admin', '$2b$12$qwjjzse4R/9phbLdOepc1eTC329BnDsqBvdWNqqrjOOuX7/rbN6Ai');

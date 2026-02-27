@@ -20,7 +20,7 @@ export function Footer() {
               alt="Tsuky Tales"
               className="object-contain"
               height={130}
-              src="/assets/img/logo.png"
+              src="/assets/img/logo.svg"
               width={130}
             />
           </Link>

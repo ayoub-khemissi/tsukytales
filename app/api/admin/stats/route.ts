@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
+import { cached } from "@/lib/cache";
 import { orderRepository } from "@/lib/repositories/order.repository";
 import { productRepository } from "@/lib/repositories/product.repository";
 import { customerRepository } from "@/lib/repositories/customer.repository";
@@ -9,46 +10,50 @@ import { customerRepository } from "@/lib/repositories/customer.repository";
 export const GET = withErrorHandler(async () => {
   await requireAdmin();
 
-  const [
-    totalRevenue,
-    totalOrders,
-    lowStockProducts,
-    totalCustomers,
-    dailySales,
-    totalProducts,
-    pendingOrders,
-  ] = await Promise.all([
-    orderRepository.sumTotal(),
-    orderRepository.count(),
-    productRepository.countLowStock(),
-    customerRepository.count(),
-    orderRepository.getDailySales(7),
-    productRepository.count(),
-    orderRepository.count("status = ?", ["pending"]),
-  ]);
+  const stats = await cached("admin:stats", 300, async () => {
+    const [
+      totalRevenue,
+      totalOrders,
+      lowStockProducts,
+      totalCustomers,
+      dailySales,
+      totalProducts,
+      pendingOrders,
+    ] = await Promise.all([
+      orderRepository.sumTotal(),
+      orderRepository.count(),
+      productRepository.countLowStock(),
+      customerRepository.count(),
+      orderRepository.getDailySales(7),
+      productRepository.count(),
+      orderRepository.count("status = ?", ["pending"]),
+    ]);
 
-  const recentOrdersResult = await orderRepository.findAndCountAll({
-    orderBy: "createdAt DESC",
-    page: 1,
-    size: 5,
+    const recentOrdersResult = await orderRepository.findAndCountAll({
+      orderBy: "createdAt DESC",
+      page: 1,
+      size: 5,
+    });
+    const recentOrdersRaw = recentOrdersResult.items;
+
+    const recentOrders = recentOrdersRaw.map((o) => ({
+      id: o.id,
+      total: o.total,
+      status: o.status,
+      createdAt: o.createdAt,
+    }));
+
+    return {
+      totalRevenue,
+      totalOrders,
+      totalCustomers,
+      totalProducts,
+      pendingOrders,
+      lowStockProducts,
+      dailySales,
+      recentOrders,
+    };
   });
-  const recentOrdersRaw = recentOrdersResult.items;
 
-  const recentOrders = recentOrdersRaw.map((o) => ({
-    id: o.id,
-    total: o.total,
-    status: o.status,
-    createdAt: o.createdAt,
-  }));
-
-  return NextResponse.json({
-    totalRevenue,
-    totalOrders,
-    totalCustomers,
-    totalProducts,
-    pendingOrders,
-    lowStockProducts,
-    dailySales,
-    recentOrders,
-  });
+  return NextResponse.json(stats);
 });

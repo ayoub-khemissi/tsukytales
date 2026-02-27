@@ -14,7 +14,7 @@ interface IntegrationStatus {
 interface IntegrationsResponse {
   stripe: IntegrationStatus;
   boxtal: IntegrationStatus;
-  resend: IntegrationStatus;
+  mail: IntegrationStatus;
 }
 
 export default function IntegrationsPage() {
@@ -68,23 +68,25 @@ export default function IntegrationsPage() {
           status: integrations.boxtal,
         },
         {
-          key: "resend",
-          label: t("integrations_resend"),
-          status: integrations.resend,
+          key: "mail",
+          label: t("integrations_mail"),
+          status: integrations.mail,
         },
       ]
     : [];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">{t("integrations_title")}</h1>
+      <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white mb-6">
+        {t("integrations_title")}
+      </h1>
 
       {loading ? (
         <div className="flex justify-center py-20">
           <Spinner color="primary" size="lg" />
         </div>
       ) : !integrations ? (
-        <Card className="border border-divider">
+        <Card className="admin-glass rounded-xl">
           <CardBody className="py-16 text-center">
             <p className="text-default-500">{t("integrations_no_data")}</p>
           </CardBody>
@@ -92,10 +94,12 @@ export default function IntegrationsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {integrationCards.map((integration) => (
-            <Card key={integration.key} className="border border-divider">
+            <Card key={integration.key} className="admin-glass rounded-xl">
               <CardBody className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">{integration.label}</h2>
+                  <h2 className="font-heading text-lg font-semibold">
+                    {integration.label}
+                  </h2>
                   {getStatusChip(integration.status)}
                 </div>
                 {integration.status.error && (
