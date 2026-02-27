@@ -33,7 +33,7 @@
 | OS | Ubuntu 24.04 LTS |
 | Node.js | 18+ (LTS recommended: 20.x) |
 | MySQL | 8.0+ |
-| pnpm | 9+ |
+| pnpm | 10+ |
 | Nginx | 1.24+ |
 | Redis | 7+ (optional) |
 
@@ -161,8 +161,14 @@ cd /var/www/tsukytales
 ### Install dependencies
 
 ```bash
+# First install (generates the lockfile):
+sudo -u tsukytales pnpm install
+
+# Subsequent installs (CI/CD, redeployments):
 sudo -u tsukytales pnpm install --frozen-lockfile
 ```
+
+> **pnpm 10+ note:** Build scripts are blocked by default. The project includes a `pnpm.onlyBuiltDependencies` whitelist in `package.json` to allow required native builds (sharp, @swc/core, @tailwindcss/oxide, etc.).
 
 ---
 
@@ -183,12 +189,6 @@ This creates all tables and inserts:
 
 ```bash
 mysql -u tsukytales -p --default-character-set=utf8mb4 tsukytales < /var/www/tsukytales/lib/db/seed_test.sql
-```
-
-### Apply migrations
-
-```bash
-mysql -u tsukytales -p tsukytales < /var/www/tsukytales/lib/db/migrations/001_add_stripe_customer_id_column.sql
 ```
 
 > **Important:** Change the admin password on first access to the back-office.
@@ -286,6 +286,8 @@ GOOGLE_CLIENT_SECRET=""
 
 ### Production build
 
+> **Important:** `NEXTAUTH_SECRET` must be set in `.env.local` before building. The build validates environment variables and will fail if this value is empty. Generate one with `openssl rand -base64 32`.
+
 ```bash
 cd /var/www/tsukytales
 sudo -u tsukytales pnpm build
@@ -319,7 +321,7 @@ module.exports = {
   apps: [
     {
       name: "tsukytales",
-      script: "node_modules/.bin/next",
+      script: "node_modules/next/dist/bin/next",
       args: "start",
       cwd: "/var/www/tsukytales",
       instances: "max",         // 1 worker per CPU core

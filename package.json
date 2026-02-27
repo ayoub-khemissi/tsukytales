@@ -79,6 +79,19 @@
     "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@fortawesome/fontawesome-common-types",
+      "@fortawesome/fontawesome-svg-core",
+      "@fortawesome/free-solid-svg-icons",
+      "@heroui/shared-utils",
+      "@parcel/watcher",
+      "@swc/core",
+      "@tailwindcss/oxide",
+      "sharp",
+      "unrs-resolver"
+    ]
+  },
   "devDependencies": {
     "@eslint/compat": "^2.0.2",
     "@eslint/eslintrc": "^3.3.4",
