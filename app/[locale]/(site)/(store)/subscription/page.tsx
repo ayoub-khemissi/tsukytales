@@ -207,8 +207,15 @@ function SubscriptionCard({
         {t("badge_subscription")}
       </span>
 
-      {/* Title */}
-      <div className="mt-6 mb-8 text-center">
+      {/* Logo + Title */}
+      <div className="mt-6 mb-8 text-center flex flex-col items-center gap-4">
+        <Image
+          alt="Tsuky Tales"
+          className="rounded-full"
+          height={56}
+          src="/assets/img/logo-round.svg"
+          width={56}
+        />
         <h3 className="font-heading text-[1.3rem] sm:text-[1.5rem] font-bold text-text-brand dark:text-white tracking-[2px] uppercase">
           {t("card_sub_title")}
         </h3>
@@ -314,8 +321,15 @@ function PreorderCard({
         </span>
       )}
 
-      {/* Title */}
-      <div className="mt-6 mb-8 text-center">
+      {/* Logo + Title */}
+      <div className="mt-6 mb-8 text-center flex flex-col items-center gap-4">
+        <Image
+          alt="Tsuky Tales"
+          className="rounded-full"
+          height={56}
+          src="/assets/img/logo-round.svg"
+          width={56}
+        />
         <h3 className="font-heading text-[1.3rem] sm:text-[1.5rem] font-bold text-text-brand dark:text-white tracking-[2px] uppercase">
           {t("preorder_title")}
         </h3>

@@ -422,6 +422,35 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
   DATE_SUB(@now, INTERVAL 5 DAY)
 );
 
+-- Order 9: Marie — subscription order, delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(9, 1009, 1, 'marie.dupont@test.com',
+  'completed', 'delivered', 'captured', 29.80, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Marie', 'last_name', 'Dupont',
+    'street', '12 Rue de Rivoli', 'zip_code', '75001',
+    'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Marie', 'last_name', 'Dupont',
+    'street', '12 Rue de Rivoli', 'zip_code', '75001',
+    'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_009',
+    'stripe_subscription_id', 'sub_test_marie_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR777888999',
+    'total_weight', 0.45
+  ),
+  DATE_SUB(@now, INTERVAL 3 MONTH)
+);
+
 -- ============================================================
 -- Carts
 -- ============================================================

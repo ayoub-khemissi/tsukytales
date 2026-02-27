@@ -245,7 +245,7 @@
     "password_min": "Mindestens 8 Zeichen"
   },
   "account": {
-    "title": "Mein Konto",
+    "title": "Mein <gold>Konto</gold>",
     "tab_profile": "Profil",
     "tab_orders": "Bestellungen",
     "tab_addresses": "Adressen",

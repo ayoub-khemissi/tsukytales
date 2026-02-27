@@ -26,6 +26,8 @@ import {
   faCreditCard,
 } from "@fortawesome/free-solid-svg-icons";
 
+import Image from "next/image";
+
 import PaymentMethodsTab from "@/components/account/payment-methods-tab";
 import { Link } from "@/i18n/navigation";
 import { useScrollReveal } from "@/lib/hooks/use-scroll-reveal";
@@ -336,12 +338,20 @@ export default function AccountPage() {
       {/* ========== HEADER ========== */}
       <div className="glass rounded-[24px] sm:rounded-[30px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 mb-10 px-5 py-6 sm:px-10 sm:py-8">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl shrink-0">
-            <FontAwesomeIcon icon={faUser} />
-          </div>
+          <Image
+            alt="Tsuky Tales"
+            className="shrink-0 rounded-full"
+            height={56}
+            src="/assets/img/logo-round.svg"
+            width={56}
+          />
           <div>
             <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
-              {t("title")}
+              {t.rich("title", {
+                gold: (chunks) => (
+                  <span className="magic-text">{chunks}</span>
+                ),
+              })}
             </h1>
             <p className="text-sm text-text-light dark:text-gray-400">
               {profile?.email || session?.user?.email}

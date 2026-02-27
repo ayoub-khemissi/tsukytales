@@ -6,7 +6,7 @@
     "contact": "Contact",
     "about": "À propos",
     "cart": "Panier",
-    "account": "Mon compte",
+    "account": "Mon espace client",
     "login": "Connexion",
     "register": "Inscription",
     "logout": "Déconnexion",
@@ -246,7 +246,7 @@
     "password_min": "8 caractères minimum"
   },
   "account": {
-    "title": "Mon compte",
+    "title": "Mon espace <gold>client</gold>",
     "tab_profile": "Profil",
     "tab_orders": "Commandes",
     "tab_addresses": "Adresses",

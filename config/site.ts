@@ -17,7 +17,7 @@ export const siteConfig = {
     { label: "Abonnement", href: "/abonnement" },
     { label: "Contact", href: "/contact" },
     { label: "À propos", href: "/a-propos" },
-    { label: "Mon compte", href: "/compte" },
+    { label: "Mon espace client", href: "/compte" },
     { label: "Panier", href: "/panier" },
   ],
 };

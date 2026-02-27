@@ -42,7 +42,7 @@ export default function HomePage() {
                 alt="Tsuky Tales"
                 className="object-contain"
                 height={200}
-                src="/assets/img/hero_logo.svg"
+                src="/assets/img/hero-logo.svg"
                 style={{
                   animation: "float 6s ease-in-out infinite",
                   transformOrigin: "center bottom",
