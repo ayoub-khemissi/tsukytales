@@ -44,9 +44,6 @@ const envSchema = z.object({
   BOXTAL_CLIENT_ID: optStr,
   BOXTAL_CLIENT_SECRET: optStr,
   BOXTAL_WEBHOOK_SECRET: optStr,
-  BOXTAL_OFFER_RELAY: optStr,
-  BOXTAL_OFFER_HOME: optStr,
-
   // Boxtal Sender
   BOXTAL_SENDER_FIRST_NAME: optStr,
   BOXTAL_SENDER_LAST_NAME: optStr,

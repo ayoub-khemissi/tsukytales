@@ -202,6 +202,17 @@ export async function cancelShipment(
   }
 }
 
+function getOfferCode(isRelay: boolean, country: string): string {
+  if (isRelay) {
+    return country === "FR" ? "MONR-CpourToi" : "MONR-CpourToiEurope";
+  }
+  if (country === "FR") return "POFR-ColissimoAccess";
+  if (HOME_OM_COUNTRIES.includes(country))
+    return "POFR-ColissimoAccessOutreMer";
+
+  return "POFR-ColissimoAccessInternational";
+}
+
 export async function createShipment(orderId: number) {
   const order = await orderRepository.findById(orderId);
 
@@ -236,9 +247,6 @@ export async function createShipment(orderId: number) {
 
   const addr: any = order.shipping_address || {};
   const isRelay = !!(addr.relay || order.metadata?.shipping_method === "relay");
-  const offerCode = isRelay
-    ? process.env.BOXTAL_OFFER_RELAY || "MONR-CpourToi"
-    : process.env.BOXTAL_OFFER_HOME || "COLI-Standard";
 
   const dest = isRelay ? addr.relay || addr : addr;
   const destStreet = dest.street || dest.address?.street || "";
@@ -256,6 +264,8 @@ export async function createShipment(orderId: number) {
     order.metadata?.shipping_country ||
     "FR"
   ).toUpperCase();
+
+  const offerCode = getOfferCode(isRelay, destCountry);
 
   // A2: Use shipping address name, fallback to email only if absent
   const firstName =
