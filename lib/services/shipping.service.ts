@@ -293,7 +293,7 @@ export async function createShipment(orderId: number) {
 
   const body = {
     shippingOfferCode: offerCode,
-    labelType: "PDF_A4",
+    labelType: "PDF_10x15",
     shipment: {
       externalId: `TSK-${order.id}`,
       packages: [
