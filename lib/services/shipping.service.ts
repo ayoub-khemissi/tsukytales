@@ -328,9 +328,6 @@ export async function createShipment(orderId: number) {
         },
       },
       ...(isRelay && relayCode ? { dropOffPointCode: relayCode } : {}),
-      ...(isRelay
-        ? { pickupPointCode: process.env.BOXTAL_PICKUP_CODE || "17199" }
-        : {}),
     },
   };
 
