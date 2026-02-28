@@ -25,7 +25,6 @@ import {
   faBan,
   faCreditCard,
 } from "@fortawesome/free-solid-svg-icons";
-
 import Image from "next/image";
 
 import PaymentMethodsTab from "@/components/account/payment-methods-tab";
@@ -348,9 +347,7 @@ export default function AccountPage() {
           <div>
             <h1 className="font-heading italic text-2xl font-bold text-text-brand dark:text-white">
               {t.rich("title", {
-                gold: (chunks) => (
-                  <span className="magic-text">{chunks}</span>
-                ),
+                gold: (chunks) => <span className="magic-text">{chunks}</span>,
               })}
             </h1>
             <p className="text-sm text-text-light dark:text-gray-400">
