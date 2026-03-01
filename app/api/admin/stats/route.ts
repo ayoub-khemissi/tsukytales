@@ -13,20 +13,18 @@ export const GET = withErrorHandler(async () => {
   const stats = await cached("admin:stats", 300, async () => {
     const [
       totalRevenue,
-      totalOrders,
+      orderStats,
       lowStockProducts,
       totalCustomers,
       dailySales,
       totalProducts,
-      pendingOrders,
     ] = await Promise.all([
       orderRepository.sumTotal(),
-      orderRepository.count(),
+      orderRepository.getOrderStats(),
       productRepository.countLowStock(),
       customerRepository.count(),
       orderRepository.getDailySales(7),
       productRepository.count(),
-      orderRepository.count("status = ?", ["pending"]),
     ]);
 
     const recentOrdersResult = await orderRepository.findAndCountAll({
@@ -45,10 +43,10 @@ export const GET = withErrorHandler(async () => {
 
     return {
       totalRevenue,
-      totalOrders,
+      totalOrders: orderStats.total,
       totalCustomers,
       totalProducts,
-      pendingOrders,
+      pendingOrders: orderStats.pending,
       lowStockProducts,
       dailySales,
       recentOrders,

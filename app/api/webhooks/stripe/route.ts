@@ -369,6 +369,7 @@ export async function POST(req: NextRequest) {
 
         await invalidateMany(
           "products:list",
+          "product:active-subscription",
           "admin:stats",
           "admin:financial",
           "admin:subscriptions",

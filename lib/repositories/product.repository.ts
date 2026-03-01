@@ -63,11 +63,13 @@ class ProductRepository extends BaseRepository<ProductRow> {
   }
 
   async findActiveSubscriptionProduct(): Promise<ProductRow | null> {
-    const [rows] = await pool.execute<ProductRow[]>(
-      "SELECT * FROM products WHERE is_active = 1 AND (is_deleted = 0 OR is_deleted IS NULL) ORDER BY createdAt DESC LIMIT 1",
-    );
+    return cached(cacheKey("product:active-subscription"), 600, async () => {
+      const [rows] = await pool.execute<ProductRow[]>(
+        "SELECT * FROM products WHERE is_active = 1 AND (is_deleted = 0 OR is_deleted IS NULL) ORDER BY createdAt DESC LIMIT 1",
+      );
 
-    return rows[0] ?? null;
+      return rows[0] ?? null;
+    });
   }
 
   async decrementStock(id: number, amount: number = 1): Promise<boolean> {

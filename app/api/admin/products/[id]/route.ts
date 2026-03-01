@@ -37,6 +37,7 @@ export const PUT = withErrorHandler(async (req: NextRequest, context) => {
   await invalidateMany(
     "products:list",
     "product:slug",
+    "product:active-subscription",
     "variants:product",
     "admin:stats",
   );
@@ -54,7 +55,12 @@ export const DELETE = withErrorHandler(async (_req: NextRequest, context) => {
 
   await productRepository.update(parseInt(id), { is_deleted: true });
 
-  await invalidateMany("products:list", "product:slug", "admin:stats");
+  await invalidateMany(
+    "products:list",
+    "product:slug",
+    "product:active-subscription",
+    "admin:stats",
+  );
 
   return NextResponse.json({ success: true });
 });

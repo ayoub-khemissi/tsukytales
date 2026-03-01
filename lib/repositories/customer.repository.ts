@@ -5,7 +5,7 @@ import { RowDataPacket } from "mysql2";
 import { BaseRepository } from "./base.repository";
 
 import { pool } from "@/lib/db/connection";
-import { cached, cacheKey, invalidateByPrefix } from "@/lib/cache";
+import { cached, cacheKey, invalidate } from "@/lib/cache";
 import { getPagination, getPagingData } from "@/lib/utils/pagination";
 
 type Params = any[];
@@ -128,15 +128,24 @@ class CustomerRepository extends BaseRepository<CustomerRow> {
     id: number,
     metadata: Record<string, unknown>,
   ): Promise<boolean> {
+    // Read customer BEFORE update to get email + stripe_customer_id for targeted invalidation
+    const customer = await this.findById(id);
+
     const result = await this.update(id, {
       metadata: JSON.stringify(metadata),
     });
 
-    // Invalidate customer cache
-    await Promise.all([
-      invalidateByPrefix("customer:email"),
-      invalidateByPrefix("customer:stripe"),
-    ]);
+    // Targeted invalidation (2 DEL instead of 2 SCAN)
+    if (customer) {
+      await Promise.all([
+        invalidate(
+          cacheKey("customer:email", customer.email.toLowerCase().trim()),
+        ),
+        customer.stripe_customer_id
+          ? invalidate(cacheKey("customer:stripe", customer.stripe_customer_id))
+          : Promise.resolve(),
+      ]);
+    }
 
     return result;
   }
@@ -156,8 +165,8 @@ class CustomerRepository extends BaseRepository<CustomerRow> {
       metadata: JSON.stringify({}),
     });
 
-    // Invalidate email cache for the new customer
-    await invalidateByPrefix("customer:email");
+    // Invalidate email cache for the new customer (targeted)
+    await invalidate(cacheKey("customer:email", normalizedEmail));
 
     const customer = await this.findById(id);
 

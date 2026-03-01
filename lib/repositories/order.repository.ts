@@ -1,6 +1,6 @@
 import type { OrderRow } from "@/types/db.types";
 
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 import { BaseRepository } from "./base.repository";
 
@@ -16,7 +16,7 @@ class OrderRepository extends BaseRepository<OrderRow> {
 
   async sumTotal(): Promise<number> {
     const [[row]] = await pool.execute<(RowDataPacket & { total: number })[]>(
-      "SELECT COALESCE(SUM(total), 0) as total FROM orders",
+      "SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE payment_status = 'captured'",
     );
 
     return Number(row.total) || 0;
@@ -30,7 +30,7 @@ class OrderRepository extends BaseRepository<OrderRow> {
     >(
       `SELECT DATE(createdAt) as date, COALESCE(SUM(total), 0) as total
        FROM orders
-       WHERE createdAt >= DATE_SUB(NOW(), INTERVAL ? DAY)
+       WHERE createdAt >= DATE_SUB(NOW(), INTERVAL ? DAY) AND payment_status = 'captured'
        GROUP BY DATE(createdAt)
        ORDER BY date ASC`,
       [days],
@@ -125,7 +125,7 @@ class OrderRepository extends BaseRepository<OrderRow> {
     },
   ) {
     const { limit, offset } = getPagination(options?.page, options?.size);
-    const conditions: string[] = ["(customer_id = ? OR LOWER(email) = ?)"];
+    const conditions: string[] = ["(customer_id = ? OR email = ?)"];
     const params: Params = [customerId, email.toLowerCase().trim()];
 
     if (options?.status) {
@@ -157,11 +157,13 @@ class OrderRepository extends BaseRepository<OrderRow> {
   async updateCustomerIdByEmail(
     email: string,
     customerId: number,
-  ): Promise<void> {
-    await pool.execute(
-      "UPDATE orders SET customer_id = ? WHERE LOWER(email) = ? AND (customer_id IS NULL OR customer_id != ?)",
+  ): Promise<number> {
+    const [result] = await pool.execute<ResultSetHeader>(
+      "UPDATE orders SET customer_id = ? WHERE email = ? AND (customer_id IS NULL OR customer_id != ?)",
       [customerId, email.toLowerCase().trim(), customerId],
     );
+
+    return result.affectedRows;
   }
 
   async getSalesHistory(
@@ -228,6 +230,18 @@ class OrderRepository extends BaseRepository<OrderRow> {
     );
 
     return rows[0] ?? null;
+  }
+
+  async getOrderStats(): Promise<{ total: number; pending: number }> {
+    const [[row]] = await pool.execute<
+      (RowDataPacket & { total: number; pending: number })[]
+    >(
+      `SELECT COUNT(*) as total,
+              SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+       FROM orders`,
+    );
+
+    return { total: row.total, pending: Number(row.pending) };
   }
 }
 

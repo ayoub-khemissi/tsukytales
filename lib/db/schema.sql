@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_products_preorder` (`is_preorder`),
   INDEX `idx_products_active` (`is_active`),
+  INDEX `idx_products_active_deleted` (`is_active`, `is_deleted`),
   INDEX `idx_products_deleted` (`is_deleted`),
   FULLTEXT INDEX `idx_products_search` (`name`, `description`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -113,6 +114,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   INDEX `idx_orders_email` (`email`),
   INDEX `idx_orders_status_created` (`status`, `createdAt` DESC),
   INDEX `idx_orders_payment_status` (`payment_status`),
+  INDEX `idx_orders_payment_created` (`payment_status`, `createdAt`),
   INDEX `idx_orders_fulfillment_status` (`fulfillment_status`),
   INDEX `idx_orders_stripe_invoice` (`stripe_invoice_id`),
   INDEX `idx_orders_payment_intent` (`payment_intent_id`),

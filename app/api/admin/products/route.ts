@@ -73,7 +73,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const id = await productRepository.create(body);
   const product = await productRepository.findById(id);
 
-  await invalidateMany("products:list", "product:slug", "admin:stats");
+  await invalidateMany(
+    "products:list",
+    "product:slug",
+    "product:active-subscription",
+    "admin:stats",
+  );
 
   return NextResponse.json(product, { status: 201 });
 });
