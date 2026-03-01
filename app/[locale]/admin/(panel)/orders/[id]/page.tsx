@@ -768,8 +768,7 @@ export default function OrderDetailPage() {
                         <>
                           <p>{relay.address.street}</p>
                           <p>
-                            {relay.address.zipCode ||
-                              relay.address.zip_code}{" "}
+                            {relay.address.zipCode || relay.address.zip_code}{" "}
                             {relay.address.city}
                           </p>
                         </>

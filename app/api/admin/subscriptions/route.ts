@@ -31,9 +31,13 @@ interface SubscriptionItem {
 
 /** Extract the "shipped" date from an order's metadata.history array */
 function getShippedDate(metadata: any): string | null {
-  const history = metadata?.history as { date: string; status: string }[] | undefined;
+  const history = metadata?.history as
+    | { date: string; status: string }[]
+    | undefined;
+
   if (!history) return null;
   const shipped = history.find((h) => h.status === "shipped");
+
   return shipped?.date ?? null;
 }
 
@@ -62,8 +66,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
     // Group orders by customer email
     const ordersByEmail = new Map<string, (typeof orders)[0][]>();
+
     for (const o of orders) {
       const list = ordersByEmail.get(o.email) || [];
+
       list.push(o);
       ordersByEmail.set(o.email, list);
     }
@@ -90,11 +96,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
       for (let j = 0; j < chunk.length; j++) {
         const result = results[j];
+
         if (result.status === "fulfilled") {
           const sched = result.value;
           // Find next billing from phases
           const now = Math.floor(Date.now() / 1000);
           let nextBilling: number | null = null;
+
           for (const phase of sched.phases) {
             if (phase.start_date > now) {
               nextBilling = phase.start_date;
@@ -103,9 +111,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           }
 
           scheduleStatuses.set(chunk[j], {
-            status: sched.status === "active" || sched.status === "not_started"
-              ? "active"
-              : sched.status,
+            status:
+              sched.status === "active" || sched.status === "not_started"
+                ? "active"
+                : sched.status,
             current_period_end: nextBilling,
             cancel_at_period_end: false,
           });
@@ -119,14 +128,21 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const stripeSubIds = Array.from(
       new Set(
         orders
-          .map((o) => (o.metadata as any)?.stripe_subscription_id as string | undefined)
+          .map(
+            (o) =>
+              (o.metadata as any)?.stripe_subscription_id as string | undefined,
+          )
           .filter((id): id is string => !!id && !id.startsWith("sub_test_")),
       ),
     );
 
     const stripeSubStatuses = new Map<
       string,
-      { status: string; current_period_end: number | null; cancel_at_period_end: boolean }
+      {
+        status: string;
+        current_period_end: number | null;
+        cancel_at_period_end: boolean;
+      }
     >();
 
     for (let i = 0; i < stripeSubIds.length; i += 10) {
@@ -137,8 +153,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
       for (let j = 0; j < chunk.length; j++) {
         const result = results[j];
+
         if (result.status === "fulfilled") {
           const sub = result.value;
+
           stripeSubStatuses.set(chunk[j], {
             status: sub.status,
             current_period_end: (sub as any).current_period_end ?? null,
@@ -153,11 +171,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     // 4. Collect all subscriber emails and find the last shipment date
     //    from non-preorder orders (subscription orders with status "shipped" in history)
     const allEmails = new Set<string>();
+
     for (const c of subscriberRows) allEmails.add(c.email);
     for (const e of Array.from(ordersByEmail.keys())) allEmails.add(e);
 
     // Find last shipped date per email from ALL orders (not just subscription ones)
     const lastShipmentByEmail = new Map<string, string>();
+
     if (allEmails.size > 0) {
       const emailArr = Array.from(allEmails);
       const placeholders = emailArr.map(() => "?").join(",");
@@ -171,6 +191,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       for (const o of allOrders) {
         if (lastShipmentByEmail.has(o.email)) continue;
         const shipped = getShippedDate(o.metadata);
+
         if (shipped) lastShipmentByEmail.set(o.email, shipped);
       }
     }
@@ -187,6 +208,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       const latest = customerOrders[0];
 
       let status = "active";
+
       if (scheduleInfo) {
         status = scheduleInfo.status;
       }
@@ -196,14 +218,18 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           ? `https://dashboard.stripe.com/${env.STRIPE_ACCOUNT_ID}/subscription_schedules/${scheduleId}`
           : null;
 
-      const total_spent = customerOrders.reduce((sum, o) => sum + Number(o.total), 0);
+      const total_spent = customerOrders.reduce(
+        (sum, o) => sum + Number(o.total),
+        0,
+      );
 
       items.push({
         id: scheduleId || `db_${customer.id}`,
         customer_id: customer.id,
         customer_email: customer.email,
         customer_name:
-          [customer.first_name, customer.last_name].filter(Boolean).join(" ") || null,
+          [customer.first_name, customer.last_name].filter(Boolean).join(" ") ||
+          null,
         plan_name: "Box Littéraire Tsuky Tales",
         status,
         stripe_status: scheduleInfo?.status ?? null,
@@ -227,10 +253,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       const latest = customerOrders[0];
       const meta = latest.metadata as any;
       const stripeSubId = meta?.stripe_subscription_id as string | undefined;
-      const stripeInfo = stripeSubId ? stripeSubStatuses.get(stripeSubId) : null;
+      const stripeInfo = stripeSubId
+        ? stripeSubStatuses.get(stripeSubId)
+        : null;
       const customer = await customerRepository.findByEmail(email);
 
       let status: string;
+
       if (stripeInfo) {
         status = stripeInfo.status;
       } else if (latest.status === "canceled") {
@@ -244,7 +273,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           ? `https://dashboard.stripe.com/${env.STRIPE_ACCOUNT_ID}/subscriptions/${stripeSubId}`
           : null;
 
-      const total_spent = customerOrders.reduce((sum, o) => sum + Number(o.total), 0);
+      const total_spent = customerOrders.reduce(
+        (sum, o) => sum + Number(o.total),
+        0,
+      );
       const oldest = customerOrders[customerOrders.length - 1];
 
       items.push({
@@ -252,7 +284,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         customer_id: customer?.id ?? null,
         customer_email: email,
         customer_name: customer
-          ? [customer.first_name, customer.last_name].filter(Boolean).join(" ") || null
+          ? [customer.first_name, customer.last_name]
+              .filter(Boolean)
+              .join(" ") || null
           : null,
         plan_name: "Box Littéraire Tsuky Tales",
         status,

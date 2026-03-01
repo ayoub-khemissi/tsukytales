@@ -57,6 +57,7 @@ export const createOrderSchema = z
   .refine(
     (data) => {
       if (data.shipping_method !== "home") return true;
+
       return HOME_REQUIRED_FIELDS.every(
         (f) => data.shipping_address[f] && data.shipping_address[f]!.length > 0,
       );

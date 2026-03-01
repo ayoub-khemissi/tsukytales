@@ -601,7 +601,10 @@ export default function AccountPage() {
                               ?.zipCode ||
                               (order.shipping_address as any).relay.address
                                 ?.zip_code}{" "}
-                            {(order.shipping_address as any).relay.address?.city}
+                            {
+                              (order.shipping_address as any).relay.address
+                                ?.city
+                            }
                           </>
                         ) : (
                           <>

@@ -15,8 +15,7 @@ export default function PrivacyPage() {
             className="font-heading font-bold text-primary dark:text-white leading-tight mb-4"
             style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
-            {t("title")}{" "}
-            <span className="magic-text">{t("title_accent")}</span>
+            {t("title")} <span className="magic-text">{t("title_accent")}</span>
           </h1>
           <p className="text-sm text-text-light dark:text-gray-400">
             {t("last_updated")}
