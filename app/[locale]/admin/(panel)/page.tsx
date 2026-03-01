@@ -46,6 +46,7 @@ const statusColorMap: Record<
 export default function AdminDashboardPage() {
   const t = useTranslations("admin");
   const tc = useTranslations("common");
+  const ts = useTranslations("status");
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -261,14 +262,14 @@ export default function AdminDashboardPage() {
                         className="text-sm font-medium text-primary hover:underline"
                         href={`/admin/orders/${order.id}`}
                       >
-                        #{order.id}
+                        TSK-{order.id}
                       </Link>
                       <Chip
                         color={statusColorMap[order.status] || "default"}
                         size="sm"
                         variant="flat"
                       >
-                        {order.status}
+                        {ts.has(order.status) ? ts(order.status) : order.status}
                       </Chip>
                     </div>
                     <div className="flex items-center gap-4 shrink-0">
