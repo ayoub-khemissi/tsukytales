@@ -6,6 +6,15 @@ const optStr = z.preprocess(
   z.string().min(1).optional(),
 );
 
+const relaySchema = z
+  .object({
+    code: z.string(),
+    name: z.string(),
+    network: z.string().optional(),
+    address: z.record(z.string(), z.unknown()).optional(),
+  })
+  .optional();
+
 const addressSchema = z.object({
   first_name: optStr,
   last_name: optStr,
@@ -15,6 +24,7 @@ const addressSchema = z.object({
   city: optStr,
   country: z.string().max(2).optional(),
   phone: optStr,
+  relay: relaySchema,
 });
 
 /** Fields required for home delivery. */
