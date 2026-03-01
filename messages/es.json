@@ -188,8 +188,7 @@
     "error_subject_max": "El asunto no debe superar los 200 caracteres",
     "error_message_min": "El mensaje debe tener al menos 10 caracteres",
     "error_message_max": "El mensaje no debe superar los 2000 caracteres",
-    "consent": "Acepto que mis datos sean utilizados para procesar mi solicitud de acuerdo con nuestra {privacy}.",
-    "consent_privacy": "política de privacidad"
+    "consent": "Acepto que mis datos sean utilizados para procesar mi solicitud de acuerdo con nuestra <privacy>política de privacidad</privacy>."
   },
   "about": {
     "hero_subtitle": "El Legado Literario",
@@ -266,9 +265,7 @@
     "error_last_name_max": "El apellido no debe superar los 100 caracteres",
     "error_password_min": "La contraseña debe tener al menos 8 caracteres",
     "error_passwords_mismatch": "Las contraseñas no coinciden",
-    "consent": "Acepto las {terms} y la {privacy}.",
-    "consent_terms": "Condiciones de venta",
-    "consent_privacy": "política de privacidad"
+    "consent": "Acepto las <terms>Condiciones de venta</terms> y la <privacy>política de privacidad</privacy>."
   },
   "account": {
     "title": "Mi <gold>cuenta</gold>",

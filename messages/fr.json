@@ -188,8 +188,7 @@
     "error_subject_max": "Le sujet ne doit pas dépasser 200 caractères",
     "error_message_min": "Le message doit contenir au moins 10 caractères",
     "error_message_max": "Le message ne doit pas dépasser 2000 caractères",
-    "consent": "J'accepte que mes données soient utilisées pour traiter ma demande conformément à notre {privacy}.",
-    "consent_privacy": "politique de confidentialité"
+    "consent": "J'accepte que mes données soient utilisées pour traiter ma demande conformément à notre <privacy>politique de confidentialité</privacy>."
   },
   "about": {
     "hero_subtitle": "L'Héritage Littéraire",
@@ -266,9 +265,7 @@
     "error_last_name_max": "Le nom ne doit pas dépasser 100 caractères",
     "error_password_min": "Le mot de passe doit contenir au moins 8 caractères",
     "error_passwords_mismatch": "Les mots de passe ne correspondent pas",
-    "consent": "J'accepte les {terms} et la {privacy}.",
-    "consent_terms": "CGV",
-    "consent_privacy": "politique de confidentialité"
+    "consent": "J'accepte les <terms>CGV</terms> et la <privacy>politique de confidentialité</privacy>."
   },
   "account": {
     "title": "Mon espace <gold>client</gold>",

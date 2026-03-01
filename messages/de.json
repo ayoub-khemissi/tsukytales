@@ -188,8 +188,7 @@
     "error_subject_max": "Der Betreff darf 200 Zeichen nicht überschreiten",
     "error_message_min": "Die Nachricht muss mindestens 10 Zeichen enthalten",
     "error_message_max": "Die Nachricht darf 2000 Zeichen nicht überschreiten",
-    "consent": "Ich stimme zu, dass meine Daten zur Bearbeitung meiner Anfrage gemäß unserer {privacy} verwendet werden.",
-    "consent_privacy": "Datenschutzerklärung"
+    "consent": "Ich stimme zu, dass meine Daten zur Bearbeitung meiner Anfrage gemäß unserer <privacy>Datenschutzerklärung</privacy> verwendet werden."
   },
   "about": {
     "hero_subtitle": "Das Literarische Erbe",
@@ -265,9 +264,7 @@
     "error_last_name_max": "Der Nachname darf 100 Zeichen nicht überschreiten",
     "error_password_min": "Das Passwort muss mindestens 8 Zeichen enthalten",
     "error_passwords_mismatch": "Passwörter stimmen nicht überein",
-    "consent": "Ich akzeptiere die {terms} und die {privacy}.",
-    "consent_terms": "AGB",
-    "consent_privacy": "Datenschutzerklärung"
+    "consent": "Ich akzeptiere die <terms>AGB</terms> und die <privacy>Datenschutzerklärung</privacy>."
   },
   "account": {
     "title": "Mein <gold>Konto</gold>",

@@ -188,8 +188,7 @@
     "error_subject_max": "L'oggetto non deve superare i 200 caratteri",
     "error_message_min": "Il messaggio deve contenere almeno 10 caratteri",
     "error_message_max": "Il messaggio non deve superare i 2000 caratteri",
-    "consent": "Accetto che i miei dati vengano utilizzati per elaborare la mia richiesta in conformità con la nostra {privacy}.",
-    "consent_privacy": "politica sulla privacy"
+    "consent": "Accetto che i miei dati vengano utilizzati per elaborare la mia richiesta in conformità con la nostra <privacy>politica sulla privacy</privacy>."
   },
   "about": {
     "hero_subtitle": "L'Eredità Letteraria",
@@ -266,9 +265,7 @@
     "error_last_name_max": "Il cognome non deve superare i 100 caratteri",
     "error_password_min": "La password deve contenere almeno 8 caratteri",
     "error_passwords_mismatch": "Le password non corrispondono",
-    "consent": "Accetto le {terms} e la {privacy}.",
-    "consent_terms": "Condizioni generali di vendita",
-    "consent_privacy": "politica sulla privacy"
+    "consent": "Accetto le <terms>Condizioni generali di vendita</terms> e la <privacy>politica sulla privacy</privacy>."
   },
   "account": {
     "title": "Il mio <gold>account</gold>",
