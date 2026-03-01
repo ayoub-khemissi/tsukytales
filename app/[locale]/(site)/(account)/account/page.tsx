@@ -263,8 +263,8 @@ export default function AccountPage() {
     setCreatingAddress(true);
     setAddressForm({
       label: "",
-      first_name: "",
-      last_name: "",
+      first_name: profile?.first_name || "",
+      last_name: profile?.last_name || "",
       street: "",
       zip_code: "",
       city: "",
