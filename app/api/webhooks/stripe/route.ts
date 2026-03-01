@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
                 : (intent.payment_method as any)?.type || "card",
             discount_incremented: discountId ? true : undefined,
           },
-          { status: "completed", label: "Paiement confirmé via webhook" },
+          "payment_confirmed",
         );
 
         await orderRepository.update(order.id, {
@@ -224,12 +224,7 @@ export async function POST(req: NextRequest) {
 
           const updatedMeta = pushOrderHistory(
             { ...(order!.metadata || {}) },
-            {
-              status: newPaymentStatus,
-              label: isFullRefund
-                ? "Remboursement total détecté via webhook Stripe"
-                : `Remboursement partiel détecté via webhook Stripe (${charge.amount_refunded / 100}€)`,
-            },
+            newPaymentStatus,
           );
 
           await connection.execute(
@@ -334,8 +329,7 @@ export async function POST(req: NextRequest) {
             history: [
               {
                 date: new Date().toISOString(),
-                status: "completed",
-                label: "Commande abonnement créée via invoice.paid",
+                status: "created",
               },
             ],
           }),

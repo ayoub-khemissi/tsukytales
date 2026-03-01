@@ -42,7 +42,16 @@
     "no_results": "Keine Ergebnisse",
     "required_field": "Dieses Feld ist erforderlich",
     "invalid_email": "Ungültige E-Mail",
-    "currency": "€"
+    "currency": "€",
+    "order_history_created": "Bestellung aufgegeben",
+    "order_history_payment_confirmed": "Zahlung bestätigt",
+    "order_history_shipped": "Bestellung versendet",
+    "order_history_reshipped": "Bestellung erneut versendet",
+    "order_history_delivered": "Bestellung zugestellt",
+    "order_history_canceled": "Bestellung storniert",
+    "order_history_refunded": "Bestellung erstattet",
+    "order_history_partially_refunded": "Teilweise erstattet",
+    "order_history_empty": "Kein Verlauf"
   },
   "home": {
     "hero_subtitle_art": "Die Kunst der Flucht",
@@ -570,6 +579,10 @@
     "orders_shipping_reship": "Erneut versenden",
     "orders_shipping_reship_confirm": "Vorherigen Versand stornieren und einen neuen erstellen?",
     "orders_no_actions": "Keine Aktionen verfügbar",
+    "orders_no_actions_pending": "Warten auf Zahlung",
+    "orders_no_actions_canceled": "Bestellung storniert",
+    "orders_no_actions_refunded": "Bestellung storniert und erstattet",
+    "orders_no_actions_delivered": "Bestellung geliefert und abgeschlossen",
     "orders_no_notes": "Keine Notizen",
     "orders_no_address": "Keine Lieferadresse",
     "orders_shipping_info": "Versand",

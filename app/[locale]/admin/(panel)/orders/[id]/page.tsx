@@ -19,6 +19,7 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
+import OrderTimeline from "@/components/shared/OrderTimeline";
 
 interface OrderItem {
   id: number;
@@ -51,7 +52,7 @@ interface OrderNote {
 interface HistoryEntry {
   date: string;
   status: string;
-  label: string;
+  label?: string;
 }
 
 interface OrderMetadata {
@@ -402,83 +403,121 @@ export default function OrderDetailPage() {
                 </div>
               )}
 
-              <div className="flex flex-row gap-3 flex-wrap">
-                {(order.fulfillment_status === "not_fulfilled" ||
-                  meta.shipping_failed) && (
-                  <Button
-                    color="primary"
-                    isLoading={shipping}
-                    variant="shadow"
-                    onPress={() =>
-                      meta.shipping_failed
-                        ? openConfirmModal(
-                            "retry",
-                            t("orders_confirm_retry_title"),
-                            t("orders_confirm_retry_desc"),
-                            "primary",
-                            common("confirm"),
-                          )
-                        : openConfirmModal(
-                            "ship",
-                            t("orders_confirm_ship_title"),
-                            t("orders_confirm_ship_desc"),
-                            "primary",
-                            common("confirm"),
-                          )
-                    }
-                  >
-                    {meta.shipping_failed
-                      ? t("orders_shipping_retry")
-                      : t("orders_ship")}
-                  </Button>
-                )}
-                {order.fulfillment_status !== "not_fulfilled" &&
+              {(() => {
+                const canShip =
+                  (order.status === "completed" &&
+                    order.fulfillment_status === "not_fulfilled" &&
+                    order.payment_status === "captured") ||
+                  !!meta.shipping_failed;
+                const canReship =
+                  order.fulfillment_status !== "not_fulfilled" &&
                   order.status !== "canceled" &&
-                  !meta.shipping_failed && (
-                    <Button
-                      color="warning"
-                      isLoading={shipping}
-                      variant="flat"
-                      onPress={() =>
-                        openConfirmModal(
-                          "reship",
-                          t("orders_confirm_reship_title"),
-                          t("orders_confirm_reship_desc"),
-                          "warning",
-                          common("confirm"),
-                        )
-                      }
-                    >
-                      {t("orders_shipping_reship")}
-                    </Button>
-                  )}
-                {order.payment_status === "captured" && (
-                  <Button
-                    color="danger"
-                    isLoading={refunding}
-                    variant="flat"
-                    onPress={() =>
-                      openConfirmModal(
-                        "refund",
-                        t("orders_confirm_refund_title"),
-                        t("orders_confirm_refund_desc"),
-                        "danger",
-                        common("confirm"),
-                      )
-                    }
-                  >
-                    {t("orders_refund")}
-                  </Button>
-                )}
-                {order.fulfillment_status !== "not_fulfilled" &&
-                  order.payment_status !== "captured" &&
-                  !meta.shipping_failed &&
-                  order.status === "canceled" && (
+                  !meta.shipping_failed;
+                const canRefund = order.payment_status === "captured";
+                const hasActions = canShip || canReship || canRefund;
+
+                if (!hasActions) {
+                  let messageKey = "orders_no_actions";
+
+                  if (order.status === "pending") {
+                    messageKey = "orders_no_actions_pending";
+                  } else if (order.status === "canceled") {
+                    messageKey =
+                      order.payment_status === "refunded"
+                        ? "orders_no_actions_refunded"
+                        : "orders_no_actions_canceled";
+                  } else if (order.fulfillment_status === "delivered") {
+                    messageKey = "orders_no_actions_delivered";
+                  }
+
+                  return (
                     <p className="text-default-500 text-sm">
-                      {t("orders_no_actions")}
+                      {t(messageKey as any)}
                     </p>
-                  )}
-              </div>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-row gap-3 flex-wrap">
+                    {canShip && (
+                      <Button
+                        color="primary"
+                        isLoading={shipping}
+                        variant="shadow"
+                        onPress={() =>
+                          meta.shipping_failed
+                            ? openConfirmModal(
+                                "retry",
+                                t("orders_confirm_retry_title"),
+                                t("orders_confirm_retry_desc"),
+                                "primary",
+                                common("confirm"),
+                              )
+                            : openConfirmModal(
+                                "ship",
+                                t("orders_confirm_ship_title"),
+                                t("orders_confirm_ship_desc"),
+                                "primary",
+                                common("confirm"),
+                              )
+                        }
+                      >
+                        {meta.shipping_failed
+                          ? t("orders_shipping_retry")
+                          : t("orders_ship")}
+                      </Button>
+                    )}
+                    {canReship && (
+                      <Button
+                        color="warning"
+                        isLoading={shipping}
+                        variant="flat"
+                        onPress={() =>
+                          openConfirmModal(
+                            "reship",
+                            t("orders_confirm_reship_title"),
+                            t("orders_confirm_reship_desc"),
+                            "warning",
+                            common("confirm"),
+                          )
+                        }
+                      >
+                        {t("orders_shipping_reship")}
+                      </Button>
+                    )}
+                    {canRefund && (
+                      <Button
+                        color="danger"
+                        isLoading={refunding}
+                        variant="flat"
+                        onPress={() =>
+                          openConfirmModal(
+                            "refund",
+                            t("orders_confirm_refund_title"),
+                            t("orders_confirm_refund_desc"),
+                            "danger",
+                            common("confirm"),
+                          )
+                        }
+                      >
+                        {t("orders_refund")}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })()}
+            </CardBody>
+          </Card>
+
+          {/* History */}
+          <Card className="admin-glass rounded-xl">
+            <CardHeader>
+              <h2 className="font-heading font-semibold text-lg">
+                {t("orders_shipping_history")}
+              </h2>
+            </CardHeader>
+            <CardBody>
+              <OrderTimeline history={history} />
             </CardBody>
           </Card>
 
@@ -714,31 +753,6 @@ export default function OrderDetailPage() {
                         </span>
                       </div>
                     )}
-                </div>
-              </CardBody>
-            </Card>
-          )}
-
-          {/* C1: History */}
-          {history.length > 0 && (
-            <Card className="admin-glass rounded-xl">
-              <CardHeader>
-                <h2 className="font-heading font-semibold text-lg">
-                  {t("orders_shipping_history")}
-                </h2>
-              </CardHeader>
-              <CardBody>
-                <div className="space-y-3">
-                  {history.map((entry, i) => (
-                    <div key={i} className="flex gap-3 text-sm">
-                      <div className="text-default-400 shrink-0 w-16">
-                        {new Date(entry.date).toLocaleDateString()}
-                      </div>
-                      <div>
-                        <p className="font-medium">{entry.label}</p>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </CardBody>
             </Card>

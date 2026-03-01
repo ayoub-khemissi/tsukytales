@@ -42,7 +42,16 @@
     "no_results": "Aucun résultat",
     "required_field": "Ce champ est requis",
     "invalid_email": "Email invalide",
-    "currency": "€"
+    "currency": "€",
+    "order_history_created": "Commande enregistrée",
+    "order_history_payment_confirmed": "Paiement confirmé",
+    "order_history_shipped": "Commande expédiée",
+    "order_history_reshipped": "Commande ré-expédiée",
+    "order_history_delivered": "Commande livrée",
+    "order_history_canceled": "Commande annulée",
+    "order_history_refunded": "Commande remboursée",
+    "order_history_partially_refunded": "Remboursement partiel",
+    "order_history_empty": "Aucun historique"
   },
   "home": {
     "hero_title": "Bienvenue chez Tsuky Tales",
@@ -565,6 +574,10 @@
     "orders_shipping_reship": "Ré-expédier",
     "orders_shipping_reship_confirm": "Annuler l'expédition précédente et en créer une nouvelle ?",
     "orders_no_actions": "Aucune action disponible",
+    "orders_no_actions_pending": "En attente du paiement",
+    "orders_no_actions_canceled": "Commande annulée",
+    "orders_no_actions_refunded": "Commande annulée et remboursée",
+    "orders_no_actions_delivered": "Commande livrée et finalisée",
     "orders_no_notes": "Aucune note",
     "orders_no_address": "Aucune adresse de livraison",
     "orders_shipping_info": "Expédition",

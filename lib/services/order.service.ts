@@ -27,12 +27,12 @@ import { AppError } from "@/lib/errors/app-error";
 /** Append an entry to `metadata.history` for audit trail. */
 export function pushOrderHistory(
   metadata: OrderMetadata | null,
-  entry: { status: string; label: string },
+  status: string,
 ): OrderMetadata {
   const meta = { ...(metadata || {}) };
   const history = (meta.history as Array<Record<string, string>>) || [];
 
-  history.push({ date: new Date().toISOString(), ...entry });
+  history.push({ date: new Date().toISOString(), status });
 
   return { ...meta, history } as OrderMetadata;
 }
@@ -73,10 +73,7 @@ export async function cancelOrderWithStockRestore(
   await withTransaction(async (connection) => {
     await restoreStock(connection, order.items || []);
 
-    const updatedMeta = pushOrderHistory(order.metadata, {
-      status: "canceled",
-      label: "Commande annulée — stock restauré",
-    });
+    const updatedMeta = pushOrderHistory(order.metadata, "canceled");
 
     await connection.execute(
       "UPDATE orders SET status = ?, payment_status = ?, metadata = ? WHERE id = ?",
@@ -292,8 +289,7 @@ export async function createOrder(
           history: [
             {
               date: new Date().toISOString(),
-              status: "pending",
-              label: "Commande créée",
+              status: "created",
             },
           ],
         }),
@@ -374,7 +370,7 @@ export async function confirmOrder(orderId: number, customerId: number | null) {
 
   let updatedMetadata = pushOrderHistory(
     { ...(order.metadata || {}), payment_method: pmType },
-    { status: "completed", label: "Paiement confirmé" },
+    "payment_confirmed",
   );
 
   // Increment discount usage now that payment is confirmed

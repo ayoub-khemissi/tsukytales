@@ -82,12 +82,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       meta.refunded_by = adminEmail;
       meta.refunded_at = new Date().toISOString();
 
-      const updatedMeta = pushOrderHistory(meta, {
-        status: "refunded",
-        label: shippingOrderId
-          ? `Commande remboursée intégralement par ${adminEmail} — stock restauré — expédition ${shippingCancelled ? "annulée" : "non annulable"}`
-          : `Commande remboursée intégralement par ${adminEmail} — stock restauré`,
-      });
+      const updatedMeta = pushOrderHistory(meta, "refunded");
 
       await connection.execute(
         "UPDATE orders SET status = ?, payment_status = ?, metadata = ? WHERE id = ?",

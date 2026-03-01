@@ -228,7 +228,13 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'tracking_number', 'FR123456789',
     'total_weight', 0.90,
     'discount_code', 'BIENVENUE10',
-    'discount_amount', 5.98
+    'discount_amount', 5.98,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 5 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'pending', 'label', 'Commande créée'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 5 MONTH), INTERVAL 2 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'completed', 'label', 'Paiement confirmé'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 5 MONTH), INTERVAL 1 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped', 'label', 'Commande expédiée via Boxtal'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 5 MONTH), INTERVAL 4 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered', 'label', 'Commande livrée')
+    )
   ),
   DATE_SUB(@now, INTERVAL 5 MONTH)
 );
@@ -256,7 +262,12 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'shipping_cost', 4.90,
     'tracking_number', 'FR987654321',
     'shipping_order_id', 'boxtal_test_002',
-    'total_weight', 0.45
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 3 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 3 DAY), INTERVAL 1 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'payment_confirmed'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped')
+    )
   ),
   DATE_SUB(@now, INTERVAL 3 DAY)
 );
@@ -281,7 +292,10 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_003',
     'shipping_method', 'home',
-    'shipping_cost', 0
+    'shipping_cost', 0,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 1 HOUR), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created')
+    )
   ),
   DATE_SUB(@now, INTERVAL 1 HOUR)
 );
@@ -310,7 +324,13 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'tracking_number', 'FR111222333',
     'discount_code', 'NOEL2025',
     'discount_amount', 5.99,
-    'notes', 'Cadeau — merci d''emballer soigneusement'
+    'notes', 'Cadeau — merci d''emballer soigneusement',
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 2 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'pending', 'label', 'Commande créée'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 MONTH), INTERVAL 2 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'completed', 'label', 'Paiement confirmé via webhook'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped', 'label', 'Commande expédiée via Boxtal'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered', 'label', 'Commande livrée')
+    )
   ),
   DATE_SUB(@now, INTERVAL 2 MONTH)
 );
@@ -336,7 +356,13 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'payment_intent_id', 'pi_test_005',
     'shipping_method', 'home',
     'shipping_cost', 0,
-    'notes', 'Client a demandé annulation avant expédition'
+    'notes', 'Client a demandé annulation avant expédition',
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 2 WEEK), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 WEEK), INTERVAL 1 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'payment_confirmed'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 WEEK), INTERVAL 3 HOUR), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'canceled'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 WEEK), INTERVAL 4 HOUR), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'refunded')
+    )
   ),
   DATE_SUB(@now, INTERVAL 2 WEEK)
 );
@@ -364,7 +390,13 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'shipping_method', 'home',
     'shipping_cost', 4.90,
     'tracking_number', 'FR444555666',
-    'total_weight', 0.95
+    'total_weight', 0.95,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 45 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 45 DAY), INTERVAL 2 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'payment_confirmed'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 44 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 41 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
   ),
   DATE_SUB(@now, INTERVAL 45 DAY)
 );
@@ -391,7 +423,14 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'shipping_method', 'home',
     'shipping_cost', 4.90,
     'tracking_number', 'FR333444555',
-    'notes', 'Livre arrivé abîmé — remboursement partiel de 12.00 EUR'
+    'notes', 'Livre arrivé abîmé — remboursement partiel de 12.00 EUR',
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 1 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 1 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'payment_confirmed'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 1 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 4 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 10 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'partially_refunded')
+    )
   ),
   DATE_SUB(@now, INTERVAL 1 MONTH)
 );
@@ -417,7 +456,11 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'payment_intent_id', 'pi_test_008',
     'shipping_method', 'home',
     'shipping_cost', 4.90,
-    'notes', 'Précommande — expédition prévue mars 2026'
+    'notes', 'Précommande — expédition prévue mars 2026',
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 5 DAY), INTERVAL 2 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'payment_confirmed')
+    )
   ),
   DATE_SUB(@now, INTERVAL 5 DAY)
 );
@@ -446,7 +489,12 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'shipping_method', 'home',
     'shipping_cost', 4.90,
     'tracking_number', 'FR777888999',
-    'total_weight', 0.45
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 3 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 3 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 3 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
   ),
   DATE_SUB(@now, INTERVAL 3 MONTH)
 );

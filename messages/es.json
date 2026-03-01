@@ -42,7 +42,16 @@
     "no_results": "Sin resultados",
     "required_field": "Este campo es obligatorio",
     "invalid_email": "Email inválido",
-    "currency": "€"
+    "currency": "€",
+    "order_history_created": "Pedido registrado",
+    "order_history_payment_confirmed": "Pago confirmado",
+    "order_history_shipped": "Pedido enviado",
+    "order_history_reshipped": "Pedido reenviado",
+    "order_history_delivered": "Pedido entregado",
+    "order_history_canceled": "Pedido cancelado",
+    "order_history_refunded": "Pedido reembolsado",
+    "order_history_partially_refunded": "Reembolso parcial",
+    "order_history_empty": "Sin historial"
   },
   "home": {
     "hero_subtitle_art": "El Arte de la Evasión",
@@ -565,6 +574,10 @@
     "orders_shipping_reship": "Reenviar",
     "orders_shipping_reship_confirm": "¿Cancelar el envío anterior y crear uno nuevo?",
     "orders_no_actions": "No hay acciones disponibles",
+    "orders_no_actions_pending": "Esperando pago",
+    "orders_no_actions_canceled": "Pedido cancelado",
+    "orders_no_actions_refunded": "Pedido cancelado y reembolsado",
+    "orders_no_actions_delivered": "Pedido entregado y finalizado",
     "orders_no_notes": "Sin notas",
     "orders_no_address": "Sin dirección de envío",
     "orders_shipping_info": "Envío",

@@ -6,6 +6,7 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
+import { Checkbox } from "@heroui/checkbox";
 import {
   Table,
   TableHeader,
@@ -214,20 +215,42 @@ export default function OrdersPage() {
     setPage(1);
   };
 
-  const disabledKeys = useMemo(
-    () =>
-      new Set(
-        orders
-          .filter(
-            (o) =>
-              o.status !== "completed" ||
-              o.fulfillment_status !== "not_fulfilled" ||
-              o.payment_status !== "captured",
-          )
-          .map((o) => String(o.id)),
-      ),
-    [orders],
+  const isEligibleForShipping = useCallback(
+    (o: Order) =>
+      o.status === "completed" &&
+      o.fulfillment_status === "not_fulfilled" &&
+      o.payment_status === "captured",
+    [],
   );
+
+  const eligibleIds = useMemo(
+    () =>
+      new Set(orders.filter(isEligibleForShipping).map((o) => String(o.id))),
+    [orders, isEligibleForShipping],
+  );
+
+  const allEligibleSelected =
+    eligibleIds.size > 0 &&
+    Array.from(eligibleIds).every((id) => selectedKeys.has(id));
+
+  const toggleAll = () => {
+    if (allEligibleSelected) {
+      setSelectedKeys(new Set());
+    } else {
+      setSelectedKeys(new Set(eligibleIds));
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    const next = new Set(selectedKeys);
+
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelectedKeys(next);
+  };
 
   const handleBulkShip = async () => {
     setBulkShipping(true);
@@ -287,11 +310,14 @@ export default function OrdersPage() {
           >
             {t("export_csv")}
           </Button>
-          {selectedKeys.size > 0 && (
-            <Button color="primary" size="sm" onPress={onOpen}>
-              {t("orders_ship_selected", { count: selectedKeys.size })}
-            </Button>
-          )}
+          <Button
+            color="primary"
+            isDisabled={selectedKeys.size === 0}
+            size="sm"
+            onPress={onOpen}
+          >
+            {t("orders_ship_selected", { count: selectedKeys.size })}
+          </Button>
         </div>
       </div>
 
@@ -368,24 +394,19 @@ export default function OrdersPage() {
       ) : (
         <>
           <div className="overflow-x-auto">
-            <Table
-              aria-label={t("orders_title")}
-              disabledKeys={disabledKeys}
-              selectedKeys={selectedKeys}
-              selectionMode="multiple"
-              onSelectionChange={(keys) => {
-                if (keys === "all") {
-                  const eligible = orders
-                    .filter((o) => !disabledKeys.has(String(o.id)))
-                    .map((o) => String(o.id));
-
-                  setSelectedKeys(new Set(eligible));
-                } else {
-                  setSelectedKeys(new Set(keys as Set<string>));
-                }
-              }}
-            >
+            <Table aria-label={t("orders_title")}>
               <TableHeader>
+                <TableColumn className="w-10">
+                  {eligibleIds.size > 0 && (
+                    <Checkbox
+                      isIndeterminate={
+                        selectedKeys.size > 0 && !allEligibleSelected
+                      }
+                      isSelected={allEligibleSelected}
+                      onValueChange={toggleAll}
+                    />
+                  )}
+                </TableColumn>
                 <TableColumn>
                   <SortableColumn
                     column="id"
@@ -423,6 +444,14 @@ export default function OrdersPage() {
               <TableBody>
                 {orders.map((order) => (
                   <TableRow key={order.id}>
+                    <TableCell>
+                      {isEligibleForShipping(order) && (
+                        <Checkbox
+                          isSelected={selectedKeys.has(String(order.id))}
+                          onValueChange={() => toggleOne(String(order.id))}
+                        />
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Link
                         className="text-primary font-medium hover:underline"

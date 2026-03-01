@@ -52,7 +52,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       history.push({
         date: new Date().toISOString(),
         status: "shipped",
-        label: "Commande expédiée via Boxtal (bulk)",
       });
 
       await orderRepository.update(orderId, {

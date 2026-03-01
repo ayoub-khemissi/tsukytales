@@ -14,6 +14,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!order) throw new AppError("Commande introuvable", 404);
 
+  if (
+    !force &&
+    (order.status !== "completed" ||
+      order.fulfillment_status !== "not_fulfilled" ||
+      order.payment_status !== "captured")
+  ) {
+    throw new AppError("Commande non éligible à l'expédition", 400);
+  }
+
   // Force re-ship: cancel old shipment and reset state
   if (
     force &&
@@ -75,10 +84,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   history.push({
     date: new Date().toISOString(),
-    status: "shipped",
-    label: force
-      ? "Commande ré-expédiée via Boxtal"
-      : "Commande expédiée via Boxtal",
+    status: force ? "reshipped" : "shipped",
   });
   await orderRepository.update(orderId, {
     metadata: JSON.stringify({ ...meta, history }),
