@@ -53,18 +53,13 @@ export async function restoreStock(
   }
 
   if (productItems.length > 0) {
-    const caseClauses = productItems.map(() => "WHEN ? THEN ?").join(" ");
-    const ids = productItems.map((p) => p.id);
-    const params: (number | string)[] = [];
-
-    for (const p of productItems) {
-      params.push(p.id, p.quantity);
-    }
-    params.push(...ids);
+    const caseClauses = productItems
+      .map((p) => `WHEN ${Number(p.id)} THEN ${Number(p.quantity)}`)
+      .join(" ");
+    const idsLit = productItems.map((p) => Number(p.id)).join(",");
 
     await connection.query<ResultSetHeader>(
-      `UPDATE products SET stock = stock + CASE id ${caseClauses} END WHERE id IN (${ids.map(() => "?").join(",")})`,
-      params,
+      `UPDATE products SET stock = stock + CASE id ${caseClauses} END WHERE id IN (${idsLit})`,
     );
   }
 }
@@ -191,22 +186,15 @@ export async function createOrder(
     const finalTotal = itemsTotal + shippingCost - discountAmount;
 
     // 7. Decrement stock (batch)
-    const ids = data.items.map((i) => i.product_id);
-    const caseDec = data.items.map(() => "WHEN ? THEN ?").join(" ");
-    const caseGuard = data.items.map(() => "WHEN ? THEN ?").join(" ");
-    const params: (number | string)[] = [];
-
-    for (const i of data.items) {
-      params.push(i.product_id, i.quantity);
-    }
-    for (const i of data.items) {
-      params.push(i.product_id, i.quantity);
-    }
-    params.push(...ids);
+    // Build SQL with literal values for CASE expressions — product_id and
+    // quantity are already validated as positive integers by Zod.
+    const caseDec = data.items
+      .map((i) => `WHEN ${Number(i.product_id)} THEN ${Number(i.quantity)}`)
+      .join(" ");
+    const idsLit = data.items.map((i) => Number(i.product_id)).join(",");
 
     const [stockRes] = await connection.query<ResultSetHeader>(
-      `UPDATE products SET stock = stock - CASE id ${caseDec} END WHERE id IN (${ids.map(() => "?").join(",")}) AND stock >= CASE id ${caseGuard} END`,
-      params,
+      `UPDATE products SET stock = stock - CASE id ${caseDec} END WHERE id IN (${idsLit}) AND stock >= CASE id ${caseDec} END`,
     );
 
     if (stockRes.affectedRows !== data.items.length) {

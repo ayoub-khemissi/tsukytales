@@ -223,6 +223,7 @@
     "badge_subscription": "SUBSCRIPTION",
     "stock_low": "Only {count} left!",
     "stock_out": "Sold Out",
+    "stock_available": "avail.",
     "subscribe_cta": "Subscribe",
     "add_to_cart": "Add to Cart",
     "billing_dates": "Billing dates",

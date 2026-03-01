@@ -223,6 +223,7 @@
     "badge_subscription": "ABBONAMENTO",
     "stock_low": "Solo {count} rimasti!",
     "stock_out": "Esaurito",
+    "stock_available": "disp.",
     "subscribe_cta": "Iscriviti",
     "add_to_cart": "Aggiungi al carrello",
     "billing_dates": "Addebiti",

@@ -306,13 +306,16 @@ function PreorderCard({
     id: number;
     name: string;
     price: number;
+    quantity?: number;
     image?: string;
     slug: string;
   }) => void;
   router: ReturnType<typeof useRouter>;
 }) {
+  const [qty, setQty] = useState(1);
   const isActive = !!product.is_preorder;
   const isOutOfStock = isActive && product.stock === 0;
+  const maxQty = Math.max(product.stock, 0);
 
   return (
     <div className="step-card relative bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-full min-h-[550px] sm:min-h-[620px] px-5 pt-14 pb-8 sm:px-10 sm:pt-18 sm:pb-12">
@@ -359,6 +362,37 @@ function PreorderCard({
           </span>
         </div>
 
+        {isActive && !isOutOfStock && (
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Button
+              isIconOnly
+              className="min-w-8 h-8"
+              isDisabled={qty <= 1}
+              size="sm"
+              variant="flat"
+              onPress={() => setQty((q) => Math.max(1, q - 1))}
+            >
+              -
+            </Button>
+            <span className="w-10 text-center font-semibold text-lg">
+              {qty}
+            </span>
+            <Button
+              isIconOnly
+              className="min-w-8 h-8"
+              isDisabled={qty >= maxQty}
+              size="sm"
+              variant="flat"
+              onPress={() => setQty((q) => Math.min(maxQty, q + 1))}
+            >
+              +
+            </Button>
+            <span className="text-xs text-default-400">
+              / {maxQty} {t("stock_available")}
+            </span>
+          </div>
+        )}
+
         {isActive ? (
           <Button
             className="btn-brand bg-gradient-to-r from-accent-gold to-accent-gold-light font-semibold w-full text-white"
@@ -369,6 +403,7 @@ function PreorderCard({
                 id: product.id,
                 name: product.name,
                 price: product.price,
+                quantity: qty,
                 image: product.image || undefined,
                 slug: product.slug,
               });

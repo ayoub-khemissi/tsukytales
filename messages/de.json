@@ -222,6 +222,7 @@
     "badge_subscription": "ABONNEMENT",
     "stock_low": "Nur noch {count} übrig!",
     "stock_out": "Ausverkauft",
+    "stock_available": "verf.",
     "subscribe_cta": "Abonnieren",
     "add_to_cart": "In den Warenkorb",
     "billing_dates": "Abbuchungen",
