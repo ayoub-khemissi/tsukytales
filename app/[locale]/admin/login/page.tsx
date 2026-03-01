@@ -33,12 +33,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
-      {/* Fixed cloud layer */}
-      <div className="admin-login-bg-fixed" />
-      {/* Moving cloud layer */}
-      <div className="admin-login-bg-drift" />
-      {/* Content */}
+    <div className="relative min-h-screen flex items-center justify-center px-4 bg-pattern-overlay">
       <div className="relative z-10 w-full max-w-md">
         <div className="glass rounded-[24px] sm:rounded-[40px] px-6 py-10 sm:px-10 sm:py-14 border border-[#D4AF37]/15 shadow-2xl shadow-[#D4AF37]/10">
           <div className="flex flex-col items-center gap-2 pb-6">
