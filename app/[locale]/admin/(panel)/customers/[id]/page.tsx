@@ -15,10 +15,19 @@ interface Customer {
   first_name: string | null;
   last_name: string | null;
   email: string;
+  has_account: boolean;
   createdAt: string;
-  metadata: Record<string, unknown> | null;
+  updatedAt: string;
+  metadata: {
+    phone?: string;
+    city?: string;
+    address?: string;
+    zip_code?: string;
+    [key: string]: unknown;
+  } | null;
   orders?: Order[];
   addresses?: Address[];
+  totalSpent?: string;
 }
 
 interface Order {
@@ -37,9 +46,11 @@ interface Address {
   first_name: string;
   last_name: string;
   street: string;
+  street_complement: string | null;
   zip_code: string;
   city: string;
   country: string;
+  phone: string | null;
   is_default: boolean;
 }
 
@@ -134,14 +145,66 @@ export default function CustomerDetailPage() {
 
       {/* Customer info card */}
       <Card className="admin-glass rounded-xl">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <h2 className="font-heading font-semibold text-lg">{fullName}</h2>
+          <Chip
+            color={customer.has_account ? "primary" : "default"}
+            size="sm"
+            variant="flat"
+          >
+            {t(
+              customer.has_account
+                ? "customers_account_yes"
+                : "customers_account_no",
+            )}
+          </Chip>
         </CardHeader>
         <CardBody className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-default-500">{t("customers_email")}</p>
               <p className="font-medium">{customer.email}</p>
+            </div>
+            {customer.metadata?.phone && (
+              <div>
+                <p className="text-sm text-default-500">
+                  {t("customers_detail_phone")}
+                </p>
+                <p className="font-medium">{customer.metadata.phone}</p>
+              </div>
+            )}
+            {customer.metadata?.city && (
+              <div>
+                <p className="text-sm text-default-500">
+                  {t("customers_detail_city")}
+                </p>
+                <p className="font-medium">
+                  {[
+                    customer.metadata.address,
+                    customer.metadata.zip_code,
+                    customer.metadata.city,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+              </div>
+            )}
+            <div>
+              <p className="text-sm text-default-500">
+                {t("customers_detail_total_spent")}
+              </p>
+              <p className="font-medium text-primary">
+                {Number(customer.totalSpent || 0).toFixed(2)}
+                {common("currency")}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-default-500">
+                {t("customers_detail_orders_count", {
+                  count: orders.length,
+                })}
+              </p>
+              <p className="font-medium">{orders.length}</p>
             </div>
             <div>
               <p className="text-sm text-default-500">
@@ -151,6 +214,17 @@ export default function CustomerDetailPage() {
                 {new Date(customer.createdAt).toLocaleDateString()}
               </p>
             </div>
+            {customer.updatedAt &&
+              customer.updatedAt !== customer.createdAt && (
+                <div>
+                  <p className="text-sm text-default-500">
+                    {t("customers_detail_updated")}
+                  </p>
+                  <p className="font-medium">
+                    {new Date(customer.updatedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
           </div>
         </CardBody>
       </Card>
@@ -168,7 +242,7 @@ export default function CustomerDetailPage() {
               {t("orders_empty")}
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="flex flex-col gap-4">
               {orders.map((order) => (
                 <Link key={order.id} href={`/admin/orders/${order.id}`}>
                   <Card className="admin-glass rounded-xl hover:shadow-lg transition-all cursor-pointer">
@@ -242,7 +316,7 @@ export default function CustomerDetailPage() {
         <CardBody>
           {addresses.length === 0 ? (
             <p className="text-default-500 text-center py-6">
-              {t("customers_empty")}
+              {t("customers_detail_no_addresses")}
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -253,7 +327,7 @@ export default function CustomerDetailPage() {
                       <span className="font-semibold">{addr.label}</span>
                       {addr.is_default && (
                         <Chip color="primary" size="sm" variant="flat">
-                          Default
+                          {t("customers_detail_default_address")}
                         </Chip>
                       )}
                     </div>
@@ -261,8 +335,20 @@ export default function CustomerDetailPage() {
                       {addr.first_name} {addr.last_name}
                       <br />
                       {addr.street}
+                      {addr.street_complement && (
+                        <>
+                          <br />
+                          {addr.street_complement}
+                        </>
+                      )}
                       <br />
                       {addr.zip_code} {addr.city}, {addr.country}
+                      {addr.phone && (
+                        <>
+                          <br />
+                          {addr.phone}
+                        </>
+                      )}
                     </p>
                   </CardBody>
                 </Card>

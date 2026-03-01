@@ -4,6 +4,7 @@ import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
 import { customerRepository } from "@/lib/repositories/customer.repository";
 import { orderRepository } from "@/lib/repositories/order.repository";
+import { addressRepository } from "@/lib/repositories/address.repository";
 import { AppError } from "@/lib/errors/app-error";
 
 export const GET = withErrorHandler(async (_req: NextRequest, context) => {
@@ -14,11 +15,14 @@ export const GET = withErrorHandler(async (_req: NextRequest, context) => {
 
   if (!customer) throw new AppError("Client introuvable", 404);
 
-  const orders = await orderRepository.findAll({
-    where: "customer_id = ?",
-    params: [parseInt(id)],
-    orderBy: "createdAt DESC",
-  });
+  const [orders, addresses] = await Promise.all([
+    orderRepository.findAll({
+      where: "customer_id = ?",
+      params: [parseInt(id)],
+      orderBy: "createdAt DESC",
+    }),
+    addressRepository.findByCustomerId(parseInt(id)),
+  ]);
 
   const totalSpent = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
@@ -28,6 +32,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, context) => {
   return NextResponse.json({
     ...customerData,
     orders: orders.slice(0, 20),
+    addresses,
     totalSpent: totalSpent.toFixed(2),
   });
 });
