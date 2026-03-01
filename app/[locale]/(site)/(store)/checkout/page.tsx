@@ -412,8 +412,8 @@ export default function CheckoutPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {/* Email for guests */}
-          {session?.user?.role !== "customer" && (
+          {/* Email for guests (hidden if logged in — email comes from session) */}
+          {!session?.user && (
             <Card className="border border-divider">
               <CardBody className="p-6">
                 <Input
