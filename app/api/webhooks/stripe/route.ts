@@ -264,6 +264,52 @@ export async function POST(req: NextRequest) {
       }
 
       // ---------------------------------------------------------------
+      // Subscription invoice created — void/delete if phase is skipped
+      // ---------------------------------------------------------------
+      case "invoice.created": {
+        const invoice = event.data.object as any;
+
+        if (!invoice.subscription) break;
+
+        const stripeCustomerId = invoice.customer as string;
+        const customer = await findCustomerByStripeId(stripeCustomerId);
+
+        if (!customer) break;
+
+        const skippedPhases = (customer.metadata?.subscription_skipped ||
+          []) as string[];
+        const periodStart = invoice.lines?.data?.[0]?.period?.start;
+
+        if (!periodStart || skippedPhases.length === 0) break;
+
+        const phaseDate = new Date(periodStart * 1000)
+          .toISOString()
+          .split("T")[0];
+
+        if (skippedPhases.includes(phaseDate)) {
+          if (invoice.status === "draft") {
+            await stripe.invoices.del(invoice.id);
+          } else if (invoice.status === "open") {
+            await stripe.invoices.voidInvoice(invoice.id);
+          }
+
+          const updatedSkipped = skippedPhases.filter(
+            (d: string) => d !== phaseDate,
+          );
+
+          await customerRepository.updateMetadata(customer.id, {
+            ...customer.metadata,
+            subscription_skipped: updatedSkipped,
+          });
+
+          logger.info(
+            `[Stripe Webhook] Voided/deleted invoice ${invoice.id} for skipped phase ${phaseDate}`,
+          );
+        }
+        break;
+      }
+
+      // ---------------------------------------------------------------
       // Subscription invoice paid
       // ---------------------------------------------------------------
       case "invoice.paid": {
@@ -291,6 +337,24 @@ export async function POST(req: NextRequest) {
             `[Stripe Webhook] Customer not found for stripe_customer_id: ${stripeCustomerId}`,
           );
           break;
+        }
+
+        // Safety net: don't create order if phase was skipped
+        const skippedPhases = (foundCustomer.metadata?.subscription_skipped ||
+          []) as string[];
+        const periodStart = invoice.lines?.data?.[0]?.period?.start;
+
+        if (periodStart) {
+          const phaseDate = new Date(periodStart * 1000)
+            .toISOString()
+            .split("T")[0];
+
+          if (skippedPhases.includes(phaseDate)) {
+            logger.warn(
+              `[Stripe Webhook] invoice.paid for skipped phase ${phaseDate}, skipping order creation`,
+            );
+            break;
+          }
         }
 
         // Use the currently active subscription product (not the one from signup)
