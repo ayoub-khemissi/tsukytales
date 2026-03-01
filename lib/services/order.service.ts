@@ -62,7 +62,7 @@ export async function restoreStock(
     }
     params.push(...ids);
 
-    await connection.execute<ResultSetHeader>(
+    await connection.query<ResultSetHeader>(
       `UPDATE products SET stock = stock + CASE id ${caseClauses} END WHERE id IN (${ids.map(() => "?").join(",")})`,
       params,
     );
@@ -204,7 +204,7 @@ export async function createOrder(
     }
     params.push(...ids);
 
-    const [stockRes] = await connection.execute<ResultSetHeader>(
+    const [stockRes] = await connection.query<ResultSetHeader>(
       `UPDATE products SET stock = stock - CASE id ${caseDec} END WHERE id IN (${ids.map(() => "?").join(",")}) AND stock >= CASE id ${caseGuard} END`,
       params,
     );
