@@ -352,139 +352,141 @@ export default function SettingsPage() {
       </h1>
 
       <div className="space-y-6">
-        {/* Password Card */}
-        <Card className="max-w-lg admin-glass rounded-xl">
-          <CardHeader className="flex-col items-start gap-1 px-6 pt-6">
-            <h2 className="font-heading text-lg font-semibold">
-              {t("settings_change_password")}
-            </h2>
-          </CardHeader>
-          <CardBody className="px-6 pb-6">
-            <Form
-              className="flex flex-col gap-4"
-              validationBehavior="native"
-              onSubmit={handlePasswordSubmit}
-            >
-              {success && (
-                <Chip
-                  className="w-full max-w-full py-4 text-center"
-                  color="success"
-                  variant="flat"
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Password Card */}
+          <Card className="admin-glass rounded-xl">
+            <CardHeader className="flex-col items-start gap-1 px-6 pt-6">
+              <h2 className="font-heading text-lg font-semibold">
+                {t("settings_change_password")}
+              </h2>
+            </CardHeader>
+            <CardBody className="px-6 pb-6">
+              <Form
+                className="flex flex-col gap-4"
+                validationBehavior="native"
+                onSubmit={handlePasswordSubmit}
+              >
+                {success && (
+                  <Chip
+                    className="w-full max-w-full py-4 text-center"
+                    color="success"
+                    variant="flat"
+                  >
+                    {success}
+                  </Chip>
+                )}
+                {error && (
+                  <Chip
+                    className="w-full max-w-full py-4 text-center"
+                    color="danger"
+                    variant="flat"
+                  >
+                    {error}
+                  </Chip>
+                )}
+                <Input
+                  isRequired
+                  autoComplete="current-password"
+                  label={t("settings_current_password")}
+                  type="password"
+                  value={currentPassword}
+                  onValueChange={setCurrentPassword}
+                />
+                <Input
+                  isRequired
+                  autoComplete="new-password"
+                  label={t("settings_new_password")}
+                  minLength={8}
+                  type="password"
+                  value={newPassword}
+                  onValueChange={setNewPassword}
+                />
+                <Input
+                  isRequired
+                  autoComplete="new-password"
+                  label={t("settings_confirm_password")}
+                  type="password"
+                  value={confirmPassword}
+                  onValueChange={setConfirmPassword}
+                />
+                <Button
+                  className="mt-2"
+                  color="primary"
+                  isLoading={loading}
+                  type="submit"
                 >
-                  {success}
-                </Chip>
+                  {t("settings_submit")}
+                </Button>
+              </Form>
+            </CardBody>
+          </Card>
+
+          {/* Subscription Dates Card */}
+          <Card className="admin-glass rounded-xl">
+            <CardHeader className="flex-col items-start gap-1 px-6 pt-6">
+              <h2 className="font-heading text-lg font-semibold">
+                {t("sub_dates_title")}
+              </h2>
+            </CardHeader>
+            <CardBody className="px-6 pb-6 space-y-3">
+              {subDates.length > 0 && (
+                <ul className="space-y-2">
+                  {subDates.map((d) => (
+                    <li
+                      key={d}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <span>
+                        {new Date(d + "T00:00:00").toLocaleDateString("fr-FR")}
+                      </span>
+                      <Button
+                        isIconOnly
+                        className="min-w-6 w-6 h-6"
+                        color="danger"
+                        isDisabled={dateSaving}
+                        radius="full"
+                        size="sm"
+                        variant="light"
+                        onPress={() => handleRemoveDate(d)}
+                      >
+                        &times;
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
               )}
-              {error && (
+              <div className="flex gap-2">
+                <Input
+                  size="sm"
+                  type="date"
+                  value={newDate}
+                  onValueChange={(v) => {
+                    setNewDate(v);
+                    setDateError("");
+                  }}
+                />
+                <Button
+                  color="primary"
+                  isLoading={dateSaving}
+                  size="sm"
+                  variant="flat"
+                  onPress={handleAddDate}
+                >
+                  {t("sub_dates_add")}
+                </Button>
+              </div>
+              {dateError && (
                 <Chip
                   className="w-full max-w-full py-4 text-center"
                   color="danger"
                   variant="flat"
                 >
-                  {error}
+                  {dateError}
                 </Chip>
               )}
-              <Input
-                isRequired
-                autoComplete="current-password"
-                label={t("settings_current_password")}
-                type="password"
-                value={currentPassword}
-                onValueChange={setCurrentPassword}
-              />
-              <Input
-                isRequired
-                autoComplete="new-password"
-                label={t("settings_new_password")}
-                minLength={8}
-                type="password"
-                value={newPassword}
-                onValueChange={setNewPassword}
-              />
-              <Input
-                isRequired
-                autoComplete="new-password"
-                label={t("settings_confirm_password")}
-                type="password"
-                value={confirmPassword}
-                onValueChange={setConfirmPassword}
-              />
-              <Button
-                className="mt-2"
-                color="primary"
-                isLoading={loading}
-                type="submit"
-              >
-                {t("settings_submit")}
-              </Button>
-            </Form>
-          </CardBody>
-        </Card>
-
-        {/* Subscription Dates Card */}
-        <Card className="max-w-lg admin-glass rounded-xl">
-          <CardHeader className="flex-col items-start gap-1 px-6 pt-6">
-            <h2 className="font-heading text-lg font-semibold">
-              {t("sub_dates_title")}
-            </h2>
-          </CardHeader>
-          <CardBody className="px-6 pb-6 space-y-3">
-            {subDates.length > 0 && (
-              <ul className="space-y-2">
-                {subDates.map((d) => (
-                  <li
-                    key={d}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <span>
-                      {new Date(d + "T00:00:00").toLocaleDateString("fr-FR")}
-                    </span>
-                    <Button
-                      isIconOnly
-                      className="min-w-6 w-6 h-6"
-                      color="danger"
-                      isDisabled={dateSaving}
-                      radius="full"
-                      size="sm"
-                      variant="light"
-                      onPress={() => handleRemoveDate(d)}
-                    >
-                      &times;
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="flex gap-2">
-              <Input
-                size="sm"
-                type="date"
-                value={newDate}
-                onValueChange={(v) => {
-                  setNewDate(v);
-                  setDateError("");
-                }}
-              />
-              <Button
-                color="primary"
-                isLoading={dateSaving}
-                size="sm"
-                variant="flat"
-                onPress={handleAddDate}
-              >
-                {t("sub_dates_add")}
-              </Button>
-            </div>
-            {dateError && (
-              <Chip
-                className="w-full max-w-full py-4 text-center"
-                color="danger"
-                variant="flat"
-              >
-                {dateError}
-              </Chip>
-            )}
-          </CardBody>
-        </Card>
+            </CardBody>
+          </Card>
+        </div>
 
         {/* Shipping Rates Card */}
         <Card className="admin-glass rounded-xl">
