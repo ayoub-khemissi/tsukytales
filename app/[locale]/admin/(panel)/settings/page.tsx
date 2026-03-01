@@ -8,6 +8,7 @@ import { Chip } from "@heroui/chip";
 import { Form } from "@heroui/form";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Spinner } from "@heroui/spinner";
+import { Switch } from "@heroui/switch";
 import { useTranslations } from "next-intl";
 
 interface RateTier {
@@ -154,6 +155,13 @@ export default function SettingsPage() {
   const [dateError, setDateError] = useState("");
   const [dateSaving, setDateSaving] = useState(false);
 
+  // Product settings state
+  const [showProductDetail, setShowProductDetail] = useState(true);
+  const [productSettingsLoading, setProductSettingsLoading] = useState(true);
+  const [productSettingsSaving, setProductSettingsSaving] = useState(false);
+  const [productSettingsSuccess, setProductSettingsSuccess] = useState("");
+  const [productSettingsError, setProductSettingsError] = useState("");
+
   const fetchSubDates = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/settings/subscription-dates");
@@ -171,6 +179,52 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchSubDates();
   }, [fetchSubDates]);
+
+  const fetchProductSettings = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/settings/product");
+
+      if (res.ok) {
+        const data = await res.json();
+
+        setShowProductDetail(data.show_product_detail ?? true);
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setProductSettingsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProductSettings();
+  }, [fetchProductSettings]);
+
+  const handleToggleProductDetail = async (value: boolean) => {
+    setProductSettingsSaving(true);
+    setProductSettingsSuccess("");
+    setProductSettingsError("");
+    setShowProductDetail(value);
+    try {
+      const res = await fetch("/api/admin/settings/product", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ show_product_detail: value }),
+      });
+
+      if (res.ok) {
+        setProductSettingsSuccess(t("settings_product_saved"));
+      } else {
+        setShowProductDetail(!value);
+        setProductSettingsError(t("settings_product_error"));
+      }
+    } catch {
+      setShowProductDetail(!value);
+      setProductSettingsError(t("settings_product_error"));
+    } finally {
+      setProductSettingsSaving(false);
+    }
+  };
 
   const suggestNextDate = useCallback((): string => {
     if (subDates.length > 0) {
@@ -483,6 +537,57 @@ export default function SettingsPage() {
                 >
                   {dateError}
                 </Chip>
+              )}
+            </CardBody>
+          </Card>
+
+          {/* Product Settings Card */}
+          <Card className="admin-glass rounded-xl">
+            <CardHeader className="flex-col items-start gap-1 px-6 pt-6">
+              <h2 className="font-heading text-lg font-semibold">
+                {t("settings_product_title")}
+              </h2>
+            </CardHeader>
+            <CardBody className="px-6 pb-6 space-y-3">
+              {productSettingsLoading ? (
+                <div className="flex justify-center py-4">
+                  <Spinner size="sm" />
+                </div>
+              ) : (
+                <>
+                  <Switch
+                    isDisabled={productSettingsSaving}
+                    isSelected={showProductDetail}
+                    onValueChange={handleToggleProductDetail}
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {t("settings_product_show_detail")}
+                      </span>
+                      <span className="text-xs text-default-400">
+                        {t("settings_product_show_detail_desc")}
+                      </span>
+                    </div>
+                  </Switch>
+                  {productSettingsSuccess && (
+                    <Chip
+                      className="w-full max-w-full py-4 text-center"
+                      color="success"
+                      variant="flat"
+                    >
+                      {productSettingsSuccess}
+                    </Chip>
+                  )}
+                  {productSettingsError && (
+                    <Chip
+                      className="w-full max-w-full py-4 text-center"
+                      color="danger"
+                      variant="flat"
+                    >
+                      {productSettingsError}
+                    </Chip>
+                  )}
+                </>
               )}
             </CardBody>
           </Card>

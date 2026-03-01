@@ -43,6 +43,7 @@ export default function SubscriptionPage() {
   const { data: session } = useSession();
   const [product, setProduct] = useState<ActiveProduct | null>(null);
   const [subscriptionDates, setSubscriptionDates] = useState<string[]>([]);
+  const [showProductDetail, setShowProductDetail] = useState(true);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   const router = useRouter();
@@ -57,6 +58,7 @@ export default function SubscriptionPage() {
 
         setProduct(items[0] ?? null);
         setSubscriptionDates(data.subscription_dates || []);
+        setShowProductDetail(data.show_product_detail ?? true);
       })
       .finally(() => setLoading(false));
   }, [locale]);
@@ -151,12 +153,18 @@ export default function SubscriptionPage() {
               </div>
 
               {/* Detail section — full width */}
-              <DetailSection common={common} product={product} t={t} />
+              {showProductDetail && (
+                <DetailSection common={common} product={product} t={t} />
+              )}
             </div>
           ) : (
             /* ===== CASE A: no preorder ===== */
-            <div className="flex flex-col md:flex-row gap-8 md:items-stretch">
-              <div className="w-full max-w-[360px] mx-auto md:mx-0 md:w-[360px] md:flex-shrink-0">
+            <div
+              className={`flex flex-col ${showProductDetail ? "md:flex-row" : ""} gap-8 md:items-stretch`}
+            >
+              <div
+                className={`w-full max-w-[360px] mx-auto ${showProductDetail ? "md:mx-0 md:w-[360px] md:flex-shrink-0" : ""}`}
+              >
                 <SubscriptionCard
                   common={common}
                   locale={locale}
@@ -166,9 +174,11 @@ export default function SubscriptionPage() {
                   t={t}
                 />
               </div>
-              <div className="w-full md:flex-1">
-                <DetailSection common={common} product={product} t={t} />
-              </div>
+              {showProductDetail && (
+                <div className="w-full md:flex-1">
+                  <DetailSection common={common} product={product} t={t} />
+                </div>
+              )}
             </div>
           )}
         </div>

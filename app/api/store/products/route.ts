@@ -86,6 +86,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       if (subscriptionPage === "true") {
         response.subscription_dates =
           (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
+        response.show_product_detail =
+          (await settingsRepository.get<boolean>("show_product_detail")) ??
+          true;
       }
 
       return response;
