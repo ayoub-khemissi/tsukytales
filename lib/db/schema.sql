@@ -50,7 +50,6 @@ CREATE TABLE IF NOT EXISTS `products` (
   `length` DECIMAL(6,2) NOT NULL DEFAULT 21.00,
   `width` DECIMAL(6,2) NOT NULL DEFAULT 15.00,
   `height` DECIMAL(6,2) NOT NULL DEFAULT 3.00,
-  `is_subscription` TINYINT(1) NOT NULL DEFAULT 0,
   `is_active` TINYINT(1) NOT NULL DEFAULT 0,
   `subscription_price` DECIMAL(10,2) DEFAULT NULL,
   `is_deleted` TINYINT(1) NOT NULL DEFAULT 0,

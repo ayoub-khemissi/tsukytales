@@ -108,7 +108,7 @@ INSERT INTO `addresses` (`customer_id`, `label`, `first_name`, `last_name`, `str
 -- ============================================================
 -- Products
 -- ============================================================
-INSERT INTO `products` (`id`, `name`, `slug`, `description`, `price`, `stock`, `image`, `is_preorder`, `weight`, `length`, `width`, `height`, `is_subscription`, `is_active`, `subscription_price`, `images`, `translations`, `createdAt`) VALUES
+INSERT INTO `products` (`id`, `name`, `slug`, `description`, `price`, `stock`, `image`, `is_preorder`, `weight`, `length`, `width`, `height`, `is_active`, `subscription_price`, `images`, `translations`, `createdAt`) VALUES
 -- Active product: subscription + preorder (to test Case B layout)
 -- Toggle is_preorder to 0 in admin to test Case A
 (1,
@@ -118,7 +118,7 @@ INSERT INTO `products` (`id`, `name`, `slug`, `description`, `price`, `stock`, `
   27.90, 8,
   'assets/uploads/img/products/voyage-de-tsuky.jpg',
   1, 0.45, 25.00, 18.00, 1.50,
-  1, 1, 24.90,
+  1, 24.90,
   JSON_ARRAY('assets/uploads/img/products/voyage-de-tsuky.jpg', 'assets/uploads/img/products/voyage-de-tsuky-2.jpg', 'assets/uploads/img/products/voyage-de-tsuky-3.jpg'),
   JSON_OBJECT(
     'en', JSON_OBJECT('name', 'Tsuky''s Journey', 'description', 'Dive into the poetic world of Tsuky, a curious little fox who sets off to discover the world. A 48-page full-colour illustrated book, carefully bound.'),
@@ -136,7 +136,7 @@ INSERT INTO `products` (`id`, `name`, `slug`, `description`, `price`, `stock`, `
   27.90, 30,
   'assets/uploads/img/products/oiseau-papier.jpg',
   1, 0.50, 25.00, 18.00, 1.50,
-  0, 0, NULL,
+  0, NULL,
   JSON_ARRAY('assets/uploads/img/products/oiseau-papier.jpg', 'assets/uploads/img/products/oiseau-papier-2.jpg'),
   JSON_OBJECT(
     'en', JSON_OBJECT('name', 'The Paper Bird', 'description', 'The next Tsuky Tales album! A tale about the fragility and beauty of dreams. Release planned spring 2026. Limited edition with signed bookplate.'),

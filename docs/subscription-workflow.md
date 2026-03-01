@@ -55,7 +55,7 @@ The `/subscribe` page fetches the active subscription product:
 GET /api/store/products?subscription_page=true&locale={locale}
 ```
 
-Returns the product with `is_subscription = true` and `is_active = true`.
+Returns the first active product (`is_active = true`).
 
 ### Step 2 — Shipping & Address
 
@@ -67,7 +67,7 @@ Same UX as checkout:
 ### Step 3 — Create Subscription (`POST /api/store/subscriptions`)
 
 **Validations:**
-- Product exists and `is_subscription = true`
+- Product exists and `is_active = true`
 - Product has stock > 0
 - Customer does not already have a `subscription_schedule_id` in metadata
 

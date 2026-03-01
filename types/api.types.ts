@@ -39,7 +39,6 @@ export interface ProductResponse {
   image: string | null;
   is_preorder: boolean;
   weight: number;
-  is_subscription: boolean;
   subscription_price: number | null;
 }
 

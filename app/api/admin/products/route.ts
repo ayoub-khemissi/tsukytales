@@ -31,12 +31,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   if (type && type !== "all") {
     if (type === "preorder") {
       conditions.push("is_preorder = 1");
-    } else if (type === "subscription") {
-      conditions.push("is_subscription = 1");
     } else if (type === "standard") {
-      conditions.push(
-        "(is_preorder = 0 OR is_preorder IS NULL) AND (is_subscription = 0 OR is_subscription IS NULL)",
-      );
+      conditions.push("(is_preorder = 0 OR is_preorder IS NULL)");
     }
   }
 

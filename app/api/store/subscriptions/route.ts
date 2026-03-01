@@ -17,8 +17,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const product = await productRepository.findById(product_id);
 
-  if (!product || !product.is_subscription) {
-    throw new AppError("Ce produit n'est pas disponible en abonnement.", 400);
+  if (!product || !product.is_active) {
+    throw new AppError("Ce produit n'est pas disponible.", 400);
   }
   if (product.stock <= 0) throw new AppError("Ce produit est épuisé.", 400);
 

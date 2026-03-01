@@ -79,11 +79,11 @@ export const GET = withErrorHandler(async () => {
 
   if (subOrders.length === 0) return NextResponse.json({ active: false });
 
-  // Find subscription product
-  const [subProducts] = await pool.execute<RowDataPacket[]>(
-    `SELECT id, name, subscription_price FROM products WHERE is_subscription = 1 LIMIT 1`,
-  );
-  const product = subProducts[0] ?? null;
+  // Find subscription product from customer metadata
+  const subProductId = customer.metadata?.subscription_product_id;
+  const product = subProductId
+    ? await productRepository.findById(parseInt(subProductId as string))
+    : null;
   const subscriptionPrice = product ? Number(product.subscription_price) : null;
   const dates: string[] =
     (await settingsRepository.get<string[]>("subscription_dates")) ?? [];

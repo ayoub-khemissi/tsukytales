@@ -31,7 +31,6 @@ interface ActiveProduct {
   image: string | null;
   images: string[] | null;
   description: string | null;
-  is_subscription: boolean;
   is_preorder: boolean;
   subscription_price: number | null;
 }
@@ -457,7 +456,7 @@ function DetailSection({
               {price.toFixed(2).replace(".", ",")}
               {common("currency")}
             </span>
-            {!!product.is_subscription && (
+            {!!product.subscription_price && (
               <span className="text-text-light dark:text-gray-400 text-sm ml-1">
                 {t("per_quarter")}
               </span>

@@ -38,7 +38,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const search = searchParams.get("search") ?? undefined;
   const locale = searchParams.get("locale") ?? "fr";
 
-  const subscription = searchParams.get("subscription");
   const subscriptionPage = searchParams.get("subscription_page");
 
   const safeLocale = SUPPORTED_LOCALES.has(locale) ? locale : "fr";
@@ -49,7 +48,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       size,
       search,
       locale: safeLocale,
-      subscription,
       subscriptionPage,
     }),
     300,
@@ -59,8 +57,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
       if (subscriptionPage === "true") {
         where = `is_active = 1 AND ${notDeleted}`;
-      } else if (subscription === "true") {
-        where = `is_subscription = 1 AND ${notDeleted}`;
       } else {
         where = notDeleted;
       }

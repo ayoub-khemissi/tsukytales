@@ -55,7 +55,6 @@ export interface ProductRow extends RowDataPacket {
   length: number;
   width: number;
   height: number;
-  is_subscription: boolean;
   is_active: boolean;
   is_deleted: boolean;
   subscription_price: number | null;

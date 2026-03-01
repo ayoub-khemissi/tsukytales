@@ -25,7 +25,6 @@ export const createProductSchema = z.object({
   length: z.number().positive().default(21.0),
   width: z.number().positive().default(15.0),
   height: z.number().positive().default(3.0),
-  is_subscription: z.boolean().default(false),
   is_active: z.boolean().default(false),
   subscription_price: z.number().positive().optional(),
   images: z.array(z.string()).optional(),

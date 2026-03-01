@@ -51,7 +51,6 @@ interface SubscriptionProduct {
   stock: number;
   image: string | null;
   description: string | null;
-  is_subscription: boolean;
   subscription_price: number | null;
 }
 
