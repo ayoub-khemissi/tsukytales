@@ -78,7 +78,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         return {
           id: `admin-${admin.id}`,
-          email: "admin@tsukytales.fr",
+          email: "admin@tsukytales.com",
           name: "Admin",
           role: "admin" as const,
         };
