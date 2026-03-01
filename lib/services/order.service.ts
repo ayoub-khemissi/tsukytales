@@ -1,6 +1,7 @@
 import type {
   OrderItem,
   OrderMetadata,
+  OrderRow,
   ProductRow,
   ProductVariantRow,
 } from "@/types/db.types";
@@ -358,9 +359,22 @@ export async function createOrder(
     );
 
     const orderId = result.insertId;
-    const order = await orderRepository.findById(orderId);
+
+    // Read back from the same connection (transaction not yet committed)
+    const [orderRows] = await connection.execute<OrderRow[]>(
+      "SELECT * FROM orders WHERE id = ? LIMIT 1",
+      [orderId],
+    );
+    const order = orderRows[0];
 
     if (!order) throw new AppError("ORDER_CREATE_FAILED", 500);
+
+    // Parse JSON columns that come as strings from raw query
+    if (typeof order.items === "string") order.items = JSON.parse(order.items);
+    if (typeof order.metadata === "string")
+      order.metadata = JSON.parse(order.metadata);
+    if (typeof order.shipping_address === "string")
+      order.shipping_address = JSON.parse(order.shipping_address);
 
     // 10. Get Stripe customer
     const customer = await customerRepository.findById(resolvedCustomerId!);
@@ -378,13 +392,17 @@ export async function createOrder(
       order_number: `TSK-${orderId}`,
     });
 
-    // Store payment_intent_id
-    await orderRepository.update(orderId, {
-      metadata: JSON.stringify({
-        ...(order.metadata || {}),
-        payment_intent_id: paymentResult.payment_intent_id,
-      }),
-    });
+    // Store payment_intent_id (use transaction connection)
+    await connection.execute(
+      "UPDATE orders SET metadata = ? WHERE id = ?",
+      [
+        JSON.stringify({
+          ...(order.metadata || {}),
+          payment_intent_id: paymentResult.payment_intent_id,
+        }),
+        orderId,
+      ],
+    );
 
     return {
       order: { ...order, order_number: `TSK-${orderId}` },
