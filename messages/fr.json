@@ -290,6 +290,7 @@
     "subscription_title": "Mon abonnement",
     "subscription_none": "Aucun abonnement actif",
     "subscription_active": "Abonnement actif",
+    "subscription_cancelled": "Annulé",
     "subscription_next": "Prochain envoi : {date}",
     "subscription_cancel": "Annuler l'abonnement",
     "subscription_skip": "Passer cette box",

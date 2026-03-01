@@ -636,22 +636,54 @@ export default function AccountPage() {
         {activeTab === "subscription" && (
           <div className="space-y-4">
             {!subscription?.active ? (
-              <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] text-center px-5 py-12 sm:px-8 sm:py-16">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl mx-auto mb-4">
-                  <FontAwesomeIcon icon={faSyncAlt} />
+              <>
+                <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <FontAwesomeIcon icon={faSyncAlt} />
+                    </div>
+                    <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white">
+                      {t("subscription_title")}
+                    </h2>
+                    <Chip color="danger" size="sm" variant="flat">
+                      {t("subscription_cancelled")}
+                    </Chip>
+                  </div>
+                  {subscription?.product_name && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                      <div>
+                        <p className="text-sm text-text-light dark:text-gray-400">
+                          {t("subscription_product")}
+                        </p>
+                        <p className="font-semibold text-text-brand dark:text-white">
+                          {subscription.product_name}
+                        </p>
+                      </div>
+                      {subscription.product_price != null && (
+                        <div>
+                          <p className="text-sm text-text-light dark:text-gray-400">
+                            {t("subscription_price_label")}
+                          </p>
+                          <p className="font-semibold text-primary">
+                            {subscription.product_price
+                              .toFixed(2)
+                              .replace(".", ",")}
+                            {common("currency")}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <Button
+                    as={Link}
+                    className="btn-brand bg-primary font-semibold"
+                    href="/subscription"
+                    size="lg"
+                  >
+                    {t("subscription_subscribe_cta")}
+                  </Button>
                 </div>
-                <p className="text-text-light dark:text-gray-400 mb-4">
-                  {t("subscription_none")}
-                </p>
-                <Button
-                  as={Link}
-                  className="btn-brand bg-primary font-semibold"
-                  href="/subscription"
-                  size="lg"
-                >
-                  {t("subscription_subscribe_cta")}
-                </Button>
-              </div>
+              </>
             ) : (
               <>
                 {/* Subscription info card */}

@@ -290,6 +290,7 @@
     "subscription_title": "My Subscription",
     "subscription_none": "No active subscription",
     "subscription_active": "Active Subscription",
+    "subscription_cancelled": "Cancelled",
     "subscription_next": "Next shipment: {date}",
     "subscription_cancel": "Cancel Subscription",
     "subscription_skip": "Skip this box",

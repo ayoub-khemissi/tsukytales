@@ -23,7 +23,7 @@ export const POST = withErrorHandler(async () => {
   const meta = { ...(customer.metadata || {}) };
 
   delete meta.subscription_schedule_id;
-  delete meta.subscription_product_id;
+  // Keep subscription_product_id so we can show history
   await customerRepository.updateMetadata(customer.id, meta);
 
   logger.info(`Subscription schedule cancelled: ${scheduleId}`);

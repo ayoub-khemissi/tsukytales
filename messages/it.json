@@ -290,6 +290,7 @@
     "subscription_title": "Il mio abbonamento",
     "subscription_none": "Nessun abbonamento attivo",
     "subscription_active": "Abbonamento attivo",
+    "subscription_cancelled": "Annullato",
     "subscription_next": "Prossima spedizione: {date}",
     "subscription_cancel": "Annulla l'abbonamento",
     "subscription_skip": "Salta questa box",

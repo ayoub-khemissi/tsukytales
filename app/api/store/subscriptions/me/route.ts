@@ -97,8 +97,18 @@ export const GET = withErrorHandler(async () => {
 
   // No active subscription
   if (!scheduleId) {
+    // Still load product info from metadata for history display
+    const pastProductId = customer.metadata?.subscription_product_id;
+    const pastProduct = pastProductId
+      ? await productRepository.findById(parseInt(pastProductId as string))
+      : null;
+
     return NextResponse.json({
       active: false,
+      product_name: pastProduct?.name ?? null,
+      product_price: pastProduct
+        ? Number(pastProduct.subscription_price ?? pastProduct.price)
+        : null,
       history,
       invoices,
     });
