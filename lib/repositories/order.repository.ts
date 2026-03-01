@@ -218,6 +218,17 @@ class OrderRepository extends BaseRepository<OrderRow> {
 
     return rows[0] ?? null;
   }
+
+  async findByShippingOrderIdOrTracking(
+    value: string,
+  ): Promise<OrderRow | null> {
+    const [rows] = await pool.execute<OrderRow[]>(
+      "SELECT * FROM orders WHERE shipping_order_id = ? OR tracking_number = ? LIMIT 1",
+      [value, value],
+    );
+
+    return rows[0] ?? null;
+  }
 }
 
 export const orderRepository = new OrderRepository();

@@ -5,6 +5,7 @@ import { RowDataPacket } from "mysql2";
 import { BaseRepository } from "./base.repository";
 
 import { pool } from "@/lib/db/connection";
+import { cached, cacheKey, invalidateByPrefix } from "@/lib/cache";
 import { getPagination, getPagingData } from "@/lib/utils/pagination";
 
 type Params = any[];
@@ -15,23 +16,44 @@ class CustomerRepository extends BaseRepository<CustomerRow> {
   }
 
   async findByEmail(email: string): Promise<CustomerRow | null> {
-    const [rows] = await pool.execute<CustomerRow[]>(
-      "SELECT * FROM customers WHERE email = ? LIMIT 1",
-      [email.toLowerCase().trim()],
-    );
+    const normalized = email.toLowerCase().trim();
 
-    return rows[0] ?? null;
+    return cached(cacheKey("customer:email", normalized), 1800, async () => {
+      const [rows] = await pool.execute<CustomerRow[]>(
+        "SELECT * FROM customers WHERE email = ? LIMIT 1",
+        [normalized],
+      );
+
+      return rows[0] ?? null;
+    });
   }
 
   async findByStripeCustomerId(
     stripeCustomerId: string,
   ): Promise<CustomerRow | null> {
+    return cached(
+      cacheKey("customer:stripe", stripeCustomerId),
+      1800,
+      async () => {
+        const [rows] = await pool.execute<CustomerRow[]>(
+          "SELECT * FROM customers WHERE stripe_customer_id = ? LIMIT 1",
+          [stripeCustomerId],
+        );
+
+        return rows[0] ?? null;
+      },
+    );
+  }
+
+  async findByEmails(emails: string[]): Promise<CustomerRow[]> {
+    if (emails.length === 0) return [];
+    const placeholders = emails.map(() => "?").join(",");
     const [rows] = await pool.execute<CustomerRow[]>(
-      "SELECT * FROM customers WHERE stripe_customer_id = ? LIMIT 1",
-      [stripeCustomerId],
+      `SELECT * FROM customers WHERE email IN (${placeholders})`,
+      emails,
     );
 
-    return rows[0] ?? null;
+    return rows;
   }
 
   async adminSearch(options: {
@@ -106,7 +128,17 @@ class CustomerRepository extends BaseRepository<CustomerRow> {
     id: number,
     metadata: Record<string, unknown>,
   ): Promise<boolean> {
-    return this.update(id, { metadata: JSON.stringify(metadata) });
+    const result = await this.update(id, {
+      metadata: JSON.stringify(metadata),
+    });
+
+    // Invalidate customer cache
+    await Promise.all([
+      invalidateByPrefix("customer:email"),
+      invalidateByPrefix("customer:stripe"),
+    ]);
+
+    return result;
   }
 
   async getOrCreateGuest(email: string): Promise<CustomerRow> {
@@ -123,6 +155,9 @@ class CustomerRepository extends BaseRepository<CustomerRow> {
       last_name: null,
       metadata: JSON.stringify({}),
     });
+
+    // Invalidate email cache for the new customer
+    await invalidateByPrefix("customer:email");
 
     const customer = await this.findById(id);
 

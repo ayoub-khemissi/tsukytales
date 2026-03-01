@@ -389,15 +389,9 @@ export async function createShipment(orderId: number) {
 }
 
 export async function getTrackingInfo(trackingNumber: string) {
-  // Look up order by shipping_order_id or tracking_number in metadata
+  // Look up order by shipping_order_id or tracking_number in a single query
   const order =
-    (await orderRepository.findByShippingOrderId(trackingNumber)) ??
-    (await orderRepository
-      .findAll({
-        where: "tracking_number = ?",
-        params: [trackingNumber],
-      })
-      .then((rows) => rows[0] ?? null));
+    await orderRepository.findByShippingOrderIdOrTracking(trackingNumber);
 
   const meta = (order?.metadata || {}) as any;
   const history = (meta.history || []) as Array<Record<string, string>>;

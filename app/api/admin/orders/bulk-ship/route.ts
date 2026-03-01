@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
 import { orderRepository } from "@/lib/repositories/order.repository";
+import { pushOrderHistory } from "@/lib/services/order.service";
 import * as shippingService from "@/lib/services/shipping.service";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
@@ -17,12 +18,16 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     );
   }
 
+  // Batch load all orders upfront
+  const allOrders = await orderRepository.findByIds(orderIds);
+  const orderMap = new Map(allOrders.map((o) => [o.id, o]));
+
   const results: Array<{ orderId: number; success: boolean; error?: string }> =
     [];
 
   for (const orderId of orderIds) {
     try {
-      const order = await orderRepository.findById(orderId);
+      const order = orderMap.get(orderId);
 
       if (!order) {
         results.push({ orderId, success: false, error: "Order not found" });
@@ -44,18 +49,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
       await shippingService.createShipment(orderId);
 
-      // Add history entry
-      const updatedOrder = await orderRepository.findById(orderId);
-      const meta = (updatedOrder?.metadata || {}) as Record<string, unknown>;
-      const history = (meta.history as Array<Record<string, string>>) || [];
-
-      history.push({
-        date: new Date().toISOString(),
-        status: "shipped",
-      });
+      // Add history entry using in-memory metadata (no re-fetch)
+      const updatedMeta = pushOrderHistory(order.metadata, "shipped");
 
       await orderRepository.update(orderId, {
-        metadata: JSON.stringify({ ...meta, history }),
+        metadata: JSON.stringify(updatedMeta),
       });
 
       results.push({ orderId, success: true });

@@ -37,27 +37,59 @@ export function pushOrderHistory(
   return { ...meta, history } as OrderMetadata;
 }
 
-/** Re-increment stock for every item in a cancelled / refunded order. */
+/** Re-increment stock for every item in a cancelled / refunded order (batch). */
 export async function restoreStock(
   connection: PoolConnection,
   items: OrderItem[],
 ): Promise<void> {
+  // Group items by variant vs product
+  const variantItems: { id: number; quantity: number }[] = [];
+  const productItems: { id: number; quantity: number }[] = [];
+
   for (const item of items) {
     if (item.variant_id) {
-      await connection.execute<ResultSetHeader>(
-        "UPDATE product_variants SET inventory_quantity = inventory_quantity + ? WHERE id = ?",
-        [item.quantity, item.variant_id],
-      );
+      variantItems.push({ id: item.variant_id, quantity: item.quantity });
     } else {
       const productId = item.product_id ?? item.id;
 
       if (productId) {
-        await connection.execute<ResultSetHeader>(
-          "UPDATE products SET stock = stock + ? WHERE id = ?",
-          [item.quantity, productId],
-        );
+        productItems.push({ id: productId, quantity: item.quantity });
       }
     }
+  }
+
+  // Batch restore variant stock
+  if (variantItems.length > 0) {
+    const caseClauses = variantItems.map(() => "WHEN ? THEN ?").join(" ");
+    const ids = variantItems.map((v) => v.id);
+    const params: (number | string)[] = [];
+
+    for (const v of variantItems) {
+      params.push(v.id, v.quantity);
+    }
+    params.push(...ids);
+
+    await connection.execute<ResultSetHeader>(
+      `UPDATE product_variants SET inventory_quantity = inventory_quantity + CASE id ${caseClauses} END WHERE id IN (${ids.map(() => "?").join(",")})`,
+      params,
+    );
+  }
+
+  // Batch restore product stock
+  if (productItems.length > 0) {
+    const caseClauses = productItems.map(() => "WHEN ? THEN ?").join(" ");
+    const ids = productItems.map((p) => p.id);
+    const params: (number | string)[] = [];
+
+    for (const p of productItems) {
+      params.push(p.id, p.quantity);
+    }
+    params.push(...ids);
+
+    await connection.execute<ResultSetHeader>(
+      `UPDATE products SET stock = stock + CASE id ${caseClauses} END WHERE id IN (${ids.map(() => "?").join(",")})`,
+      params,
+    );
   }
 }
 
@@ -220,29 +252,58 @@ export async function createOrder(
     // 6. Calculate final total
     const finalTotal = itemsTotal + shippingCost - discountAmount;
 
-    // 7. Decrement stock
-    for (const item of data.items) {
-      if (item.variant_id) {
-        const [res] = await connection.execute<ResultSetHeader>(
-          "UPDATE product_variants SET inventory_quantity = inventory_quantity - ? WHERE id = ? AND inventory_quantity >= ?",
-          [item.quantity, item.variant_id, item.quantity],
-        );
+    // 7. Decrement stock (batch)
+    const variantItems = data.items.filter((i) => i.variant_id != null);
+    const productOnlyItems = data.items.filter((i) => i.variant_id == null);
 
-        if (res.affectedRows === 0) {
-          throw new AppError(
-            "Erreur de décrémentation du stock (variante)",
-            500,
-          );
-        }
-      } else {
-        const [res] = await connection.execute<ResultSetHeader>(
-          "UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?",
-          [item.quantity, item.product_id, item.quantity],
-        );
+    if (variantItems.length > 0) {
+      const caseDec = variantItems.map(() => "WHEN ? THEN ?").join(" ");
+      const caseGuard = variantItems.map(() => "WHEN ? THEN ?").join(" ");
+      const ids = variantItems.map((i) => i.variant_id!);
+      const params: (number | string)[] = [];
 
-        if (res.affectedRows === 0) {
-          throw new AppError("Erreur de décrémentation du stock", 500);
-        }
+      // CASE for decrement
+      for (const i of variantItems) {
+        params.push(i.variant_id!, i.quantity);
+      }
+      // CASE for guard
+      for (const i of variantItems) {
+        params.push(i.variant_id!, i.quantity);
+      }
+      // IN clause
+      params.push(...ids);
+
+      const [res] = await connection.execute<ResultSetHeader>(
+        `UPDATE product_variants SET inventory_quantity = inventory_quantity - CASE id ${caseDec} END WHERE id IN (${ids.map(() => "?").join(",")}) AND inventory_quantity >= CASE id ${caseGuard} END`,
+        params,
+      );
+
+      if (res.affectedRows !== variantItems.length) {
+        throw new AppError("Erreur de décrémentation du stock (variante)", 500);
+      }
+    }
+
+    if (productOnlyItems.length > 0) {
+      const caseDec = productOnlyItems.map(() => "WHEN ? THEN ?").join(" ");
+      const caseGuard = productOnlyItems.map(() => "WHEN ? THEN ?").join(" ");
+      const ids = productOnlyItems.map((i) => i.product_id);
+      const params: (number | string)[] = [];
+
+      for (const i of productOnlyItems) {
+        params.push(i.product_id, i.quantity);
+      }
+      for (const i of productOnlyItems) {
+        params.push(i.product_id, i.quantity);
+      }
+      params.push(...ids);
+
+      const [res] = await connection.execute<ResultSetHeader>(
+        `UPDATE products SET stock = stock - CASE id ${caseDec} END WHERE id IN (${ids.map(() => "?").join(",")}) AND stock >= CASE id ${caseGuard} END`,
+        params,
+      );
+
+      if (res.affectedRows !== productOnlyItems.length) {
+        throw new AppError("Erreur de décrémentation du stock", 500);
       }
     }
 

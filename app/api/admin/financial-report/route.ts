@@ -27,6 +27,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           pending_count: number;
           discount_total: number;
           churned_count: number;
+          mrr: number;
         })[]
       >(
         `SELECT
@@ -38,8 +39,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         COUNT(DISTINCT CASE WHEN payment_status = 'captured' AND is_subscription_order = 1 THEN email ELSE NULL END) as subscription_count,
         COALESCE(SUM(CASE WHEN payment_status = 'awaiting' THEN total ELSE 0 END), 0) as pending_amount,
         SUM(CASE WHEN payment_status = 'awaiting' THEN 1 ELSE 0 END) as pending_count,
-        COALESCE(SUM(CASE WHEN payment_status = 'captured' THEN CAST(JSON_EXTRACT(metadata, '$.discount_amount') AS DECIMAL(10,2)) ELSE 0 END), 0) as discount_total,
-        COUNT(DISTINCT CASE WHEN is_subscription_order = 1 AND status = 'canceled' THEN email ELSE NULL END) as churned_count
+        COALESCE(SUM(CASE WHEN payment_status = 'captured' THEN discount_amount ELSE 0 END), 0) as discount_total,
+        COUNT(DISTINCT CASE WHEN is_subscription_order = 1 AND status = 'canceled' THEN email ELSE NULL END) as churned_count,
+        COALESCE(SUM(CASE WHEN payment_status = 'captured' AND is_subscription_order = 1
+          AND DATE_FORMAT(createdAt, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN total ELSE 0 END), 0) as mrr
       FROM orders
       WHERE createdAt >= DATE_SUB(NOW(), INTERVAL ? MONTH)`,
         [months],
@@ -59,14 +62,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       WHERE createdAt >= DATE_SUB(NOW(), INTERVAL ? MONTH)
       GROUP BY month ORDER BY month`,
         [months],
-      );
-
-      const [[mrrRow]] = await pool.execute<
-        (RowDataPacket & { mrr: number })[]
-      >(
-        `SELECT COALESCE(SUM(CASE WHEN payment_status = 'captured' AND is_subscription_order = 1 THEN total ELSE 0 END), 0) as mrr
-      FROM orders
-      WHERE DATE_FORMAT(createdAt, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')`,
       );
 
       const revenue = Number(stats.revenue) || 0;
@@ -95,7 +90,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
                   Number(stats.churned_count))) *
               100
             : 0,
-        mrr: Number(mrrRow.mrr) || 0,
+        mrr: Number(stats.mrr) || 0,
         monthly_trend: trend.map((row) => ({
           month: row.month,
           revenue: Number(row.revenue) || 0,

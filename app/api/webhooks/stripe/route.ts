@@ -7,7 +7,7 @@ import { orderRepository } from "@/lib/repositories/order.repository";
 import { customerRepository } from "@/lib/repositories/customer.repository";
 import { productRepository } from "@/lib/repositories/product.repository";
 import { discountRepository } from "@/lib/repositories/discount.repository";
-import { invalidateMany } from "@/lib/cache";
+import { invalidateMany, invalidateByPrefix } from "@/lib/cache";
 import * as mailService from "@/lib/mail";
 import {
   pushOrderHistory,
@@ -342,7 +342,12 @@ export async function POST(req: NextRequest) {
         if (productId)
           await productRepository.decrementStock(parseInt(productId));
 
-        await invalidateMany("products:list", "admin:stats", "admin:financial");
+        await invalidateMany(
+          "products:list",
+          "admin:stats",
+          "admin:financial",
+          "admin:subscriptions",
+        );
 
         // Send email + auto-ship (fire-and-forget)
         const order = await orderRepository.findById(orderId);
@@ -451,6 +456,7 @@ export async function POST(req: NextRequest) {
           );
         }
 
+        await invalidateByPrefix("admin:subscriptions");
         break;
       }
 
@@ -480,6 +486,7 @@ export async function POST(req: NextRequest) {
         logger.info(
           `[Stripe Webhook] Subscription deleted, cleaned metadata for customer ${customer.id}`,
         );
+        await invalidateByPrefix("admin:subscriptions");
         break;
       }
 

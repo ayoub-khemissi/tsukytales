@@ -5,6 +5,7 @@ import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
 import { orderRepository } from "@/lib/repositories/order.repository";
 import { pool } from "@/lib/db/connection";
+import { cached } from "@/lib/cache";
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireAdmin();
@@ -40,11 +41,15 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     let preorderProductIds: Set<number> | null = null;
 
     if (type === "preorder" || type === "standard") {
-      const [preorderProducts] = await pool.execute<
-        (RowDataPacket & { id: number })[]
-      >("SELECT id FROM products WHERE is_preorder = 1");
+      const ids = await cached("products:preorder-ids", 300, async () => {
+        const [rows] = await pool.execute<(RowDataPacket & { id: number })[]>(
+          "SELECT id FROM products WHERE is_preorder = 1",
+        );
 
-      preorderProductIds = new Set(preorderProducts.map((p) => p.id));
+        return rows.map((p) => p.id);
+      });
+
+      preorderProductIds = new Set(ids);
     }
 
     const isPreorder = (o: any) => {

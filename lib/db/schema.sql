@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `shipping_order_id` VARCHAR(255) AS (JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.shipping_order_id'))) STORED,
   `tracking_number` VARCHAR(255) AS (JSON_UNQUOTE(JSON_EXTRACT(`metadata`, '$.tracking_number'))) STORED,
   `is_subscription_order` TINYINT(1) AS (CASE WHEN JSON_EXTRACT(`metadata`, '$.subscription') = true THEN 1 ELSE 0 END) STORED,
+  `discount_amount` DECIMAL(10,2) AS (CAST(JSON_EXTRACT(`metadata`, '$.discount_amount') AS DECIMAL(10,2))) STORED,
 
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -118,6 +119,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   INDEX `idx_orders_shipping_order` (`shipping_order_id`),
   INDEX `idx_orders_tracking` (`tracking_number`),
   INDEX `idx_orders_subscription` (`is_subscription_order`),
+  INDEX `idx_orders_discount_amount` (`discount_amount`),
   CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

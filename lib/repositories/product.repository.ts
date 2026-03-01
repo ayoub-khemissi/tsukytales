@@ -33,12 +33,17 @@ class ProductRepository extends BaseRepository<ProductRow> {
     totalPages: number;
     currentPage: number;
   }> {
-    const like = `%${query}%`;
+    // Use FULLTEXT index (idx_products_search) for faster search
+    const booleanQuery = query
+      .trim()
+      .split(/\s+/)
+      .map((w) => `+${w}*`)
+      .join(" ");
 
     return this.findAndCountAll({
       where:
-        "(name LIKE ? OR description LIKE ?) AND (is_deleted = 0 OR is_deleted IS NULL)",
-      params: [like, like],
+        "MATCH(name, description) AGAINST(? IN BOOLEAN MODE) AND (is_deleted = 0 OR is_deleted IS NULL)",
+      params: [booleanQuery],
       orderBy: "createdAt DESC",
       page,
       size,
