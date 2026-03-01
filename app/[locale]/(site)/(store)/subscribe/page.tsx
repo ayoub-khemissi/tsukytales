@@ -172,6 +172,17 @@ export default function SubscribePage() {
       .finally(() => setProductLoading(false));
   }, [locale]);
 
+  // Check if already subscribed
+  useEffect(() => {
+    if (!session?.user) return;
+    fetch("/api/store/subscriptions/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.active) setAlreadySubscribed(true);
+      })
+      .catch(() => {});
+  }, [session?.user]);
+
   // Fetch saved addresses + customer profile
   useEffect(() => {
     if (!session?.user) return;

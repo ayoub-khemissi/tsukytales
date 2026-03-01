@@ -655,7 +655,7 @@ export default function AccountPage() {
 
                   {/* Product & pricing */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    {subscription.is_preorder && (
+                    {!!subscription.is_preorder && (
                       <div>
                         <p className="text-sm text-text-light dark:text-gray-400">
                           {t("subscription_product")}
@@ -785,10 +785,12 @@ export default function AccountPage() {
                 </div>
 
                 {/* Product detail card ("encart de présentation") */}
-                {subscription.is_preorder &&
-                  subscription.show_product_detail &&
-                  (subscription.product_image ||
-                    subscription.product_description) && (
+                {!!subscription.is_preorder &&
+                  !!subscription.show_product_detail &&
+                  !!(
+                    subscription.product_image ||
+                    subscription.product_description
+                  ) && (
                     <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] overflow-hidden">
                       <div className="grid grid-cols-1 md:grid-cols-3">
                         {subscription.product_image && (

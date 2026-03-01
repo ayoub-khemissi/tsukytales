@@ -43,6 +43,7 @@ export default function SubscriptionPage() {
   const [product, setProduct] = useState<ActiveProduct | null>(null);
   const [subscriptionDates, setSubscriptionDates] = useState<string[]>([]);
   const [showProductDetail, setShowProductDetail] = useState(true);
+  const [alreadySubscribed, setAlreadySubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   const router = useRouter();
@@ -61,6 +62,17 @@ export default function SubscriptionPage() {
       })
       .finally(() => setLoading(false));
   }, [locale]);
+
+  // Check if already subscribed
+  useEffect(() => {
+    if (!session?.user) return;
+    fetch("/api/store/subscriptions/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.active) setAlreadySubscribed(true);
+      })
+      .catch(() => {});
+  }, [session?.user]);
 
   const isPreorder = !!product?.is_preorder;
 
@@ -131,6 +143,7 @@ export default function SubscriptionPage() {
                 {/* Mobile: preorder first */}
                 <div className="order-2 md:order-1 w-full max-w-[360px] mx-auto md:mx-0">
                   <SubscriptionCard
+                    alreadySubscribed={alreadySubscribed}
                     common={common}
                     locale={locale}
                     product={product}
@@ -171,6 +184,7 @@ function SubscriptionCard({
   common,
   subscriptionDates,
   locale,
+  alreadySubscribed,
 }: {
   product: ActiveProduct;
   session: ReturnType<typeof useSession>["data"];
@@ -178,6 +192,7 @@ function SubscriptionCard({
   common: ReturnType<typeof useTranslations>;
   subscriptionDates: string[];
   locale: string;
+  alreadySubscribed: boolean;
 }) {
   const price = product.subscription_price ?? product.price;
   const isOutOfStock = product.stock === 0;
@@ -248,16 +263,28 @@ function SubscriptionCard({
           </div>
         )}
 
-        <Button
-          as={Link}
-          className="btn-brand bg-primary font-semibold w-full"
-          href={session?.user ? `/subscribe` : "/login"}
-          isDisabled={isOutOfStock}
-          size="lg"
-        >
-          <FontAwesomeIcon className="mr-2" icon={faSyncAlt} />
-          {t("subscribe_cta")}
-        </Button>
+        {alreadySubscribed ? (
+          <Button
+            as={Link}
+            className="btn-brand bg-primary font-semibold w-full"
+            href="/account?tab=subscription"
+            size="lg"
+          >
+            <FontAwesomeIcon className="mr-2" icon={faSyncAlt} />
+            {t("manage")}
+          </Button>
+        ) : (
+          <Button
+            as={Link}
+            className="btn-brand bg-primary font-semibold w-full"
+            href={session?.user ? `/subscribe` : "/login"}
+            isDisabled={isOutOfStock}
+            size="lg"
+          >
+            <FontAwesomeIcon className="mr-2" icon={faSyncAlt} />
+            {t("subscribe_cta")}
+          </Button>
+        )}
       </div>
     </div>
   );
