@@ -13,5 +13,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, context) => {
 
   if (!order) throw new AppError("Commande introuvable", 404);
 
-  return NextResponse.json(order);
+  const notes =
+    (order.metadata?.internal_notes as Array<Record<string, unknown>>) || [];
+
+  return NextResponse.json({ ...order, notes });
 });

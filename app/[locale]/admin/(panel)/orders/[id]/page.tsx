@@ -241,6 +241,22 @@ export default function OrderDetailPage() {
     }
   };
 
+  const handleDeleteNote = async (noteId: number) => {
+    try {
+      const res = await fetch("/api/admin/orders/notes", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: Number(id), noteId }),
+      });
+
+      if (res.ok) {
+        await fetchOrder();
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
     setAddingNote(true);
@@ -534,9 +550,20 @@ export default function OrderDetailPage() {
                   {order.notes.map((note, i) => (
                     <div
                       key={note.id || i}
-                      className="bg-default-50 rounded-lg p-3"
+                      className="bg-default-50 rounded-lg p-3 group"
                     >
-                      <p className="text-sm">{note.note}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm">{note.note}</p>
+                        <Button
+                          className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                          color="danger"
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleDeleteNote(note.id)}
+                        >
+                          {common("delete")}
+                        </Button>
+                      </div>
                       <p className="text-xs text-default-400 mt-1">
                         {new Date(note.createdAt).toLocaleString()}
                       </p>
