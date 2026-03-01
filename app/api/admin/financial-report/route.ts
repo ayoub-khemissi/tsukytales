@@ -20,15 +20,53 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           revenue: number;
           orders_count: number;
           refunds: number;
+          subscription_revenue: number;
+          oneoff_revenue: number;
+          subscription_count: number;
+          pending_amount: number;
+          pending_count: number;
+          discount_total: number;
+          churned_count: number;
         })[]
       >(
         `SELECT
         COALESCE(SUM(CASE WHEN payment_status = 'captured' THEN total ELSE 0 END), 0) as revenue,
         COUNT(*) as orders_count,
-        COALESCE(SUM(CASE WHEN payment_status = 'refunded' THEN total ELSE 0 END), 0) as refunds
+        COALESCE(SUM(CASE WHEN payment_status = 'refunded' THEN total ELSE 0 END), 0) as refunds,
+        COALESCE(SUM(CASE WHEN payment_status = 'captured' AND is_subscription_order = 1 THEN total ELSE 0 END), 0) as subscription_revenue,
+        COALESCE(SUM(CASE WHEN payment_status = 'captured' AND is_subscription_order = 0 THEN total ELSE 0 END), 0) as oneoff_revenue,
+        COUNT(DISTINCT CASE WHEN payment_status = 'captured' AND is_subscription_order = 1 THEN email ELSE NULL END) as subscription_count,
+        COALESCE(SUM(CASE WHEN payment_status = 'awaiting' THEN total ELSE 0 END), 0) as pending_amount,
+        SUM(CASE WHEN payment_status = 'awaiting' THEN 1 ELSE 0 END) as pending_count,
+        COALESCE(SUM(CASE WHEN payment_status = 'captured' THEN CAST(JSON_EXTRACT(metadata, '$.discount_amount') AS DECIMAL(10,2)) ELSE 0 END), 0) as discount_total,
+        COUNT(DISTINCT CASE WHEN is_subscription_order = 1 AND status = 'canceled' THEN email ELSE NULL END) as churned_count
       FROM orders
       WHERE createdAt >= DATE_SUB(NOW(), INTERVAL ? MONTH)`,
         [months],
+      );
+
+      const [trend] = await pool.execute<
+        (RowDataPacket & {
+          month: string;
+          revenue: number;
+          orders_count: number;
+        })[]
+      >(
+        `SELECT DATE_FORMAT(createdAt, '%Y-%m') as month,
+        COALESCE(SUM(CASE WHEN payment_status = 'captured' THEN total ELSE 0 END), 0) as revenue,
+        COUNT(*) as orders_count
+      FROM orders
+      WHERE createdAt >= DATE_SUB(NOW(), INTERVAL ? MONTH)
+      GROUP BY month ORDER BY month`,
+        [months],
+      );
+
+      const [[mrrRow]] = await pool.execute<
+        (RowDataPacket & { mrr: number })[]
+      >(
+        `SELECT COALESCE(SUM(CASE WHEN payment_status = 'captured' AND is_subscription_order = 1 THEN total ELSE 0 END), 0) as mrr
+      FROM orders
+      WHERE DATE_FORMAT(createdAt, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')`,
       );
 
       const revenue = Number(stats.revenue) || 0;
@@ -43,6 +81,26 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         average_order,
         refunds,
         net_revenue,
+        subscription_revenue: Number(stats.subscription_revenue) || 0,
+        oneoff_revenue: Number(stats.oneoff_revenue) || 0,
+        subscription_count: Number(stats.subscription_count) || 0,
+        pending_amount: Number(stats.pending_amount) || 0,
+        pending_count: Number(stats.pending_count) || 0,
+        discount_total: Number(stats.discount_total) || 0,
+        churned_count: Number(stats.churned_count) || 0,
+        churn_rate:
+          Number(stats.subscription_count) + Number(stats.churned_count) > 0
+            ? (Number(stats.churned_count) /
+                (Number(stats.subscription_count) +
+                  Number(stats.churned_count))) *
+              100
+            : 0,
+        mrr: Number(mrrRow.mrr) || 0,
+        monthly_trend: trend.map((row) => ({
+          month: row.month,
+          revenue: Number(row.revenue) || 0,
+          orders_count: Number(row.orders_count) || 0,
+        })),
       };
     },
   );
