@@ -27,6 +27,11 @@ import { addToast } from "@heroui/toast";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
+import {
+  STATUS_COLOR_MAP,
+  FULFILLMENT_COLOR_MAP,
+  PAYMENT_COLOR_MAP,
+} from "@/lib/admin/order-status-colors";
 import { AdminTableFilters } from "@/components/admin/AdminTableFilters";
 import {
   SortableColumn,
@@ -67,31 +72,6 @@ function parseShippingAddress(
 
   return addr;
 }
-
-const STATUS_COLOR_MAP: Record<
-  string,
-  "success" | "danger" | "warning" | "default"
-> = {
-  completed: "success",
-  canceled: "danger",
-  pending: "warning",
-};
-
-const FULFILLMENT_COLOR_MAP: Record<string, "success" | "primary" | "default"> =
-  {
-    delivered: "success",
-    shipped: "primary",
-    not_fulfilled: "default",
-  };
-
-const PAYMENT_COLOR_MAP: Record<
-  string,
-  "success" | "warning" | "danger" | "default"
-> = {
-  captured: "success",
-  refunded: "warning",
-  not_paid: "danger",
-};
 
 export default function OrdersPage() {
   const t = useTranslations("admin");

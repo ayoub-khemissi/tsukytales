@@ -7,6 +7,7 @@ import { Spinner } from "@heroui/spinner";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
+import { STATUS_COLOR_MAP } from "@/lib/admin/order-status-colors";
 
 interface RecentOrder {
   id: number;
@@ -30,18 +31,6 @@ interface Stats {
   recentOrders: RecentOrder[];
   dailySales: DailySale[];
 }
-
-const statusColorMap: Record<
-  string,
-  "warning" | "success" | "danger" | "primary" | "default"
-> = {
-  pending: "warning",
-  processing: "primary",
-  shipped: "primary",
-  delivered: "success",
-  cancelled: "danger",
-  refunded: "danger",
-};
 
 export default function AdminDashboardPage() {
   const t = useTranslations("admin");
@@ -265,7 +254,7 @@ export default function AdminDashboardPage() {
                         TSK-{order.id}
                       </Link>
                       <Chip
-                        color={statusColorMap[order.status] || "default"}
+                        color={STATUS_COLOR_MAP[order.status] || "default"}
                         size="sm"
                         variant="flat"
                       >

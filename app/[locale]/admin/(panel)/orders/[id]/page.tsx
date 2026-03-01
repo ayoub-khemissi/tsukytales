@@ -19,6 +19,11 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
+import {
+  STATUS_COLOR_MAP,
+  FULFILLMENT_COLOR_MAP,
+  PAYMENT_COLOR_MAP,
+} from "@/lib/admin/order-status-colors";
 import OrderTimeline from "@/components/shared/OrderTimeline";
 
 interface OrderItem {
@@ -87,34 +92,6 @@ interface Order {
   metadata: OrderMetadata | null;
   createdAt: string;
 }
-
-const STATUS_COLOR_MAP: Record<
-  string,
-  "success" | "danger" | "warning" | "default"
-> = {
-  completed: "success",
-  canceled: "danger",
-  pending: "warning",
-};
-
-const FULFILLMENT_COLOR_MAP: Record<
-  string,
-  "success" | "primary" | "secondary" | "default"
-> = {
-  delivered: "success",
-  shipped: "primary",
-  fulfilled: "secondary",
-  not_fulfilled: "default",
-};
-
-const PAYMENT_COLOR_MAP: Record<
-  string,
-  "success" | "warning" | "danger" | "default"
-> = {
-  captured: "success",
-  refunded: "warning",
-  not_paid: "danger",
-};
 
 export default function OrderDetailPage() {
   const params = useParams();
