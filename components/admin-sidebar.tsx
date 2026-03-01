@@ -51,6 +51,46 @@ const navItems = [
     ),
   },
   {
+    labelKey: "nav_subscriptions",
+    href: "/admin/subscriptions",
+    icon: (
+      <svg
+        fill="none"
+        height="20"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+        width="20"
+      >
+        <polyline points="23 4 23 10 17 10" />
+        <polyline points="1 20 1 14 7 14" />
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
+        <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
+      </svg>
+    ),
+  },
+  {
+    labelKey: "nav_preorders",
+    href: "/admin/preorders",
+    icon: (
+      <svg
+        fill="none"
+        height="20"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+        width="20"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    ),
+  },
+  {
     labelKey: "nav_products",
     href: "/admin/products",
     icon: (
@@ -125,46 +165,6 @@ const navItems = [
       >
         <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
         <line x1="7" x2="7.01" y1="7" y2="7" />
-      </svg>
-    ),
-  },
-  {
-    labelKey: "nav_subscriptions",
-    href: "/admin/subscriptions",
-    icon: (
-      <svg
-        fill="none"
-        height="20"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-        width="20"
-      >
-        <polyline points="23 4 23 10 17 10" />
-        <polyline points="1 20 1 14 7 14" />
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
-        <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
-      </svg>
-    ),
-  },
-  {
-    labelKey: "nav_preorders",
-    href: "/admin/preorders",
-    icon: (
-      <svg
-        fill="none"
-        height="20"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        viewBox="0 0 24 24"
-        width="20"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
       </svg>
     ),
   },
