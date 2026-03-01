@@ -155,7 +155,7 @@ export default function SubscribePage() {
   // Auth guard
   useEffect(() => {
     if (sessionStatus === "unauthenticated") {
-      router.push("/login");
+      router.push("/register?callbackUrl=/subscribe");
     }
   }, [sessionStatus, router]);
 

@@ -8,11 +8,14 @@ import { Divider } from "@heroui/divider";
 import { Form } from "@heroui/form";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 
 import { Link } from "@/i18n/navigation";
 
 export default function RegisterPage() {
   const t = useTranslations("auth");
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/account";
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -72,7 +75,7 @@ export default function RegisterPage() {
         setError(result.error);
         setLoading(false);
       } else {
-        window.location.href = "/account";
+        window.location.href = callbackUrl;
       }
     } catch {
       setError("Erreur réseau");
@@ -146,7 +149,7 @@ export default function RegisterPage() {
           <Divider className="my-6" />
           <Button
             className="btn-brand-outline w-full font-semibold"
-            onPress={() => signIn("google", { callbackUrl: "/account" })}
+            onPress={() => signIn("google", { callbackUrl })}
           >
             {t("or_continue_with")} {t("google")}
           </Button>
