@@ -16,6 +16,7 @@ import {
 } from "@heroui/table";
 import { useTranslations } from "next-intl";
 
+import { Link } from "@/i18n/navigation";
 import { AdminTableFilters } from "@/components/admin/AdminTableFilters";
 import {
   SortableColumn,
@@ -24,6 +25,7 @@ import {
 import { downloadCSV } from "@/lib/utils/export-csv";
 
 interface PreorderItem {
+  product_id: number;
   product_name: string;
   quantity: number;
 }
@@ -31,14 +33,28 @@ interface PreorderItem {
 interface Preorder {
   id: string;
   order_number: string;
+  customer_id: number | null;
   customer_email: string;
+  customer_name: string | null;
   items: PreorderItem[];
+  total: number;
   status: string;
+  payment_status: string;
   created_at: string;
 }
 
+const PAYMENT_COLOR_MAP: Record<
+  string,
+  "success" | "warning" | "danger" | "default"
+> = {
+  captured: "success",
+  refunded: "warning",
+  not_paid: "danger",
+};
+
 export default function PreordersPage() {
   const t = useTranslations("admin");
+  const common = useTranslations("common");
   const st = useTranslations("status");
   const [preorders, setPreorders] = useState<Preorder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,15 +120,19 @@ export default function PreordersPage() {
         t("preorders_order_number"),
         t("preorders_customer"),
         t("preorders_items"),
+        t("preorders_total"),
         t("preorders_status"),
+        t("preorders_payment_status"),
         t("preorders_date"),
       ];
 
       const rows = items.map((p) => [
         p.order_number,
-        p.customer_email,
+        `${p.customer_email}${p.customer_name ? ` (${p.customer_name})` : ""}`,
         p.items.map((i) => `${i.product_name} x${i.quantity}`).join(", "),
+        `${p.total.toFixed(2)}${common("currency")}`,
         st(p.status as any),
+        st(p.payment_status as any),
         new Date(p.created_at).toLocaleDateString(),
       ]);
 
@@ -200,7 +220,17 @@ export default function PreordersPage() {
                 </TableColumn>
                 <TableColumn>{t("preorders_customer")}</TableColumn>
                 <TableColumn>{t("preorders_items")}</TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="total"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("preorders_total")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
                 <TableColumn>{t("preorders_status")}</TableColumn>
+                <TableColumn>{t("preorders_payment_status")}</TableColumn>
                 <TableColumn>
                   <SortableColumn
                     column="created_at"
@@ -214,16 +244,51 @@ export default function PreordersPage() {
               <TableBody>
                 {preorders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell>{order.order_number}</TableCell>
-                    <TableCell>{order.customer_email}</TableCell>
+                    <TableCell>
+                      <Link
+                        className="text-primary font-medium hover:underline"
+                        href={`/admin/orders/${order.id}`}
+                      >
+                        {order.order_number}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      {order.customer_id ? (
+                        <Link
+                          className="hover:underline"
+                          href={`/admin/customers/${order.customer_id}`}
+                        >
+                          <span className="text-primary font-medium">
+                            {order.customer_email}
+                          </span>
+                          {order.customer_name && (
+                            <p className="text-sm text-default-500">
+                              {order.customer_name}
+                            </p>
+                          )}
+                        </Link>
+                      ) : (
+                        <span className="font-medium">
+                          {order.customer_email}
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         {order.items.map((item, i) => (
-                          <span key={i} className="text-sm">
+                          <Link
+                            key={i}
+                            className="text-sm text-primary hover:underline"
+                            href={`/admin/products/${item.product_id}`}
+                          >
                             {item.product_name} x{item.quantity}
-                          </span>
+                          </Link>
                         ))}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-default-500">
+                      {order.total.toFixed(2)}
+                      {common("currency")}
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -241,6 +306,17 @@ export default function PreordersPage() {
                       </Chip>
                     </TableCell>
                     <TableCell>
+                      <Chip
+                        color={
+                          PAYMENT_COLOR_MAP[order.payment_status] || "default"
+                        }
+                        size="sm"
+                        variant="flat"
+                      >
+                        {st(order.payment_status as any)}
+                      </Chip>
+                    </TableCell>
+                    <TableCell className="text-default-500">
                       {new Date(order.created_at).toLocaleDateString()}
                     </TableCell>
                   </TableRow>

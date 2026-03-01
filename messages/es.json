@@ -533,6 +533,8 @@
     "preorders_customer": "Cliente",
     "preorders_items": "Artículos",
     "preorders_status": "Estado",
+    "preorders_total": "Total",
+    "preorders_payment_status": "Pago",
     "preorders_date": "Fecha",
     "products_delete_confirm": "¿Está seguro de que desea eliminar este producto?",
     "products_col_name": "Nombre",

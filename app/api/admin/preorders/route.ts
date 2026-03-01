@@ -4,6 +4,7 @@ import { RowDataPacket } from "mysql2";
 import { withErrorHandler } from "@/lib/errors/handler";
 import { requireAdmin } from "@/lib/auth/helpers";
 import { pool } from "@/lib/db/connection";
+import { customerRepository } from "@/lib/repositories/customer.repository";
 import { getPagination } from "@/lib/utils/pagination";
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
@@ -56,6 +57,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const allowedSort: Record<string, string> = {
     order_number: "id",
     created_at: "createdAt",
+    total: "total",
   };
   const col = (sortBy && allowedSort[sortBy]) || "createdAt";
   const dir = sortOrder === "asc" ? "ASC" : "DESC";
@@ -66,10 +68,14 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   >(`SELECT COUNT(*) as total FROM orders WHERE ${where}`, params);
 
   const [rows] = await pool.execute<RowDataPacket[]>(
-    `SELECT id, display_id, email, items, fulfillment_status, createdAt
+    `SELECT id, display_id, customer_id, email, items, total, fulfillment_status, payment_status, createdAt
      FROM orders WHERE ${where} ORDER BY ${col} ${dir} LIMIT ? OFFSET ?`,
     [...params, String(limit), String(offset)],
   );
+
+  // Lookup customers by email for name + id
+  const customers = await customerRepository.findAll();
+  const customerByEmail = new Map(customers.map((c) => [c.email, c]));
 
   // Map to response shape, filtering items to preorder products only
   const preorderIdSet = new Set(preorderProductIds);
@@ -83,15 +89,26 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
       if (preorderItems.length === 0) return null;
 
+      const customer = customerByEmail.get(o.email);
+
       return {
         id: o.id,
-        order_number: o.display_id ? `TSK-${o.display_id}` : `#${o.id}`,
+        order_number: `TSK-${o.id}`,
+        customer_id: customer?.id ?? null,
         customer_email: o.email,
+        customer_name: customer
+          ? [customer.first_name, customer.last_name]
+              .filter(Boolean)
+              .join(" ") || null
+          : null,
         items: preorderItems.map((i: any) => ({
+          product_id: i.product_id,
           product_name: i.name,
           quantity: i.quantity,
         })),
+        total: Number(o.total),
         status: o.fulfillment_status,
+        payment_status: o.payment_status,
         created_at: o.createdAt,
       };
     })
