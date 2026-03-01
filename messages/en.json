@@ -230,7 +230,8 @@
     "preorder_desc": "RESERVE YOUR COPY OF THE NEXT LIMITED EDITION",
     "remaining_stock": "{count} copies remaining",
     "quantity": "Quantity",
-    "detail_title": "Product details"
+    "detail_title": "Product details",
+    "coming_soon": "Coming soon"
   },
   "auth": {
     "login_title": "Login",

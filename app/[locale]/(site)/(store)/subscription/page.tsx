@@ -125,8 +125,7 @@ export default function SubscriptionPage() {
             <p className="text-center text-default-500 text-lg">
               {common("no_results")}
             </p>
-          ) : isPreorder ? (
-            /* ===== CASE B: with preorder ===== */
+          ) : (
             <div className="space-y-12">
               {/* Top row: 2 cards */}
               <div className="flex flex-col md:flex-row justify-evenly gap-8">
@@ -152,32 +151,9 @@ export default function SubscriptionPage() {
                 </div>
               </div>
 
-              {/* Detail section — full width */}
-              {showProductDetail && (
+              {/* Detail section — only when preorder is active */}
+              {isPreorder && showProductDetail && (
                 <DetailSection common={common} product={product} t={t} />
-              )}
-            </div>
-          ) : (
-            /* ===== CASE A: no preorder ===== */
-            <div
-              className={`flex flex-col ${showProductDetail ? "md:flex-row" : ""} gap-8 md:items-stretch`}
-            >
-              <div
-                className={`w-full max-w-[360px] mx-auto ${showProductDetail ? "md:mx-0 md:w-[360px] md:flex-shrink-0" : ""}`}
-              >
-                <SubscriptionCard
-                  common={common}
-                  locale={locale}
-                  product={product}
-                  session={session}
-                  subscriptionDates={subscriptionDates}
-                  t={t}
-                />
-              </div>
-              {showProductDetail && (
-                <div className="w-full md:flex-1">
-                  <DetailSection common={common} product={product} t={t} />
-                </div>
               )}
             </div>
           )}
@@ -309,8 +285,9 @@ function PreorderCard({
   }) => void;
   router: ReturnType<typeof useRouter>;
 }) {
-  const isOutOfStock = product.stock === 0;
-  const isLowStock = product.stock > 0 && product.stock < 10;
+  const isActive = product.is_preorder;
+  const isOutOfStock = isActive && product.stock === 0;
+  const isLowStock = isActive && product.stock > 0 && product.stock < 10;
 
   return (
     <div className="step-card relative bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-full min-h-[550px] sm:min-h-[620px] px-5 pt-14 pb-8 sm:px-10 sm:pt-18 sm:pb-12">
@@ -319,7 +296,7 @@ function PreorderCard({
         {common("preorder")}
       </span>
 
-      {/* Stock badge */}
+      {/* Stock badge — only when preorder is active */}
       {isLowStock && (
         <span className="absolute top-5 right-5 z-10 bg-warning text-white text-[0.7rem] font-semibold px-3 py-1 rounded-full">
           {t("stock_low", { count: product.stock })}
@@ -362,24 +339,34 @@ function PreorderCard({
           </span>
         </div>
 
-        <Button
-          className="btn-brand bg-gradient-to-r from-accent-gold to-accent-gold-light font-semibold w-full text-white"
-          isDisabled={isOutOfStock}
-          size="lg"
-          onPress={() => {
-            addItem({
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image: product.image || undefined,
-              slug: product.slug,
-            });
-            router.push("/checkout");
-          }}
-        >
-          <FontAwesomeIcon className="mr-2" icon={faShoppingCart} />
-          {t("add_to_cart")}
-        </Button>
+        {isActive ? (
+          <Button
+            className="btn-brand bg-gradient-to-r from-accent-gold to-accent-gold-light font-semibold w-full text-white"
+            isDisabled={isOutOfStock}
+            size="lg"
+            onPress={() => {
+              addItem({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image || undefined,
+                slug: product.slug,
+              });
+              router.push("/checkout");
+            }}
+          >
+            <FontAwesomeIcon className="mr-2" icon={faShoppingCart} />
+            {isOutOfStock ? t("stock_out") : t("add_to_cart")}
+          </Button>
+        ) : (
+          <Button
+            isDisabled
+            className="btn-brand bg-default-200 dark:bg-gray-700 font-semibold w-full text-default-500 dark:text-gray-400"
+            size="lg"
+          >
+            {t("coming_soon")}
+          </Button>
+        )}
       </div>
     </div>
   );

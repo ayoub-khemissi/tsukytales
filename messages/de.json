@@ -229,7 +229,8 @@
     "preorder_desc": "RESERVIEREN SIE IHR EXEMPLAR DER NÄCHSTEN LIMITIERTEN AUSGABE",
     "remaining_stock": "{count} Exemplare übrig",
     "quantity": "Menge",
-    "detail_title": "Produktdetails"
+    "detail_title": "Produktdetails",
+    "coming_soon": "Demnächst verfügbar"
   },
   "auth": {
     "login_title": "Anmelden",
