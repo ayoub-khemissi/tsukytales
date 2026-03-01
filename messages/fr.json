@@ -545,7 +545,7 @@
     "products_no_variants": "Aucune variante",
     "products_field_status": "Statut",
     "products_status_active": "Actif",
-    "products_status_draft": "Brouillon",
+    "products_status_draft": "Inactif",
     "products_is_active": "Produit actif",
     "products_is_preorder": "En précommande",
     "products_create": "Créer le produit",

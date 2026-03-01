@@ -30,7 +30,9 @@ interface Product {
   slug: string;
   price: number;
   stock: number;
-  status: string;
+  weight: number;
+  is_active: boolean;
+  is_preorder: boolean;
   image: string | null;
 }
 
@@ -179,6 +181,7 @@ export default function ProductsPage() {
                     onSort={handleSort}
                   />
                 </TableColumn>
+                <TableColumn>{t("products_field_weight")}</TableColumn>
                 <TableColumn>
                   <SortableColumn
                     column="stock"
@@ -189,6 +192,7 @@ export default function ProductsPage() {
                   />
                 </TableColumn>
                 <TableColumn>{t("products_col_status")}</TableColumn>
+                <TableColumn>{t("products_is_preorder")}</TableColumn>
                 <TableColumn>{t("products_col_actions")}</TableColumn>
               </TableHeader>
               <TableBody>
@@ -206,6 +210,9 @@ export default function ProductsPage() {
                       {Number(product.price).toFixed(2)}
                       {common("currency")}
                     </TableCell>
+                    <TableCell className="text-default-500">
+                      {Number(product.weight).toFixed(2)} kg
+                    </TableCell>
                     <TableCell>
                       <Chip
                         color={product.stock > 0 ? "success" : "danger"}
@@ -217,17 +224,26 @@ export default function ProductsPage() {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        color={
-                          product.status === "active" ? "success" : "default"
-                        }
+                        color={product.is_active ? "success" : "default"}
                         size="sm"
-                        variant="flat"
+                        variant="dot"
                       >
                         {t(
-                          product.status === "active"
+                          product.is_active
                             ? "products_status_active"
                             : "products_status_draft",
                         )}
+                      </Chip>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        color={product.is_preorder ? "warning" : "default"}
+                        size="sm"
+                        variant="dot"
+                      >
+                        {product.is_preorder
+                          ? t("products_status_active")
+                          : t("products_status_draft")}
                       </Chip>
                     </TableCell>
                     <TableCell>

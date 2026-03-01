@@ -550,7 +550,7 @@
     "products_no_variants": "Keine Varianten",
     "products_field_status": "Status",
     "products_status_active": "Aktiv",
-    "products_status_draft": "Entwurf",
+    "products_status_draft": "Inaktiv",
     "products_is_active": "Aktives Produkt",
     "products_is_preorder": "Vorbestellung",
     "products_create": "Produkt erstellen",

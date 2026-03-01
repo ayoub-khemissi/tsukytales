@@ -545,7 +545,7 @@
     "products_no_variants": "Nessuna variante",
     "products_field_status": "Stato",
     "products_status_active": "Attivo",
-    "products_status_draft": "Bozza",
+    "products_status_draft": "Inattivo",
     "products_is_active": "Prodotto attivo",
     "products_is_preorder": "Preordine",
     "products_create": "Crea prodotto",
