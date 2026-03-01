@@ -24,6 +24,7 @@ import {
   faUndo,
   faBan,
   faCreditCard,
+  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 
@@ -117,6 +118,7 @@ export default function AccountPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [skipMessage, setSkipMessage] = useState("");
   const [editingAddress, setEditingAddress] = useState<number | null>(null);
+  const [creatingAddress, setCreatingAddress] = useState(false);
   const [addressForm, setAddressForm] = useState({
     label: "",
     first_name: "",
@@ -240,6 +242,7 @@ export default function AccountPage() {
   };
 
   const startEditingAddress = (addr: Address) => {
+    setCreatingAddress(false);
     setEditingAddress(addr.id);
     setAddressForm({
       label: addr.label,
@@ -252,6 +255,44 @@ export default function AccountPage() {
       phone: addr.phone || "",
       is_default: !!addr.is_default,
     });
+  };
+
+  const startCreatingAddress = () => {
+    setEditingAddress(null);
+    setCreatingAddress(true);
+    setAddressForm({
+      label: "",
+      first_name: "",
+      last_name: "",
+      street: "",
+      zip_code: "",
+      city: "",
+      country: "FR",
+      phone: "",
+      is_default: addresses.length === 0,
+    });
+  };
+
+  const createAddress = async () => {
+    setAddressSaved(false);
+    setAddressApiError(false);
+
+    const res = await fetch("/api/store/addresses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(addressForm),
+    });
+
+    if (!res.ok) {
+      setAddressApiError(true);
+      setTimeout(() => setAddressApiError(false), 3000);
+
+      return;
+    }
+    setAddressSaved(true);
+    setCreatingAddress(false);
+    await fetchData();
+    setTimeout(() => setAddressSaved(false), 3000);
   };
 
   if (loading) {
@@ -746,7 +787,152 @@ export default function AccountPage() {
         {/* Addresses */}
         {activeTab === "addresses" && (
           <div className="space-y-4">
-            {addresses.length === 0 ? (
+            {addressSaved && (
+              <div className="bg-success-50 text-success p-3 rounded-2xl text-sm font-medium">
+                {t("addresses_saved")}
+              </div>
+            )}
+            {addressApiError && (
+              <div className="bg-danger-50 text-danger p-3 rounded-2xl text-sm font-medium">
+                {t("addresses_error")}
+              </div>
+            )}
+
+            {addresses.length < 3 && !creatingAddress && (
+              <Button
+                color="primary"
+                startContent={<FontAwesomeIcon icon={faPlus} />}
+                variant="flat"
+                onPress={startCreatingAddress}
+              >
+                {t("addresses_add")}
+              </Button>
+            )}
+
+            {creatingAddress && (
+              <div className="bg-white dark:bg-gray-900 rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] px-4 py-5 sm:px-8 sm:py-6">
+                <h3 className="font-heading font-semibold text-text-brand dark:text-white mb-4">
+                  {t("addresses_add")}
+                </h3>
+                <Form
+                  className="space-y-4 w-full overflow-hidden"
+                  validationBehavior="native"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    createAddress();
+                  }}
+                >
+                  <Input
+                    isRequired
+                    label={t("addresses_label")}
+                    maxLength={50}
+                    size="sm"
+                    value={addressForm.label}
+                    onValueChange={(v) =>
+                      setAddressForm((f) => ({ ...f, label: v }))
+                    }
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Input
+                      isRequired
+                      label={auth("first_name")}
+                      maxLength={100}
+                      size="sm"
+                      value={addressForm.first_name}
+                      onValueChange={(v) =>
+                        setAddressForm((f) => ({ ...f, first_name: v }))
+                      }
+                    />
+                    <Input
+                      isRequired
+                      label={auth("last_name")}
+                      maxLength={100}
+                      size="sm"
+                      value={addressForm.last_name}
+                      onValueChange={(v) =>
+                        setAddressForm((f) => ({ ...f, last_name: v }))
+                      }
+                    />
+                  </div>
+                  <Input
+                    isRequired
+                    label={t("addresses_street")}
+                    maxLength={255}
+                    size="sm"
+                    value={addressForm.street}
+                    onValueChange={(v) =>
+                      setAddressForm((f) => ({ ...f, street: v }))
+                    }
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
+                    <Input
+                      isRequired
+                      label={t("addresses_zip_code")}
+                      maxLength={10}
+                      size="sm"
+                      value={addressForm.zip_code}
+                      onValueChange={(v) =>
+                        setAddressForm((f) => ({ ...f, zip_code: v }))
+                      }
+                    />
+                    <Input
+                      isRequired
+                      label={t("addresses_city")}
+                      maxLength={100}
+                      size="sm"
+                      value={addressForm.city}
+                      onValueChange={(v) =>
+                        setAddressForm((f) => ({ ...f, city: v }))
+                      }
+                    />
+                    <Input
+                      isRequired
+                      label={t("addresses_country")}
+                      maxLength={2}
+                      size="sm"
+                      value={addressForm.country}
+                      onValueChange={(v) =>
+                        setAddressForm((f) => ({
+                          ...f,
+                          country: v.toUpperCase(),
+                        }))
+                      }
+                    />
+                  </div>
+                  <Input
+                    isRequired
+                    label={t("addresses_phone")}
+                    maxLength={20}
+                    size="sm"
+                    value={addressForm.phone}
+                    onValueChange={(v) =>
+                      setAddressForm((f) => ({ ...f, phone: v }))
+                    }
+                  />
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      className="w-full sm:w-auto"
+                      color="primary"
+                      size="sm"
+                      startContent={<FontAwesomeIcon icon={faSave} />}
+                      type="submit"
+                    >
+                      {common("save")}
+                    </Button>
+                    <Button
+                      className="w-full sm:w-auto"
+                      size="sm"
+                      variant="light"
+                      onPress={() => setCreatingAddress(false)}
+                    >
+                      {common("cancel")}
+                    </Button>
+                  </div>
+                </Form>
+              </div>
+            )}
+
+            {addresses.length === 0 && !creatingAddress ? (
               <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] text-center px-5 py-12 sm:px-8 sm:py-16">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl mx-auto mb-4">
                   <FontAwesomeIcon icon={faMapMarkerAlt} />
@@ -757,16 +943,6 @@ export default function AccountPage() {
               </div>
             ) : (
               <>
-                {addressSaved && (
-                  <div className="bg-success-50 text-success p-3 rounded-2xl text-sm font-medium">
-                    {t("addresses_saved")}
-                  </div>
-                )}
-                {addressApiError && (
-                  <div className="bg-danger-50 text-danger p-3 rounded-2xl text-sm font-medium">
-                    {t("addresses_error")}
-                  </div>
-                )}
                 {addresses.map((addr) => (
                   <div
                     key={addr.id}

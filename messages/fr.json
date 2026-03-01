@@ -292,6 +292,8 @@
     "addresses_edit": "Modifier",
     "addresses_set_default": "Définir par défaut",
     "addresses_saved": "Adresse mise à jour",
+    "addresses_created": "Adresse ajoutée",
+    "addresses_max": "Vous avez atteint le nombre maximum d'adresses (3)",
     "addresses_error": "Erreur lors de la mise à jour de l'adresse",
     "addresses_label": "Libellé",
     "addresses_street": "Adresse",

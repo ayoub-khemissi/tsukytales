@@ -14,6 +14,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const data = validate(createAddressSchema, body);
   const customerId = session.user.customerId!;
 
+  const count = await addressRepository.countByCustomer(customerId);
+
+  if (count >= 3) {
+    return NextResponse.json(
+      { error: "Maximum number of addresses reached (3)" },
+      { status: 400 },
+    );
+  }
+
   const address = await withTransaction(async (connection) => {
     if (data.is_default) {
       await connection.execute<ResultSetHeader>(
