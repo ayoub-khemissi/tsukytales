@@ -754,18 +754,56 @@ export default function OrderDetailPage() {
             <CardBody>
               {order.shipping_address ? (
                 <div className="text-sm text-default-600 space-y-1">
-                  <p className="font-medium text-foreground">
-                    {order.shipping_address.first_name}{" "}
-                    {order.shipping_address.last_name}
-                  </p>
-                  <p>{order.shipping_address.street}</p>
-                  <p>
-                    {order.shipping_address.zip_code}{" "}
-                    {order.shipping_address.city}
-                  </p>
-                  <p>{order.shipping_address.country}</p>
-                  {order.shipping_address.phone && (
-                    <p>{order.shipping_address.phone}</p>
+                  {isRelay && relay ? (
+                    <>
+                      <p className="font-medium text-foreground">
+                        {relay.name}
+                        {relay.code && (
+                          <span className="text-default-400 ml-1">
+                            ({relay.code})
+                          </span>
+                        )}
+                      </p>
+                      {relay.address && (
+                        <>
+                          <p>{relay.address.street}</p>
+                          <p>
+                            {relay.address.zipCode ||
+                              relay.address.zip_code}{" "}
+                            {relay.address.city}
+                          </p>
+                        </>
+                      )}
+                      {(order.shipping_address.first_name ||
+                        order.shipping_address.last_name) && (
+                        <p className="mt-2 text-default-400">
+                          {t("orders_recipient")}:{" "}
+                          {order.shipping_address.first_name}{" "}
+                          {order.shipping_address.last_name}
+                        </p>
+                      )}
+                      {order.shipping_address.phone && (
+                        <p className="text-default-400">
+                          {order.shipping_address.phone}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium text-foreground">
+                        {order.shipping_address.first_name}{" "}
+                        {order.shipping_address.last_name}
+                      </p>
+                      <p>{order.shipping_address.street}</p>
+                      <p>
+                        {order.shipping_address.zip_code}{" "}
+                        {order.shipping_address.city}
+                      </p>
+                      <p>{order.shipping_address.country}</p>
+                      {order.shipping_address.phone && (
+                        <p>{order.shipping_address.phone}</p>
+                      )}
+                    </>
                   )}
                 </div>
               ) : (

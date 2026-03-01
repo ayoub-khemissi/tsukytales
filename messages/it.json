@@ -633,6 +633,7 @@
     "orders_no_actions_delivered": "Ordine consegnato e finalizzato",
     "orders_no_notes": "Nessuna nota",
     "orders_no_address": "Nessun indirizzo di spedizione",
+    "orders_recipient": "Destinatario",
     "orders_shipping_info": "Spedizione",
     "orders_shipping_method": "Metodo",
     "orders_shipping_method_relay": "Punto di ritiro",

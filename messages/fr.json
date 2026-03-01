@@ -635,6 +635,7 @@
     "orders_no_actions_delivered": "Commande livrée et finalisée",
     "orders_no_notes": "Aucune note",
     "orders_no_address": "Aucune adresse de livraison",
+    "orders_recipient": "Destinataire",
     "orders_shipping_info": "Expédition",
     "orders_shipping_method": "Méthode",
     "orders_shipping_method_relay": "Point Relais",

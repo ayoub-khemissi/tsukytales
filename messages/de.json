@@ -632,6 +632,7 @@
     "orders_no_actions_delivered": "Bestellung geliefert und abgeschlossen",
     "orders_no_notes": "Keine Notizen",
     "orders_no_address": "Keine Lieferadresse",
+    "orders_recipient": "Empfänger",
     "orders_shipping_info": "Versand",
     "orders_shipping_method": "Methode",
     "orders_shipping_method_relay": "Abholpunkt",

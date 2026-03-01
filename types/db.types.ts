@@ -93,6 +93,21 @@ export type PaymentStatus =
   | "canceled"
   | "requires_action";
 
+export interface RelayAddress {
+  street?: string;
+  zipCode?: string;
+  zip_code?: string;
+  city?: string;
+  country?: string;
+}
+
+export interface RelayInfo {
+  code: string;
+  name: string;
+  network?: string;
+  address?: RelayAddress;
+}
+
 export interface OrderAddress {
   first_name?: string;
   last_name?: string;
@@ -102,6 +117,7 @@ export interface OrderAddress {
   city?: string;
   country?: string;
   phone?: string;
+  relay?: RelayInfo;
 }
 
 export interface OrderItem {

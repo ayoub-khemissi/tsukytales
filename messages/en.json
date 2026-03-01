@@ -635,6 +635,7 @@
     "orders_no_actions_delivered": "Order delivered and finalized",
     "orders_no_notes": "No notes",
     "orders_no_address": "No shipping address",
+    "orders_recipient": "Recipient",
     "orders_shipping_info": "Shipping",
     "orders_shipping_method": "Method",
     "orders_shipping_method_relay": "Relay Point",
