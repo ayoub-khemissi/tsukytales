@@ -32,7 +32,7 @@ interface FinancialReport {
   monthly_trend: MonthlyTrend[];
 }
 
-const PERIODS = [3, 6, 12, 0] as const;
+const PERIODS = [1, 3, 6, 12, 0] as const;
 
 export default function FinancesPage() {
   const t = useTranslations("admin");
@@ -43,6 +43,7 @@ export default function FinancesPage() {
   const [months, setMonths] = useState(6);
 
   const periodLabels: Record<number, string> = {
+    1: t("finances_period_1m"),
     3: t("finances_period_3m"),
     6: t("finances_period_6m"),
     12: t("finances_period_12m"),
