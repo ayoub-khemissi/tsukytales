@@ -8,6 +8,26 @@ import { customerRepository } from "@/lib/repositories/customer.repository";
 import { cached } from "@/lib/cache";
 import { logger } from "@/lib/utils/logger";
 import { env } from "@/lib/utils/env";
+import { pool } from "@/lib/db/connection";
+import { CustomerRow } from "@/types/db.types";
+
+interface SubscriptionItem {
+  id: string;
+  customer_id: number | null;
+  customer_email: string;
+  customer_name: string | null;
+  plan_name: string;
+  status: string;
+  stripe_status: string | null;
+  stripe_dashboard_url: string | null;
+  next_billing_date: string | null;
+  cancel_at_period_end: boolean;
+  orders_count: number;
+  last_order_date: string;
+  amount: number;
+  total_spent: number;
+  created_at: string;
+}
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireAdmin();
@@ -21,24 +41,27 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const limitParam = Number(searchParams.get("limit") || 20);
 
   const data = await cached("admin:subscriptions", 120, async () => {
-    // 1. Get subscription orders from DB
+    // 1. Find all customers with an active subscription_schedule_id
+    const [subscriberRows] = await pool.execute<CustomerRow[]>(
+      "SELECT * FROM customers WHERE subscription_schedule_id IS NOT NULL",
+    );
+
+    // 2. Get subscription orders from DB
     const orders = await orderRepository.findAll({
       where: "is_subscription_order = 1",
       orderBy: "createdAt DESC",
     });
 
-    // 2. Group by customer email (latest order per customer)
-    const byEmail = new Map<string, (typeof orders)[0][]>();
-
+    // Group orders by customer email
+    const ordersByEmail = new Map<string, (typeof orders)[0][]>();
     for (const o of orders) {
-      const list = byEmail.get(o.email) || [];
-
+      const list = ordersByEmail.get(o.email) || [];
       list.push(o);
-      byEmail.set(o.email, list);
+      ordersByEmail.set(o.email, list);
     }
 
-    // 3. Try to fetch Stripe statuses for known subscription IDs (batched)
-    const stripeStatuses = new Map<
+    // 3. Fetch Stripe schedule statuses for all subscribers
+    const scheduleStatuses = new Map<
       string,
       {
         status: string;
@@ -47,32 +70,68 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       }
     >();
 
+    const scheduleIds = subscriberRows
+      .map((c) => c.metadata?.subscription_schedule_id as string | undefined)
+      .filter((id): id is string => !!id);
+
+    for (let i = 0; i < scheduleIds.length; i += 10) {
+      const chunk = scheduleIds.slice(i, i + 10);
+      const results = await Promise.allSettled(
+        chunk.map((id) => stripe.subscriptionSchedules.retrieve(id)),
+      );
+
+      for (let j = 0; j < chunk.length; j++) {
+        const result = results[j];
+        if (result.status === "fulfilled") {
+          const sched = result.value;
+          // Find next billing from phases
+          const now = Math.floor(Date.now() / 1000);
+          let nextBilling: number | null = null;
+          for (const phase of sched.phases) {
+            if (phase.start_date > now) {
+              nextBilling = phase.start_date;
+              break;
+            }
+          }
+
+          scheduleStatuses.set(chunk[j], {
+            status: sched.status === "active" || sched.status === "not_started"
+              ? "active"
+              : sched.status,
+            current_period_end: nextBilling,
+            cancel_at_period_end: false,
+          });
+        } else {
+          logger.warn(`[Subscriptions] Could not fetch schedule ${chunk[j]}`);
+        }
+      }
+    }
+
+    // Also fetch Stripe subscription statuses from orders
     const stripeSubIds = Array.from(
       new Set(
         orders
-          .map(
-            (o) =>
-              (o.metadata as any)?.stripe_subscription_id as string | undefined,
-          )
+          .map((o) => (o.metadata as any)?.stripe_subscription_id as string | undefined)
           .filter((id): id is string => !!id && !id.startsWith("sub_test_")),
       ),
     );
 
-    // Fetch in parallel batches of 10 to avoid Stripe rate-limiting
+    const stripeSubStatuses = new Map<
+      string,
+      { status: string; current_period_end: number | null; cancel_at_period_end: boolean }
+    >();
+
     for (let i = 0; i < stripeSubIds.length; i += 10) {
       const chunk = stripeSubIds.slice(i, i + 10);
-
       const results = await Promise.allSettled(
         chunk.map((subId) => stripe.subscriptions.retrieve(subId)),
       );
 
       for (let j = 0; j < chunk.length; j++) {
         const result = results[j];
-
         if (result.status === "fulfilled") {
           const sub = result.value;
-
-          stripeStatuses.set(chunk[j], {
+          stripeSubStatuses.set(chunk[j], {
             status: sub.status,
             current_period_end: (sub as any).current_period_end ?? null,
             cancel_at_period_end: (sub as any).cancel_at_period_end ?? false,
@@ -83,23 +142,63 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       }
     }
 
-    // 4. Build response items (one per customer)
-    // Only fetch customers whose emails are in the subscription set
-    const customers = await customerRepository.findByEmails(
-      Array.from(byEmail.keys()),
-    );
-    const customerByEmail = new Map(customers.map((c) => [c.email, c]));
+    // 4. Build items — start from subscribers (customers with schedules)
+    const seenEmails = new Set<string>();
+    const items: SubscriptionItem[] = [];
 
-    return Array.from(byEmail.entries()).map(([email, customerOrders]) => {
+    for (const customer of subscriberRows) {
+      seenEmails.add(customer.email);
+      const scheduleId = customer.metadata?.subscription_schedule_id as string;
+      const scheduleInfo = scheduleId ? scheduleStatuses.get(scheduleId) : null;
+      const customerOrders = ordersByEmail.get(customer.email) || [];
+      const latest = customerOrders[0];
+
+      // Determine status from Stripe schedule
+      let status = "active";
+      if (scheduleInfo) {
+        status = scheduleInfo.status;
+      }
+
+      const stripeDashboardUrl =
+        env.STRIPE_ACCOUNT_ID && scheduleId
+          ? `https://dashboard.stripe.com/${env.STRIPE_ACCOUNT_ID}/subscription_schedules/${scheduleId}`
+          : null;
+
+      const total_spent = customerOrders.reduce((sum, o) => sum + Number(o.total), 0);
+
+      items.push({
+        id: scheduleId || `db_${customer.id}`,
+        customer_id: customer.id,
+        customer_email: customer.email,
+        customer_name:
+          [customer.first_name, customer.last_name].filter(Boolean).join(" ") || null,
+        plan_name: "Box Littéraire Tsuky Tales",
+        status,
+        stripe_status: scheduleInfo?.status ?? null,
+        stripe_dashboard_url: stripeDashboardUrl,
+        next_billing_date: scheduleInfo?.current_period_end
+          ? new Date(scheduleInfo.current_period_end * 1000).toISOString()
+          : null,
+        cancel_at_period_end: scheduleInfo?.cancel_at_period_end ?? false,
+        orders_count: customerOrders.length,
+        last_order_date: latest ? latest.createdAt.toISOString() : customer.createdAt.toISOString(),
+        amount: latest ? Number(latest.total) : 0,
+        total_spent,
+        created_at: customer.createdAt.toISOString(),
+      });
+    }
+
+    // 5. Also add entries from subscription orders whose email isn't already covered
+    for (const [email, customerOrders] of Array.from(ordersByEmail.entries())) {
+      if (seenEmails.has(email)) continue;
+
       const latest = customerOrders[0];
       const meta = latest.metadata as any;
       const stripeSubId = meta?.stripe_subscription_id as string | undefined;
-      const stripeInfo = stripeSubId ? stripeStatuses.get(stripeSubId) : null;
-      const customer = customerByEmail.get(email);
+      const stripeInfo = stripeSubId ? stripeSubStatuses.get(stripeSubId) : null;
+      const customer = await customerRepository.findByEmail(email);
 
-      // Determine status: Stripe source of truth if available, else derive from DB
       let status: string;
-
       if (stripeInfo) {
         status = stripeInfo.status;
       } else if (latest.status === "canceled") {
@@ -108,26 +207,20 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         status = "active";
       }
 
-      // Build Stripe Dashboard URL if account ID and subscription ID are available
       const stripeDashboardUrl =
         env.STRIPE_ACCOUNT_ID && stripeSubId && !stripeSubId.startsWith("db_")
           ? `https://dashboard.stripe.com/${env.STRIPE_ACCOUNT_ID}/subscriptions/${stripeSubId}`
           : null;
 
-      const total_spent = customerOrders.reduce(
-        (sum, o) => sum + Number(o.total),
-        0,
-      );
+      const total_spent = customerOrders.reduce((sum, o) => sum + Number(o.total), 0);
       const oldest = customerOrders[customerOrders.length - 1];
 
-      return {
+      items.push({
         id: stripeSubId || `db_${latest.id}`,
         customer_id: customer?.id ?? null,
         customer_email: email,
         customer_name: customer
-          ? [customer.first_name, customer.last_name]
-              .filter(Boolean)
-              .join(" ") || null
+          ? [customer.first_name, customer.last_name].filter(Boolean).join(" ") || null
           : null,
         plan_name: "Box Littéraire Tsuky Tales",
         status,
@@ -138,12 +231,14 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           : null,
         cancel_at_period_end: stripeInfo?.cancel_at_period_end ?? false,
         orders_count: customerOrders.length,
-        last_order_date: latest.createdAt,
+        last_order_date: latest.createdAt.toISOString(),
         amount: Number(latest.total),
         total_spent,
-        created_at: oldest.createdAt,
-      };
-    });
+        created_at: oldest.createdAt.toISOString(),
+      });
+    }
+
+    return items;
   });
 
   let items = data;
