@@ -329,7 +329,14 @@
     "subscription_cancel_confirm": "Are you sure you want to cancel your subscription?",
     "subscription_subscribe_cta": "Subscribe",
     "subscription_skipped_badge": "Skipped",
-    "subscription_upcoming_badge": "Upcoming"
+    "subscription_upcoming_badge": "Upcoming",
+    "subscription_invoices_title": "Payment receipts",
+    "subscription_invoices_empty": "No receipts available",
+    "subscription_invoice_download": "Download",
+    "subscription_invoice_view": "View",
+    "subscription_history_title": "Subscription history",
+    "subscription_history_empty": "No subscription orders",
+    "subscription_history_order": "Order TSK-{id}"
   },
   "status": {
     "pending": "Pending",

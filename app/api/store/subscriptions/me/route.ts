@@ -9,20 +9,100 @@ import { stripe } from "@/lib/services/payment.service";
 import { pool } from "@/lib/db/connection";
 import { settingsRepository } from "@/lib/repositories/settings.repository";
 
+interface SubscriptionOrder {
+  id: number;
+  total: number;
+  createdAt: Date | string;
+  stripe_invoice_id: string | null;
+}
+
+interface SubscriptionInvoice {
+  date: string;
+  amount: number;
+  invoice_pdf: string | null;
+  hosted_url: string | null;
+}
+
+async function getHistory(
+  customerId: number,
+): Promise<{ orders: SubscriptionOrder[]; invoices: SubscriptionInvoice[] }> {
+  // Subscription orders (history)
+  const [rows] = await pool.execute<(RowDataPacket & SubscriptionOrder)[]>(
+    `SELECT id, total, createdAt, stripe_invoice_id
+     FROM orders
+     WHERE customer_id = ? AND is_subscription_order = 1
+     ORDER BY createdAt DESC`,
+    [customerId],
+  );
+
+  const orders = rows.map((r) => ({
+    id: r.id,
+    total: Number(r.total),
+    createdAt:
+      r.createdAt instanceof Date
+        ? r.createdAt.toISOString()
+        : String(r.createdAt),
+    stripe_invoice_id: r.stripe_invoice_id,
+  }));
+
+  // Fetch last 6 Stripe invoices for receipts
+  const invoiceIds = orders
+    .map((o) => o.stripe_invoice_id)
+    .filter((id): id is string => !!id)
+    .slice(0, 6);
+
+  const invoices: SubscriptionInvoice[] = [];
+
+  if (invoiceIds.length > 0) {
+    const results = await Promise.allSettled(
+      invoiceIds.map((id) => stripe.invoices.retrieve(id)),
+    );
+
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        const inv = result.value;
+
+        invoices.push({
+          date: new Date((inv.created || 0) * 1000).toISOString(),
+          amount: (inv.amount_paid || 0) / 100,
+          invoice_pdf: inv.invoice_pdf ?? null,
+          hosted_url: inv.hosted_invoice_url ?? null,
+        });
+      }
+    }
+  }
+
+  return { orders, invoices };
+}
+
 export const GET = withErrorHandler(async () => {
   const session = await requireCustomer();
   const customer = await customerRepository.findById(session.user.customerId!);
 
-  if (!customer) return NextResponse.json({ active: false });
+  if (!customer)
+    return NextResponse.json({
+      active: false,
+      history: [],
+      invoices: [],
+    });
 
   const scheduleId = customer.metadata?.subscription_schedule_id;
-
-  if (!scheduleId) return NextResponse.json({ active: false });
-
   const shippingInfo = (customer.metadata?.subscription_shipping ||
     {}) as Record<string, unknown>;
   const skippedPhases = (customer.metadata?.subscription_skipped ||
     []) as string[];
+
+  // Always fetch history + invoices
+  const { orders: history, invoices } = await getHistory(customer.id);
+
+  // No active subscription
+  if (!scheduleId) {
+    return NextResponse.json({
+      active: false,
+      history,
+      invoices,
+    });
+  }
 
   // Try Stripe first
   try {
@@ -59,22 +139,22 @@ export const GET = withErrorHandler(async () => {
           new Date(p.start_date * 1000).toISOString().split("T")[0],
         ),
       })),
+      history,
+      invoices,
     });
   } catch {
     // Stripe unavailable — fallback to local DB data
   }
 
   // Fallback: build response from local orders + subscription product
-  const [subOrders] = await pool.execute<
-    (RowDataPacket & { createdAt: Date })[]
-  >(
-    `SELECT createdAt FROM orders WHERE customer_id = ? AND is_subscription_order = 1 ORDER BY createdAt DESC LIMIT 1`,
-    [customer.id],
-  );
+  if (history.length === 0) {
+    return NextResponse.json({
+      active: false,
+      history,
+      invoices,
+    });
+  }
 
-  if (subOrders.length === 0) return NextResponse.json({ active: false });
-
-  // Find subscription product from customer metadata
   const subProductId = customer.metadata?.subscription_product_id;
   const product = subProductId
     ? await productRepository.findById(parseInt(subProductId as string))
@@ -105,5 +185,7 @@ export const GET = withErrorHandler(async () => {
       end: d,
       skipped: skippedPhases.includes(d),
     })),
+    history,
+    invoices,
   });
 });

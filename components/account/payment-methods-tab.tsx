@@ -221,58 +221,61 @@ export default function PaymentMethodsTab() {
         </div>
       ) : (
         <>
-          {cards.map((card) => (
-            <div
-              key={card.id}
-              className="bg-white dark:bg-gray-900 rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm shrink-0">
-                    <FontAwesomeIcon icon={faCreditCard} />
+          {[...cards]
+            .sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0))
+            .map((card) => (
+              <div
+                key={card.id}
+                className="bg-white dark:bg-gray-900 rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm shrink-0">
+                      <FontAwesomeIcon icon={faCreditCard} />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-text-brand dark:text-white capitalize">
+                        {card.brand}
+                      </span>
+                      <span className="text-text-light dark:text-gray-400 ml-2">
+                        ****{card.last4}
+                      </span>
+                      <span className="text-text-light dark:text-gray-400 ml-2 text-sm">
+                        {String(card.exp_month).padStart(2, "0")}/
+                        {card.exp_year}
+                      </span>
+                    </div>
+                    {card.is_default && (
+                      <Chip color="primary" size="sm" variant="flat">
+                        {t("payments_default")}
+                      </Chip>
+                    )}
                   </div>
-                  <div>
-                    <span className="font-semibold text-text-brand dark:text-white capitalize">
-                      {card.brand}
-                    </span>
-                    <span className="text-text-light dark:text-gray-400 ml-2">
-                      ****{card.last4}
-                    </span>
-                    <span className="text-text-light dark:text-gray-400 ml-2 text-sm">
-                      {String(card.exp_month).padStart(2, "0")}/{card.exp_year}
-                    </span>
+                  <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+                    {!card.is_default && (
+                      <>
+                        <Button
+                          color="primary"
+                          size="sm"
+                          variant="flat"
+                          onPress={() => handleSetDefault(card.id)}
+                        >
+                          {t("payments_set_default")}
+                        </Button>
+                        <Button
+                          color="danger"
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleRemove(card.id)}
+                        >
+                          {t("payments_remove")}
+                        </Button>
+                      </>
+                    )}
                   </div>
-                  {card.is_default && (
-                    <Chip color="primary" size="sm" variant="flat">
-                      {t("payments_default")}
-                    </Chip>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-                  {!card.is_default && (
-                    <>
-                      <Button
-                        color="primary"
-                        size="sm"
-                        variant="flat"
-                        onPress={() => handleSetDefault(card.id)}
-                      >
-                        {t("payments_set_default")}
-                      </Button>
-                      <Button
-                        color="danger"
-                        size="sm"
-                        variant="light"
-                        onPress={() => handleRemove(card.id)}
-                      >
-                        {t("payments_remove")}
-                      </Button>
-                    </>
-                  )}
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
           {showForm && clientSecret ? (
             <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">

@@ -75,6 +75,19 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"];
 
+interface SubscriptionInvoice {
+  date: string;
+  amount: number;
+  invoice_pdf: string | null;
+  hosted_url: string | null;
+}
+
+interface SubscriptionHistoryOrder {
+  id: number;
+  total: number;
+  createdAt: string;
+}
+
 interface SubscriptionData {
   active: boolean;
   status?: string;
@@ -89,6 +102,8 @@ interface SubscriptionData {
   shipping_method?: string;
   skipped_phases?: string[];
   phases?: { start: string; end: string; skipped: boolean }[];
+  history?: SubscriptionHistoryOrder[];
+  invoices?: SubscriptionInvoice[];
 }
 
 export default function AccountPage() {
@@ -824,6 +839,112 @@ export default function AccountPage() {
                     </div>
                   )}
               </>
+            )}
+
+            {/* Payment receipts (Stripe invoices) */}
+            {subscription && (subscription.invoices?.length ?? 0) > 0 && (
+              <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+                <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white mb-6">
+                  {t("subscription_invoices_title")}
+                </h2>
+                <div className="space-y-3">
+                  {subscription.invoices!.map((inv, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-bg-brand dark:bg-gray-800"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm shrink-0">
+                          <FontAwesomeIcon icon={faCreditCard} />
+                        </div>
+                        <div>
+                          <span className="font-medium text-text-brand dark:text-white">
+                            {new Date(inv.date).toLocaleDateString("fr-FR", {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </span>
+                          <span className="text-sm text-text-light dark:text-gray-400 ml-2">
+                            {inv.amount.toFixed(2).replace(".", ",")}
+                            {common("currency")}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {inv.invoice_pdf && (
+                          <Button
+                            as="a"
+                            color="primary"
+                            href={inv.invoice_pdf}
+                            rel="noopener noreferrer"
+                            size="sm"
+                            target="_blank"
+                            variant="flat"
+                          >
+                            {t("subscription_invoice_download")}
+                          </Button>
+                        )}
+                        {inv.hosted_url && (
+                          <Button
+                            as="a"
+                            color="primary"
+                            href={inv.hosted_url}
+                            rel="noopener noreferrer"
+                            size="sm"
+                            target="_blank"
+                            variant="light"
+                          >
+                            {t("subscription_invoice_view")}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Subscription order history */}
+            {subscription && (subscription.history?.length ?? 0) > 0 && (
+              <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+                <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white mb-6">
+                  {t("subscription_history_title")}
+                </h2>
+                <div className="space-y-3">
+                  {subscription.history!.map((order) => (
+                    <div
+                      key={order.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-bg-brand dark:bg-gray-800"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm shrink-0">
+                          <FontAwesomeIcon icon={faBoxOpen} />
+                        </div>
+                        <div>
+                          <span className="font-medium text-text-brand dark:text-white">
+                            {t("subscription_history_order", { id: order.id })}
+                          </span>
+                          <span className="text-sm text-text-light dark:text-gray-400 ml-2">
+                            {new Date(order.createdAt).toLocaleDateString(
+                              "fr-FR",
+                              {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                              },
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="font-semibold text-primary">
+                        {order.total.toFixed(2).replace(".", ",")}
+                        {common("currency")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         )}

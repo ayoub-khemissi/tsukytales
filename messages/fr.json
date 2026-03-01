@@ -329,7 +329,14 @@
     "subscription_cancel_confirm": "Êtes-vous sûr de vouloir annuler votre abonnement ?",
     "subscription_subscribe_cta": "S'abonner",
     "subscription_skipped_badge": "Passé",
-    "subscription_upcoming_badge": "À venir"
+    "subscription_upcoming_badge": "À venir",
+    "subscription_invoices_title": "Reçus de paiement",
+    "subscription_invoices_empty": "Aucun reçu disponible",
+    "subscription_invoice_download": "Télécharger",
+    "subscription_invoice_view": "Voir",
+    "subscription_history_title": "Historique des abonnements",
+    "subscription_history_empty": "Aucune commande d'abonnement",
+    "subscription_history_order": "Commande TSK-{id}"
   },
   "status": {
     "pending": "En attente",
