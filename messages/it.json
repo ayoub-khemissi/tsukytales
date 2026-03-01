@@ -143,6 +143,7 @@
     "shipping_address": "Indirizzo di spedizione",
     "select_relay": "Scegli un punto relais",
     "payment_title": "Informazioni di pagamento",
+    "new_card": "Nuova carta",
     "pay_button": "Paga {amount}€",
     "processing": "Elaborazione in corso...",
     "order_summary": "Riepilogo ordine",

@@ -24,6 +24,10 @@ import dynamic from "next/dynamic";
 
 import { Link } from "@/i18n/navigation";
 import { useCart } from "@/lib/store/cart-context";
+import {
+  SavedCardPicker,
+  type SavedCard,
+} from "@/components/store/saved-card-picker";
 
 const RelayPicker = dynamic(() => import("@/components/store/relay-picker"), {
   ssr: false,
@@ -47,22 +51,31 @@ const stripePromise = loadStripe(
 );
 
 function PaymentForm({
+  clientSecret,
   amount,
   orderId,
+  savedCards,
 }: {
   clientSecret: string;
   amount: number;
   orderId: number | null;
+  savedCards: SavedCard[];
 }) {
   const t = useTranslations("checkout");
+  const at = useTranslations("account");
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedCard, setSelectedCard] = useState(
+    savedCards.find((c) => c.is_default)?.id || savedCards[0]?.id || "new",
+  );
+  const useSaved = selectedCard !== "new";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (!stripe) return;
+    if (!useSaved && !elements) return;
     setLoading(true);
     setError("");
 
@@ -72,15 +85,24 @@ function PaymentForm({
 
     if (orderId) returnUrl.searchParams.set("order_id", String(orderId));
 
-    const { error: stripeError } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: returnUrl.toString(),
-      },
-    });
+    const result = useSaved
+      ? await stripe.confirmPayment({
+          clientSecret,
+          confirmParams: {
+            payment_method: selectedCard,
+            return_url: returnUrl.toString(),
+          },
+          redirect: "if_required",
+        })
+      : await stripe.confirmPayment({
+          elements: elements!,
+          confirmParams: {
+            return_url: returnUrl.toString(),
+          },
+        });
 
-    if (stripeError) {
-      setError(stripeError.message || t("error_payment"));
+    if (result.error) {
+      setError(result.error.message || t("error_payment"));
       setLoading(false);
     }
   };
@@ -91,7 +113,16 @@ function PaymentForm({
       validationBehavior="native"
       onSubmit={handleSubmit}
     >
-      <PaymentElement />
+      {savedCards.length > 0 && (
+        <SavedCardPicker
+          cards={savedCards}
+          defaultLabel={at("payments_default")}
+          newCardLabel={t("new_card")}
+          selected={selectedCard}
+          onSelect={setSelectedCard}
+        />
+      )}
+      {!useSaved && <PaymentElement />}
       {error && <p className="text-danger text-sm">{error}</p>}
       <Button
         className="btn-brand bg-primary w-full font-semibold"
@@ -134,18 +165,23 @@ export default function CheckoutPage() {
     first_name: "",
     last_name: "",
   });
+  const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
 
-  // Fetch saved addresses + customer profile for logged-in users
+  // Fetch saved addresses + customer profile + payment methods for logged-in users
   useEffect(() => {
     if (!session?.user) return;
     Promise.all([
       fetch("/api/store/addresses/me").then((r) => (r.ok ? r.json() : [])),
       fetch("/api/store/customer/me").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/store/customer/payment-methods").then((r) =>
+        r.ok ? r.json() : { cards: [] },
+      ),
     ])
       .then(
-        ([addresses, profile]: [
+        ([addresses, profile, paymentData]: [
           SavedAddress[],
           Record<string, string> | null,
+          { cards: SavedCard[] },
         ]) => {
           const name = {
             first_name: profile?.first_name || "",
@@ -154,6 +190,7 @@ export default function CheckoutPage() {
 
           setCustomerName(name);
           setSavedAddresses(addresses);
+          setSavedCards(paymentData.cards || []);
           const defaultAddr =
             addresses.find((a) => a.is_default) || addresses[0];
 
@@ -555,6 +592,7 @@ export default function CheckoutPage() {
                     amount={grandTotal}
                     clientSecret={clientSecret}
                     orderId={orderId}
+                    savedCards={savedCards}
                   />
                 </Elements>
               </CardBody>

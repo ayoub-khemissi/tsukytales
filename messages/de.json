@@ -143,6 +143,7 @@
     "shipping_address": "Versandadresse",
     "select_relay": "Paketstation auswählen",
     "payment_title": "Zahlungsinformationen",
+    "new_card": "Neue Karte",
     "pay_button": "{amount}€ bezahlen",
     "processing": "Wird bearbeitet...",
     "order_summary": "Zusammenfassung",

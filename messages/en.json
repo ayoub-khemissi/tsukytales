@@ -143,6 +143,7 @@
     "shipping_address": "Shipping Address",
     "select_relay": "Select a Pickup Point",
     "payment_title": "Payment Information",
+    "new_card": "New card",
     "pay_button": "Pay {amount}€",
     "processing": "Processing...",
     "order_summary": "Order Summary",

@@ -143,6 +143,7 @@
     "shipping_address": "Dirección de envío",
     "select_relay": "Elegir punto de recogida",
     "payment_title": "Información de pago",
+    "new_card": "Nueva tarjeta",
     "pay_button": "Pagar {amount}€",
     "processing": "Procesando...",
     "order_summary": "Resumen",
