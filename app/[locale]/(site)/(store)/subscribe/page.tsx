@@ -134,7 +134,11 @@ function SetupForm({
           onSelect={setSelectedCard}
         />
       )}
-      {!useSaved && <PaymentElement />}
+      {!useSaved && (
+        <div className="w-full">
+          <PaymentElement />
+        </div>
+      )}
       {error && <p className="text-danger text-sm">{error}</p>}
       <Button
         className="btn-brand bg-primary w-full font-semibold"

@@ -68,7 +68,9 @@ function AddCardForm({
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
-      <PaymentElement />
+      <div className="w-full">
+        <PaymentElement />
+      </div>
       {error && <p className="text-danger text-sm">{error}</p>}
       <div className="flex flex-col sm:flex-row gap-2">
         <Button

@@ -35,7 +35,7 @@ export function SavedCardPicker({
   );
 
   return (
-    <RadioGroup value={selected} onValueChange={onSelect}>
+    <RadioGroup className="w-full" value={selected} onValueChange={onSelect}>
       {sorted.map((card) => (
         <Radio key={card.id} value={card.id}>
           <div className="flex items-center gap-2">
