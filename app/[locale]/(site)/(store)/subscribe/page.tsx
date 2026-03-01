@@ -21,6 +21,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import Image from "next/image";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import dynamic from "next/dynamic";
 
 import { Link, useRouter } from "@/i18n/navigation";
@@ -537,6 +538,7 @@ export default function SubscribePage() {
                             ? "Prénom"
                             : "First name"
                         }
+                        maxLength={100}
                         value={address.first_name}
                         onValueChange={updateAddress("first_name")}
                       />
@@ -547,6 +549,7 @@ export default function SubscribePage() {
                             ? "Nom"
                             : "Last name"
                         }
+                        maxLength={100}
                         value={address.last_name}
                         onValueChange={updateAddress("last_name")}
                       />
@@ -556,6 +559,7 @@ export default function SubscribePage() {
                       label={
                         common("quantity") === "Quantité" ? "Adresse" : "Street"
                       }
+                      maxLength={255}
                       value={address.street}
                       onValueChange={updateAddress("street")}
                     />
@@ -567,6 +571,7 @@ export default function SubscribePage() {
                             ? "Code postal"
                             : "Zip code"
                         }
+                        maxLength={10}
                         value={address.zip_code}
                         onValueChange={updateAddress("zip_code")}
                       />
@@ -575,16 +580,24 @@ export default function SubscribePage() {
                         label={
                           common("quantity") === "Quantité" ? "Ville" : "City"
                         }
+                        maxLength={100}
                         value={address.city}
                         onValueChange={updateAddress("city")}
                       />
                     </div>
                     <Input
                       isRequired
+                      errorMessage={ct("error_phone")}
                       label={
                         common("quantity") === "Quantité"
                           ? "Téléphone"
                           : "Phone"
+                      }
+                      type="tel"
+                      validate={(value) =>
+                        !isValidPhoneNumber(value, address.country as any)
+                          ? ct("error_phone")
+                          : true
                       }
                       value={address.phone}
                       onValueChange={updateAddress("phone")}

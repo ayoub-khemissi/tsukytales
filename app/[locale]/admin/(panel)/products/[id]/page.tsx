@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Input, Textarea } from "@heroui/input";
+import { Form } from "@heroui/form";
 import { Button } from "@heroui/button";
 import { Switch } from "@heroui/switch";
 import { Spinner } from "@heroui/spinner";
@@ -196,270 +197,283 @@ export default function ProductEditPage() {
         {isNew ? t("products_create_title") : t("products_edit_title")}
       </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main form */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="admin-glass rounded-xl">
-            <CardHeader>
-              <h2 className="font-heading font-semibold text-lg">
-                {t("products_general")}
-              </h2>
-            </CardHeader>
-            <CardBody className="space-y-4">
-              <Tabs
-                selectedKey={langTab}
-                size="sm"
-                variant="underlined"
-                onSelectionChange={(key) => setLangTab(key as string)}
-              >
-                {LOCALES.map((loc) => (
-                  <Tab key={loc} title={LOCALE_LABELS[loc]} />
-                ))}
-              </Tabs>
+      <Form
+        validationBehavior="native"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSave();
+        }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main form */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="admin-glass rounded-xl">
+              <CardHeader>
+                <h2 className="font-heading font-semibold text-lg">
+                  {t("products_general")}
+                </h2>
+              </CardHeader>
+              <CardBody className="space-y-4">
+                <Tabs
+                  selectedKey={langTab}
+                  size="sm"
+                  variant="underlined"
+                  onSelectionChange={(key) => setLangTab(key as string)}
+                >
+                  {LOCALES.map((loc) => (
+                    <Tab key={loc} title={LOCALE_LABELS[loc]} />
+                  ))}
+                </Tabs>
 
-              {langTab === "fr" ? (
-                <>
+                {langTab === "fr" ? (
+                  <>
+                    <Input
+                      isRequired
+                      label={t("products_field_name")}
+                      maxLength={200}
+                      value={form.name}
+                      onValueChange={(v) => updateField("name", v)}
+                    />
+                    <Textarea
+                      label={t("products_field_description")}
+                      maxLength={5000}
+                      minRows={4}
+                      value={form.description}
+                      onValueChange={(v) => updateField("description", v)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      label={`${t("products_field_name")} (${LOCALE_LABELS[langTab]})`}
+                      maxLength={200}
+                      value={
+                        translations[langTab as keyof ProductTranslations]
+                          ?.name ?? ""
+                      }
+                      onValueChange={(v) =>
+                        setTranslations((prev) => ({
+                          ...prev,
+                          [langTab]: {
+                            ...prev[langTab as keyof ProductTranslations],
+                            name: v,
+                          },
+                        }))
+                      }
+                    />
+                    <Textarea
+                      label={`${t("products_field_description")} (${LOCALE_LABELS[langTab]})`}
+                      maxLength={5000}
+                      minRows={4}
+                      value={
+                        translations[langTab as keyof ProductTranslations]
+                          ?.description ?? ""
+                      }
+                      onValueChange={(v) =>
+                        setTranslations((prev) => ({
+                          ...prev,
+                          [langTab]: {
+                            ...prev[langTab as keyof ProductTranslations],
+                            description: v,
+                          },
+                        }))
+                      }
+                    />
+                  </>
+                )}
+
+                <Input
+                  description={t("products_slug_hint")}
+                  label={t("products_field_slug")}
+                  maxLength={200}
+                  value={form.slug}
+                  onValueChange={(v) => updateField("slug", v)}
+                />
+                <div className="grid grid-cols-3 gap-4">
                   <Input
                     isRequired
-                    label={t("products_field_name")}
-                    value={form.name}
-                    onValueChange={(v) => updateField("name", v)}
+                    endContent={
+                      <span className="text-default-400 text-sm">
+                        {common("currency")}
+                      </span>
+                    }
+                    label={t("products_field_price")}
+                    type="number"
+                    value={String(form.price)}
+                    onValueChange={(v) => updateField("price", Number(v))}
                   />
-                  <Textarea
-                    label={t("products_field_description")}
-                    minRows={4}
-                    value={form.description}
-                    onValueChange={(v) => updateField("description", v)}
-                  />
-                </>
-              ) : (
-                <>
                   <Input
-                    label={`${t("products_field_name")} (${LOCALE_LABELS[langTab]})`}
-                    value={
-                      translations[langTab as keyof ProductTranslations]
-                        ?.name ?? ""
-                    }
-                    onValueChange={(v) =>
-                      setTranslations((prev) => ({
-                        ...prev,
-                        [langTab]: {
-                          ...prev[langTab as keyof ProductTranslations],
-                          name: v,
-                        },
-                      }))
-                    }
+                    label={t("products_stock")}
+                    min={0}
+                    type="number"
+                    value={String(form.stock)}
+                    onValueChange={(v) => updateField("stock", Number(v))}
                   />
-                  <Textarea
-                    label={`${t("products_field_description")} (${LOCALE_LABELS[langTab]})`}
-                    minRows={4}
-                    value={
-                      translations[langTab as keyof ProductTranslations]
-                        ?.description ?? ""
+                  <Input
+                    endContent={
+                      <span className="text-default-400 text-sm">kg</span>
                     }
-                    onValueChange={(v) =>
-                      setTranslations((prev) => ({
-                        ...prev,
-                        [langTab]: {
-                          ...prev[langTab as keyof ProductTranslations],
-                          description: v,
-                        },
-                      }))
-                    }
+                    label={t("products_field_weight")}
+                    type="number"
+                    value={String(form.weight)}
+                    onValueChange={(v) => updateField("weight", Number(v))}
                   />
-                </>
-              )}
-
-              <Input
-                description={t("products_slug_hint")}
-                label={t("products_field_slug")}
-                value={form.slug}
-                onValueChange={(v) => updateField("slug", v)}
-              />
-              <div className="grid grid-cols-3 gap-4">
-                <Input
-                  isRequired
-                  endContent={
-                    <span className="text-default-400 text-sm">
-                      {common("currency")}
-                    </span>
-                  }
-                  label={t("products_field_price")}
-                  type="number"
-                  value={String(form.price)}
-                  onValueChange={(v) => updateField("price", Number(v))}
-                />
-                <Input
-                  label={t("products_stock")}
-                  min={0}
-                  type="number"
-                  value={String(form.stock)}
-                  onValueChange={(v) => updateField("stock", Number(v))}
-                />
-                <Input
-                  endContent={
-                    <span className="text-default-400 text-sm">kg</span>
-                  }
-                  label={t("products_field_weight")}
-                  type="number"
-                  value={String(form.weight)}
-                  onValueChange={(v) => updateField("weight", Number(v))}
-                />
-              </div>
-            </CardBody>
-          </Card>
-
-          {/* Images */}
-          <Card className="admin-glass rounded-xl">
-            <CardHeader>
-              <h2 className="font-heading font-semibold text-lg">
-                {t("products_images")}
-              </h2>
-            </CardHeader>
-            <CardBody className="space-y-4">
-              {images.length > 0 && (
-                <div className="flex gap-3 flex-wrap">
-                  {images.map((img, i) => (
-                    <div key={i} className="relative group">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        alt={`Product ${i + 1}`}
-                        className="w-24 h-24 object-cover rounded-lg border border-divider"
-                        src={img.startsWith("http") ? img : `/${img}`}
-                      />
-                      <Button
-                        isIconOnly
-                        className="absolute -top-2 -right-2 min-w-5 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                        color="danger"
-                        radius="full"
-                        size="sm"
-                        variant="solid"
-                        onPress={() =>
-                          setImages((prev) =>
-                            prev.filter((_, idx) => idx !== i),
-                          )
-                        }
-                      >
-                        x
-                      </Button>
-                    </div>
-                  ))}
                 </div>
-              )}
-              <div>
-                <input
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  id="image-upload"
-                  type="file"
-                  onChange={handleImageUpload}
-                />
+              </CardBody>
+            </Card>
+
+            {/* Images */}
+            <Card className="admin-glass rounded-xl">
+              <CardHeader>
+                <h2 className="font-heading font-semibold text-lg">
+                  {t("products_images")}
+                </h2>
+              </CardHeader>
+              <CardBody className="space-y-4">
+                {images.length > 0 && (
+                  <div className="flex gap-3 flex-wrap">
+                    {images.map((img, i) => (
+                      <div key={i} className="relative group">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          alt={`Product ${i + 1}`}
+                          className="w-24 h-24 object-cover rounded-lg border border-divider"
+                          src={img.startsWith("http") ? img : `/${img}`}
+                        />
+                        <Button
+                          isIconOnly
+                          className="absolute -top-2 -right-2 min-w-5 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          color="danger"
+                          radius="full"
+                          size="sm"
+                          variant="solid"
+                          onPress={() =>
+                            setImages((prev) =>
+                              prev.filter((_, idx) => idx !== i),
+                            )
+                          }
+                        >
+                          x
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div>
+                  <input
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    id="image-upload"
+                    type="file"
+                    onChange={handleImageUpload}
+                  />
+                  <Button
+                    as="label"
+                    className="cursor-pointer"
+                    color="primary"
+                    htmlFor="image-upload"
+                    isLoading={uploading}
+                    size="sm"
+                    variant="flat"
+                  >
+                    {t("products_upload_image")}
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Status */}
+            <Card className="admin-glass rounded-xl">
+              <CardHeader>
+                <h2 className="font-heading font-semibold text-lg">
+                  {t("products_status")}
+                </h2>
+              </CardHeader>
+              <CardBody className="space-y-4">
+                <Switch
+                  isSelected={form.is_active}
+                  onValueChange={(v) => updateField("is_active", v)}
+                >
+                  {t("products_is_active")}
+                </Switch>
+                <Switch
+                  isSelected={form.is_preorder}
+                  onValueChange={(v) => updateField("is_preorder", v)}
+                >
+                  {t("products_is_preorder")}
+                </Switch>
+              </CardBody>
+            </Card>
+
+            {/* Subscription dates — read-only info */}
+            <Card className="admin-glass rounded-xl">
+              <CardHeader>
+                <h2 className="font-heading font-semibold text-lg">
+                  {t("sub_dates_title")}
+                </h2>
+              </CardHeader>
+              <CardBody className="space-y-3">
+                {subDates.length > 0 ? (
+                  <ul className="space-y-1">
+                    {subDates.map((d) => (
+                      <li key={d} className="text-sm text-default-600">
+                        {new Date(d + "T00:00:00").toLocaleDateString("fr-FR")}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-default-400">
+                    {t("sub_dates_empty")}
+                  </p>
+                )}
                 <Button
-                  as="label"
-                  className="cursor-pointer"
+                  as={Link}
                   color="primary"
-                  htmlFor="image-upload"
-                  isLoading={uploading}
+                  href="/admin/settings"
                   size="sm"
                   variant="flat"
                 >
-                  {t("products_upload_image")}
+                  {t("sub_dates_go_settings")}
                 </Button>
-              </div>
-            </CardBody>
-          </Card>
-        </div>
+              </CardBody>
+            </Card>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Status */}
-          <Card className="admin-glass rounded-xl">
-            <CardHeader>
-              <h2 className="font-heading font-semibold text-lg">
-                {t("products_status")}
-              </h2>
-            </CardHeader>
-            <CardBody className="space-y-4">
-              <Switch
-                isSelected={form.is_active}
-                onValueChange={(v) => updateField("is_active", v)}
-              >
-                {t("products_is_active")}
-              </Switch>
-              <Switch
-                isSelected={form.is_preorder}
-                onValueChange={(v) => updateField("is_preorder", v)}
-              >
-                {t("products_is_preorder")}
-              </Switch>
-            </CardBody>
-          </Card>
-
-          {/* Subscription dates — read-only info */}
-          <Card className="admin-glass rounded-xl">
-            <CardHeader>
-              <h2 className="font-heading font-semibold text-lg">
-                {t("sub_dates_title")}
-              </h2>
-            </CardHeader>
-            <CardBody className="space-y-3">
-              {subDates.length > 0 ? (
-                <ul className="space-y-1">
-                  {subDates.map((d) => (
-                    <li key={d} className="text-sm text-default-600">
-                      {new Date(d + "T00:00:00").toLocaleDateString("fr-FR")}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-default-400">
-                  {t("sub_dates_empty")}
-                </p>
-              )}
-              <Button
-                as={Link}
-                color="primary"
-                href="/admin/settings"
-                size="sm"
+            {/* Save */}
+            <Button
+              className="w-full font-semibold"
+              color="primary"
+              isLoading={saving}
+              size="lg"
+              type="submit"
+              variant="shadow"
+            >
+              {isNew ? t("products_create") : t("products_save")}
+            </Button>
+            {saveStatus === "success" && (
+              <Chip
+                className="w-full max-w-full py-4 text-center"
+                color="success"
                 variant="flat"
               >
-                {t("sub_dates_go_settings")}
-              </Button>
-            </CardBody>
-          </Card>
-
-          {/* Save */}
-          <Button
-            className="w-full font-semibold"
-            color="primary"
-            isLoading={saving}
-            size="lg"
-            variant="shadow"
-            onPress={handleSave}
-          >
-            {isNew ? t("products_create") : t("products_save")}
-          </Button>
-          {saveStatus === "success" && (
-            <Chip
-              className="w-full max-w-full py-4 text-center"
-              color="success"
-              variant="flat"
-            >
-              {t("products_saved")}
-            </Chip>
-          )}
-          {saveStatus === "error" && (
-            <Chip
-              className="w-full max-w-full py-4 text-center"
-              color="danger"
-              variant="flat"
-            >
-              {t("products_save_error")}
-            </Chip>
-          )}
+                {t("products_saved")}
+              </Chip>
+            )}
+            {saveStatus === "error" && (
+              <Chip
+                className="w-full max-w-full py-4 text-center"
+                color="danger"
+                variant="flat"
+              >
+                {t("products_save_error")}
+              </Chip>
+            )}
+          </div>
         </div>
-      </div>
+      </Form>
     </div>
   );
 }

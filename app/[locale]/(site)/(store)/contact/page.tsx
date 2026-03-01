@@ -12,6 +12,9 @@ import {
   faPaperclip,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
+import { Checkbox } from "@heroui/checkbox";
+
+import { Link } from "@/i18n/navigation";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -146,7 +149,9 @@ export default function ContactPage() {
             )}
             <Input
               isRequired
+              errorMessage={t("error_name_max")}
               label={t("name")}
+              maxLength={100}
               placeholder={t("name")}
               value={form.name}
               onValueChange={update("name")}
@@ -161,14 +166,25 @@ export default function ContactPage() {
             />
             <Input
               isRequired
+              errorMessage={t("error_subject_max")}
               label={t("subject")}
+              maxLength={200}
               placeholder={t("subject")}
               value={form.subject}
               onValueChange={update("subject")}
             />
             <Textarea
               isRequired
+              description={t("message_min")}
+              errorMessage={(v) => {
+                if (v.validationDetails.tooShort) return t("error_message_min");
+                if (v.validationDetails.tooLong) return t("error_message_max");
+
+                return;
+              }}
               label={t("message")}
+              maxLength={2000}
+              minLength={10}
               minRows={5}
               placeholder={t("message")}
               value={form.message}
@@ -225,6 +241,25 @@ export default function ContactPage() {
                 <p className="text-danger text-xs mt-1">{fileError}</p>
               )}
             </div>
+
+            <Checkbox
+              isRequired
+              classNames={{ label: "text-sm" }}
+              name="consent"
+              value="consent"
+            >
+              {t.rich("consent", {
+                privacy: (chunks) => (
+                  <Link
+                    className="text-primary underline"
+                    href="/privacy"
+                    target="_blank"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </Checkbox>
 
             <Button
               className="btn-brand bg-primary mt-2 w-full font-semibold"

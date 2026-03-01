@@ -163,7 +163,8 @@
     "relay_error": "Errore di connessione",
     "relay_select": "Punto relais selezionato",
     "relay_required": "Seleziona un punto relais",
-    "relay_hours": "Orari di apertura"
+    "relay_hours": "Orari di apertura",
+    "error_phone": "Numero di telefono non valido"
   },
   "contact": {
     "title": "Contatta",
@@ -181,7 +182,14 @@
     "attachment_add": "Aggiungi un allegato",
     "file_too_large": "Il file supera la dimensione massima di 10 MB.",
     "success": "Messaggio inviato con successo! Ti risponderemo presto.",
-    "error": "Errore durante l'invio. Per favore riprova."
+    "error": "Errore durante l'invio. Per favore riprova.",
+    "message_min": "Minimo 10 caratteri",
+    "error_name_max": "Il nome non deve superare i 100 caratteri",
+    "error_subject_max": "L'oggetto non deve superare i 200 caratteri",
+    "error_message_min": "Il messaggio deve contenere almeno 10 caratteri",
+    "error_message_max": "Il messaggio non deve superare i 2000 caratteri",
+    "consent": "Accetto che i miei dati vengano utilizzati per elaborare la mia richiesta in conformità con la nostra {privacy}.",
+    "consent_privacy": "politica sulla privacy"
   },
   "about": {
     "hero_subtitle": "L'Eredità Letteraria",
@@ -253,7 +261,14 @@
     "error_invalid": "Email o password non corretti",
     "error_exists": "Un account con questo email esiste già",
     "passwords_mismatch": "Le password non corrispondono",
-    "password_min": "Minimo 8 caratteri"
+    "password_min": "Minimo 8 caratteri",
+    "error_first_name_max": "Il nome non deve superare i 100 caratteri",
+    "error_last_name_max": "Il cognome non deve superare i 100 caratteri",
+    "error_password_min": "La password deve contenere almeno 8 caratteri",
+    "error_passwords_mismatch": "Le password non corrispondono",
+    "consent": "Accetto le {terms} e la {privacy}.",
+    "consent_terms": "Condizioni generali di vendita",
+    "consent_privacy": "politica sulla privacy"
   },
   "account": {
     "title": "Il mio <gold>account</gold>",
@@ -312,6 +327,7 @@
     "addresses_city": "Città",
     "addresses_country": "Codice paese a 2 lettere (es. IT)",
     "addresses_phone": "Telefono",
+    "addresses_error_phone": "Numero di telefono non valido",
     "profile_error": "Errore durante l'aggiornamento del profilo",
     "order_shipping_address": "Indirizzo di spedizione",
     "order_relay": "Punto di ritiro"
@@ -498,6 +514,8 @@
     "settings_confirm_password": "Conferma password",
     "settings_password_changed": "Password modificata",
     "settings_password_error": "Errore durante la modifica della password",
+    "settings_error_password_min": "La password deve contenere almeno 8 caratteri",
+    "settings_error_passwords_mismatch": "Le password non corrispondono",
     "nav_messages": "Messaggi",
     "messages_title": "Messaggi di contatto",
     "messages_search": "Cerca un messaggio...",

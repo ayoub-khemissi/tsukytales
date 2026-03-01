@@ -314,13 +314,6 @@ export default function SettingsPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
-
-    if (newPassword !== confirmPassword) {
-      setError(t("settings_password_error"));
-
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await fetch("/api/admin/change-password", {
@@ -449,6 +442,7 @@ export default function SettingsPage() {
                 <Input
                   isRequired
                   autoComplete="new-password"
+                  errorMessage={t("settings_error_password_min")}
                   label={t("settings_new_password")}
                   minLength={8}
                   type="password"
@@ -458,8 +452,15 @@ export default function SettingsPage() {
                 <Input
                   isRequired
                   autoComplete="new-password"
+                  errorMessage={t("settings_error_passwords_mismatch")}
                   label={t("settings_confirm_password")}
+                  minLength={8}
                   type="password"
+                  validate={(value) =>
+                    value !== newPassword
+                      ? t("settings_error_passwords_mismatch")
+                      : true
+                  }
                   value={confirmPassword}
                   onValueChange={setConfirmPassword}
                 />

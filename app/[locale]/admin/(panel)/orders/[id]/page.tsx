@@ -8,6 +8,7 @@ import { Chip } from "@heroui/chip";
 import { Divider } from "@heroui/divider";
 import { Spinner } from "@heroui/spinner";
 import { Input, Textarea } from "@heroui/input";
+import { Form } from "@heroui/form";
 import {
   Modal,
   ModalContent,
@@ -412,12 +413,20 @@ export default function OrderDetailPage() {
             </CardHeader>
             <CardBody className="space-y-3">
               {editingItems ? (
-                <>
+                <Form
+                  validationBehavior="native"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    saveItems();
+                  }}
+                >
                   {editItems.map((item, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <Input
+                        isRequired
                         className="flex-1"
                         label={t("orders_item_name")}
+                        maxLength={255}
                         size="sm"
                         value={item.name}
                         onValueChange={(v) => updateEditItem(i, "name", v)}
@@ -472,7 +481,7 @@ export default function OrderDetailPage() {
                       color="primary"
                       isLoading={savingItems}
                       size="sm"
-                      onPress={saveItems}
+                      type="submit"
                     >
                       {t("orders_save_items")}
                     </Button>
@@ -480,7 +489,7 @@ export default function OrderDetailPage() {
                       {common("cancel")}
                     </Button>
                   </div>
-                </>
+                </Form>
               ) : (
                 <>
                   {order.items.map((item, i) => (
@@ -703,24 +712,32 @@ export default function OrderDetailPage() {
 
               <Divider />
 
-              <div className="space-y-3">
+              <Form
+                validationBehavior="native"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddNote();
+                }}
+              >
                 <Textarea
+                  isRequired
+                  maxLength={1000}
                   minRows={2}
                   placeholder={t("orders_note_placeholder")}
                   value={newNote}
                   onValueChange={setNewNote}
                 />
                 <Button
+                  className="mt-3"
                   color="primary"
-                  isDisabled={!newNote.trim()}
                   isLoading={addingNote}
                   size="sm"
+                  type="submit"
                   variant="flat"
-                  onPress={handleAddNote}
                 >
                   {t("orders_add_note")}
                 </Button>
-              </div>
+              </Form>
             </CardBody>
           </Card>
         </div>

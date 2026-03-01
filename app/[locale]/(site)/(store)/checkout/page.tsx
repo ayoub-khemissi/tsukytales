@@ -19,6 +19,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { Chip } from "@heroui/chip";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import dynamic from "next/dynamic";
 
 import { Link } from "@/i18n/navigation";
@@ -454,6 +455,7 @@ export default function CheckoutPage() {
                             ? "Prénom"
                             : "First name"
                         }
+                        maxLength={100}
                         value={address.first_name}
                         onValueChange={updateAddress("first_name")}
                       />
@@ -464,6 +466,7 @@ export default function CheckoutPage() {
                             ? "Nom"
                             : "Last name"
                         }
+                        maxLength={100}
                         value={address.last_name}
                         onValueChange={updateAddress("last_name")}
                       />
@@ -473,6 +476,7 @@ export default function CheckoutPage() {
                       label={
                         common("quantity") === "Quantité" ? "Adresse" : "Street"
                       }
+                      maxLength={255}
                       value={address.street}
                       onValueChange={updateAddress("street")}
                     />
@@ -484,6 +488,7 @@ export default function CheckoutPage() {
                             ? "Code postal"
                             : "Zip code"
                         }
+                        maxLength={10}
                         value={address.zip_code}
                         onValueChange={updateAddress("zip_code")}
                       />
@@ -492,16 +497,24 @@ export default function CheckoutPage() {
                         label={
                           common("quantity") === "Quantité" ? "Ville" : "City"
                         }
+                        maxLength={100}
                         value={address.city}
                         onValueChange={updateAddress("city")}
                       />
                     </div>
                     <Input
                       isRequired
+                      errorMessage={t("error_phone")}
                       label={
                         common("quantity") === "Quantité"
                           ? "Téléphone"
                           : "Phone"
+                      }
+                      type="tel"
+                      validate={(value) =>
+                        !isValidPhoneNumber(value, address.country as any)
+                          ? t("error_phone")
+                          : true
                       }
                       value={address.phone}
                       onValueChange={updateAddress("phone")}

@@ -163,7 +163,8 @@
     "relay_error": "Connection error",
     "relay_select": "Selected pickup point",
     "relay_required": "Please select a pickup point",
-    "relay_hours": "Opening hours"
+    "relay_hours": "Opening hours",
+    "error_phone": "Invalid phone number"
   },
   "contact": {
     "title": "Contact ",
@@ -181,7 +182,14 @@
     "attachment_add": "Add an attachment",
     "file_too_large": "File exceeds the maximum size of 10 MB.",
     "success": "Message sent successfully! We'll get back to you shortly.",
-    "error": "Error sending message. Please try again."
+    "error": "Error sending message. Please try again.",
+    "message_min": "10 characters minimum",
+    "error_name_max": "Name must not exceed 100 characters",
+    "error_subject_max": "Subject must not exceed 200 characters",
+    "error_message_min": "Message must be at least 10 characters",
+    "error_message_max": "Message must not exceed 2000 characters",
+    "consent": "I agree that my data will be used to process my request in accordance with our {privacy}.",
+    "consent_privacy": "privacy policy"
   },
   "about": {
     "hero_subtitle": "The Literary Heritage",
@@ -253,7 +261,14 @@
     "error_invalid": "Incorrect email or password",
     "error_exists": "An account already exists with this email",
     "passwords_mismatch": "Passwords do not match",
-    "password_min": "Minimum 8 characters"
+    "password_min": "Minimum 8 characters",
+    "error_first_name_max": "First name must not exceed 100 characters",
+    "error_last_name_max": "Last name must not exceed 100 characters",
+    "error_password_min": "Password must be at least 8 characters",
+    "error_passwords_mismatch": "Passwords do not match",
+    "consent": "I accept the {terms} and the {privacy}.",
+    "consent_terms": "Terms & Conditions",
+    "consent_privacy": "privacy policy"
   },
   "account": {
     "title": "My <gold>Account</gold>",
@@ -301,6 +316,7 @@
     "addresses_city": "City",
     "addresses_country": "2-letter country code (e.g. FR)",
     "addresses_phone": "Phone",
+    "addresses_error_phone": "Invalid phone number",
     "profile_error": "Failed to update profile",
     "order_shipping_address": "Shipping address",
     "order_relay": "Relay Point",
@@ -500,6 +516,8 @@
     "settings_confirm_password": "Confirm Password",
     "settings_password_changed": "Password changed",
     "settings_password_error": "Error changing password",
+    "settings_error_password_min": "Password must be at least 8 characters",
+    "settings_error_passwords_mismatch": "Passwords do not match",
     "nav_messages": "Messages",
     "messages_title": "Contact Messages",
     "messages_search": "Search messages...",

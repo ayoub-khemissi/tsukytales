@@ -163,7 +163,8 @@
     "relay_error": "Error de conexión",
     "relay_select": "Punto de recogida seleccionado",
     "relay_required": "Por favor selecciona un punto de recogida",
-    "relay_hours": "Horario de apertura"
+    "relay_hours": "Horario de apertura",
+    "error_phone": "Número de teléfono inválido"
   },
   "contact": {
     "title": "Contácta",
@@ -181,7 +182,14 @@
     "attachment_add": "Añadir un archivo adjunto",
     "file_too_large": "El archivo supera el tamaño máximo de 10 MB.",
     "success": "¡Mensaje enviado correctamente! Te responderemos pronto.",
-    "error": "Error al enviar el mensaje. Por favor, inténtalo de nuevo."
+    "error": "Error al enviar el mensaje. Por favor, inténtalo de nuevo.",
+    "message_min": "Mínimo 10 caracteres",
+    "error_name_max": "El nombre no debe superar los 100 caracteres",
+    "error_subject_max": "El asunto no debe superar los 200 caracteres",
+    "error_message_min": "El mensaje debe tener al menos 10 caracteres",
+    "error_message_max": "El mensaje no debe superar los 2000 caracteres",
+    "consent": "Acepto que mis datos sean utilizados para procesar mi solicitud de acuerdo con nuestra {privacy}.",
+    "consent_privacy": "política de privacidad"
   },
   "about": {
     "hero_subtitle": "El Legado Literario",
@@ -253,7 +261,14 @@
     "error_invalid": "Email o contraseña incorrectos",
     "error_exists": "Ya existe una cuenta con este email",
     "passwords_mismatch": "Las contraseñas no coinciden",
-    "password_min": "Mínimo 8 caracteres"
+    "password_min": "Mínimo 8 caracteres",
+    "error_first_name_max": "El nombre no debe superar los 100 caracteres",
+    "error_last_name_max": "El apellido no debe superar los 100 caracteres",
+    "error_password_min": "La contraseña debe tener al menos 8 caracteres",
+    "error_passwords_mismatch": "Las contraseñas no coinciden",
+    "consent": "Acepto las {terms} y la {privacy}.",
+    "consent_terms": "Condiciones de venta",
+    "consent_privacy": "política de privacidad"
   },
   "account": {
     "title": "Mi <gold>cuenta</gold>",
@@ -312,6 +327,7 @@
     "addresses_city": "Ciudad",
     "addresses_country": "Código de país de 2 letras (ej: ES)",
     "addresses_phone": "Teléfono",
+    "addresses_error_phone": "Número de teléfono inválido",
     "profile_error": "Error al actualizar el perfil",
     "order_shipping_address": "Dirección de envío",
     "order_relay": "Punto de recogida"
@@ -498,6 +514,8 @@
     "settings_confirm_password": "Confirmar contraseña",
     "settings_password_changed": "Contraseña cambiada",
     "settings_password_error": "Error al cambiar la contraseña",
+    "settings_error_password_min": "La contraseña debe tener al menos 8 caracteres",
+    "settings_error_passwords_mismatch": "Las contraseñas no coinciden",
     "nav_messages": "Mensajes",
     "messages_title": "Mensajes de contacto",
     "messages_search": "Buscar un mensaje...",

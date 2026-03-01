@@ -6,6 +6,7 @@ import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
 import { Form } from "@heroui/form";
+import { Checkbox } from "@heroui/checkbox";
 import { useTranslations } from "next-intl";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -32,18 +33,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    if (form.password !== form.passwordConfirm) {
-      setError(t("passwords_mismatch"));
-
-      return;
-    }
-    if (form.password.length < 8) {
-      setError(t("password_min"));
-
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
@@ -104,13 +93,17 @@ export default function RegisterPage() {
             <div className="flex flex-col sm:flex-row gap-3">
               <Input
                 isRequired
+                errorMessage={t("error_first_name_max")}
                 label={t("first_name")}
+                maxLength={100}
                 value={form.first_name}
                 onValueChange={update("first_name")}
               />
               <Input
                 isRequired
+                errorMessage={t("error_last_name_max")}
                 label={t("last_name")}
+                maxLength={100}
                 value={form.last_name}
                 onValueChange={update("last_name")}
               />
@@ -126,18 +119,51 @@ export default function RegisterPage() {
             <Input
               isRequired
               description={t("password_min")}
+              errorMessage={t("error_password_min")}
               label={t("password")}
+              minLength={8}
               type="password"
               value={form.password}
               onValueChange={update("password")}
             />
             <Input
               isRequired
+              errorMessage={t("error_passwords_mismatch")}
               label={t("password_confirm")}
               type="password"
+              validate={(value) =>
+                value !== form.password ? t("error_passwords_mismatch") : true
+              }
               value={form.passwordConfirm}
               onValueChange={update("passwordConfirm")}
             />
+            <Checkbox
+              isRequired
+              classNames={{ label: "text-sm" }}
+              name="consent"
+              value="consent"
+            >
+              {t.rich("consent", {
+                terms: (chunks) => (
+                  <Link
+                    className="text-primary underline"
+                    href="/terms"
+                    target="_blank"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+                privacy: (chunks) => (
+                  <Link
+                    className="text-primary underline"
+                    href="/privacy"
+                    target="_blank"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </Checkbox>
             <Button
               className="btn-brand bg-primary mt-2 w-full font-semibold"
               isLoading={loading}

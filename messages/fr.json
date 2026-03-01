@@ -163,7 +163,8 @@
     "relay_error": "Erreur de connexion",
     "relay_select": "Point relais sélectionné",
     "relay_required": "Veuillez sélectionner un point relais",
-    "relay_hours": "Horaires d'ouverture"
+    "relay_hours": "Horaires d'ouverture",
+    "error_phone": "Numéro de téléphone invalide"
   },
   "contact": {
     "title": "Contactez-",
@@ -181,7 +182,14 @@
     "attachment_add": "Ajouter une pièce jointe",
     "file_too_large": "Le fichier dépasse la taille maximale de 10 Mo.",
     "success": "Message envoyé avec succès ! Nous vous répondrons rapidement.",
-    "error": "Erreur lors de l'envoi. Veuillez réessayer."
+    "error": "Erreur lors de l'envoi. Veuillez réessayer.",
+    "message_min": "10 caractères minimum",
+    "error_name_max": "Le nom ne doit pas dépasser 100 caractères",
+    "error_subject_max": "Le sujet ne doit pas dépasser 200 caractères",
+    "error_message_min": "Le message doit contenir au moins 10 caractères",
+    "error_message_max": "Le message ne doit pas dépasser 2000 caractères",
+    "consent": "J'accepte que mes données soient utilisées pour traiter ma demande conformément à notre {privacy}.",
+    "consent_privacy": "politique de confidentialité"
   },
   "about": {
     "hero_subtitle": "L'Héritage Littéraire",
@@ -253,7 +261,14 @@
     "error_invalid": "Email ou mot de passe incorrect",
     "error_exists": "Un compte existe déjà avec cet email",
     "passwords_mismatch": "Les mots de passe ne correspondent pas",
-    "password_min": "8 caractères minimum"
+    "password_min": "8 caractères minimum",
+    "error_first_name_max": "Le prénom ne doit pas dépasser 100 caractères",
+    "error_last_name_max": "Le nom ne doit pas dépasser 100 caractères",
+    "error_password_min": "Le mot de passe doit contenir au moins 8 caractères",
+    "error_passwords_mismatch": "Les mots de passe ne correspondent pas",
+    "consent": "J'accepte les {terms} et la {privacy}.",
+    "consent_terms": "CGV",
+    "consent_privacy": "politique de confidentialité"
   },
   "account": {
     "title": "Mon espace <gold>client</gold>",
@@ -301,6 +316,7 @@
     "addresses_city": "Ville",
     "addresses_country": "Pays (ex: FR)",
     "addresses_phone": "Téléphone",
+    "addresses_error_phone": "Numéro de téléphone invalide",
     "profile_error": "Erreur lors de la mise à jour du profil",
     "order_shipping_address": "Adresse de livraison",
     "order_relay": "Point Relais",
@@ -500,6 +516,8 @@
     "settings_confirm_password": "Confirmer le mot de passe",
     "settings_password_changed": "Mot de passe modifié",
     "settings_password_error": "Erreur lors du changement",
+    "settings_error_password_min": "Le mot de passe doit contenir au moins 8 caractères",
+    "settings_error_passwords_mismatch": "Les mots de passe ne correspondent pas",
     "nav_messages": "Messages",
     "messages_title": "Messages de contact",
     "messages_search": "Rechercher un message...",

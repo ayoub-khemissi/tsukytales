@@ -163,7 +163,8 @@
     "relay_error": "Verbindungsfehler",
     "relay_select": "Ausgewählte Paketstation",
     "relay_required": "Bitte wählen Sie eine Paketstation",
-    "relay_hours": "Öffnungszeiten"
+    "relay_hours": "Öffnungszeiten",
+    "error_phone": "Ungültige Telefonnummer"
   },
   "contact": {
     "title": "Kontaktiere ",
@@ -181,7 +182,14 @@
     "attachment_add": "Anhang hinzufügen",
     "file_too_large": "Die Datei überschreitet die maximale Größe von 10 MB.",
     "success": "Nachricht erfolgreich versendet! Wir werden dir bald antworten.",
-    "error": "Fehler beim Versenden. Bitte versuche es erneut."
+    "error": "Fehler beim Versenden. Bitte versuche es erneut.",
+    "message_min": "Mindestens 10 Zeichen",
+    "error_name_max": "Der Name darf 100 Zeichen nicht überschreiten",
+    "error_subject_max": "Der Betreff darf 200 Zeichen nicht überschreiten",
+    "error_message_min": "Die Nachricht muss mindestens 10 Zeichen enthalten",
+    "error_message_max": "Die Nachricht darf 2000 Zeichen nicht überschreiten",
+    "consent": "Ich stimme zu, dass meine Daten zur Bearbeitung meiner Anfrage gemäß unserer {privacy} verwendet werden.",
+    "consent_privacy": "Datenschutzerklärung"
   },
   "about": {
     "hero_subtitle": "Das Literarische Erbe",
@@ -252,7 +260,14 @@
     "error_invalid": "E-Mail oder Passwort ist falsch",
     "error_exists": "Es gibt bereits ein Konto mit dieser E-Mail",
     "passwords_mismatch": "Passwörter stimmen nicht überein",
-    "password_min": "Mindestens 8 Zeichen"
+    "password_min": "Mindestens 8 Zeichen",
+    "error_first_name_max": "Der Vorname darf 100 Zeichen nicht überschreiten",
+    "error_last_name_max": "Der Nachname darf 100 Zeichen nicht überschreiten",
+    "error_password_min": "Das Passwort muss mindestens 8 Zeichen enthalten",
+    "error_passwords_mismatch": "Passwörter stimmen nicht überein",
+    "consent": "Ich akzeptiere die {terms} und die {privacy}.",
+    "consent_terms": "AGB",
+    "consent_privacy": "Datenschutzerklärung"
   },
   "account": {
     "title": "Mein <gold>Konto</gold>",
@@ -317,6 +332,7 @@
     "addresses_city": "Stadt",
     "addresses_country": "2-Buchstaben-Ländercode (z.B. DE)",
     "addresses_phone": "Telefon",
+    "addresses_error_phone": "Ungültige Telefonnummer",
     "profile_error": "Fehler beim Aktualisieren des Profils",
     "order_shipping_address": "Lieferadresse",
     "order_relay": "Abholpunkt"
@@ -503,6 +519,8 @@
     "settings_confirm_password": "Passwort bestätigen",
     "settings_password_changed": "Passwort geändert",
     "settings_password_error": "Fehler beim Ändern des Passworts",
+    "settings_error_password_min": "Das Passwort muss mindestens 8 Zeichen enthalten",
+    "settings_error_passwords_mismatch": "Passwörter stimmen nicht überein",
     "nav_messages": "Nachrichten",
     "messages_title": "Kontaktnachrichten",
     "messages_search": "Nachricht suchen...",

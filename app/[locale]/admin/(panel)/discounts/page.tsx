@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
+import { Form } from "@heroui/form";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Pagination } from "@heroui/pagination";
@@ -351,72 +352,76 @@ export default function DiscountsPage() {
           {(onClose) => (
             <>
               <ModalHeader>{t("discounts_add")}</ModalHeader>
-              <ModalBody className="space-y-4">
-                <Input
-                  isRequired
-                  label={t("discounts_code")}
-                  placeholder="SUMMER25"
-                  value={formCode}
-                  onValueChange={setFormCode}
-                />
-                <Select
-                  isRequired
-                  label={t("discounts_type")}
-                  selectedKeys={[formType]}
-                  onSelectionChange={(keys) => {
-                    const val = Array.from(keys)[0] as "percentage" | "fixed";
+              <Form
+                validationBehavior="native"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleCreate(onClose);
+                }}
+              >
+                <ModalBody className="space-y-4">
+                  <Input
+                    isRequired
+                    label={t("discounts_code")}
+                    maxLength={50}
+                    placeholder="SUMMER25"
+                    value={formCode}
+                    onValueChange={setFormCode}
+                  />
+                  <Select
+                    isRequired
+                    label={t("discounts_type")}
+                    selectedKeys={[formType]}
+                    onSelectionChange={(keys) => {
+                      const val = Array.from(keys)[0] as "percentage" | "fixed";
 
-                    if (val) setFormType(val);
-                  }}
-                >
-                  <SelectItem key="percentage">
-                    {t("discounts_type_percentage")}
-                  </SelectItem>
-                  <SelectItem key="fixed">
-                    {t("discounts_type_fixed")}
-                  </SelectItem>
-                </Select>
-                <Input
-                  isRequired
-                  endContent={
-                    <span className="text-default-400 text-sm">
-                      {formType === "percentage" ? "%" : common("currency")}
-                    </span>
-                  }
-                  label={t("discounts_value")}
-                  placeholder={formType === "percentage" ? "25" : "10.00"}
-                  type="number"
-                  value={formValue}
-                  onValueChange={setFormValue}
-                />
-                <Input
-                  label={t("discounts_max_usage")}
-                  placeholder="100"
-                  type="number"
-                  value={formMaxUsage}
-                  onValueChange={setFormMaxUsage}
-                />
-                <Input
-                  label={t("discounts_expires")}
-                  placeholder="YYYY-MM-DD"
-                  type="date"
-                  value={formExpiresAt}
-                  onValueChange={setFormExpiresAt}
-                />
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
-                  {common("cancel")}
-                </Button>
-                <Button
-                  color="primary"
-                  isDisabled={!formCode.trim() || !formValue}
-                  isLoading={creating}
-                  onPress={() => handleCreate(onClose)}
-                >
-                  {common("confirm")}
-                </Button>
-              </ModalFooter>
+                      if (val) setFormType(val);
+                    }}
+                  >
+                    <SelectItem key="percentage">
+                      {t("discounts_type_percentage")}
+                    </SelectItem>
+                    <SelectItem key="fixed">
+                      {t("discounts_type_fixed")}
+                    </SelectItem>
+                  </Select>
+                  <Input
+                    isRequired
+                    endContent={
+                      <span className="text-default-400 text-sm">
+                        {formType === "percentage" ? "%" : common("currency")}
+                      </span>
+                    }
+                    label={t("discounts_value")}
+                    placeholder={formType === "percentage" ? "25" : "10.00"}
+                    type="number"
+                    value={formValue}
+                    onValueChange={setFormValue}
+                  />
+                  <Input
+                    label={t("discounts_max_usage")}
+                    placeholder="100"
+                    type="number"
+                    value={formMaxUsage}
+                    onValueChange={setFormMaxUsage}
+                  />
+                  <Input
+                    label={t("discounts_expires")}
+                    placeholder="YYYY-MM-DD"
+                    type="date"
+                    value={formExpiresAt}
+                    onValueChange={setFormExpiresAt}
+                  />
+                </ModalBody>
+                <ModalFooter>
+                  <Button variant="flat" onPress={onClose}>
+                    {common("cancel")}
+                  </Button>
+                  <Button color="primary" isLoading={creating} type="submit">
+                    {common("confirm")}
+                  </Button>
+                </ModalFooter>
+              </Form>
             </>
           )}
         </ModalContent>

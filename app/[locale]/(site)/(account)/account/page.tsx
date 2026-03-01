@@ -27,6 +27,7 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 import PaymentMethodsTab from "@/components/account/payment-methods-tab";
 import { Link } from "@/i18n/navigation";
@@ -901,9 +902,18 @@ export default function AccountPage() {
                   </div>
                   <Input
                     isRequired
+                    errorMessage={t("addresses_error_phone")}
                     label={t("addresses_phone")}
-                    maxLength={20}
                     size="sm"
+                    type="tel"
+                    validate={(value) =>
+                      !isValidPhoneNumber(
+                        value,
+                        (addressForm.country || "FR") as any,
+                      )
+                        ? t("addresses_error_phone")
+                        : true
+                    }
                     value={addressForm.phone}
                     onValueChange={(v) =>
                       setAddressForm((f) => ({ ...f, phone: v }))
@@ -1087,9 +1097,18 @@ export default function AccountPage() {
                         </div>
                         <Input
                           isRequired
+                          errorMessage={t("addresses_error_phone")}
                           label={t("addresses_phone")}
-                          maxLength={20}
                           size="sm"
+                          type="tel"
+                          validate={(value) =>
+                            !isValidPhoneNumber(
+                              value,
+                              (addressForm.country || "FR") as any,
+                            )
+                              ? t("addresses_error_phone")
+                              : true
+                          }
                           value={addressForm.phone}
                           onValueChange={(v) =>
                             setAddressForm((f) => ({ ...f, phone: v }))

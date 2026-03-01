@@ -64,6 +64,7 @@
     "intl-messageformat": "10.7.16",
     "ioredis": "^5.9.3",
     "leaflet": "^1.9.4",
+    "libphonenumber-js": "^1.12.38",
     "mysql2": "^3.18.0",
     "next": "15.5.9",
     "next-auth": "5.0.0-beta.30",
