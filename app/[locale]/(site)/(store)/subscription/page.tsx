@@ -387,9 +387,6 @@ function PreorderCard({
             >
               +
             </Button>
-            <span className="text-xs text-default-400">
-              / {maxQty} {t("stock_available")}
-            </span>
           </div>
         )}
 
