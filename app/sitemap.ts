@@ -5,7 +5,16 @@ import { productRepository } from "@/lib/repositories/product.repository";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com";
 
-const STATIC_ROUTES = ["/", "/about", "/subscription", "/contact", "/branding"];
+const STATIC_ROUTES = [
+  "/",
+  "/about",
+  "/subscription",
+  "/subscribe",
+  "/contact",
+  "/legal",
+  "/privacy",
+  "/terms",
+];
 
 function buildLocalePath(locale: string, path: string) {
   const cleanPath = path === "/" ? "" : path;
