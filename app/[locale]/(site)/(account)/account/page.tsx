@@ -586,17 +586,22 @@ export default function AccountPage() {
                         icon={faTruck}
                       />
                       <span>
-                        {(order.shipping_address as Record<string, string>)
-                          .relay ? (
+                        {(order.shipping_address as any).relay ? (
                           <>
                             <span className="font-medium">
                               {t("order_relay")}
                             </span>
                             {" — "}
-                            {
-                              (order.shipping_address as Record<string, string>)
-                                .relay
-                            }
+                            {(order.shipping_address as any).relay.name}
+                            {", "}
+                            {(order.shipping_address as any).relay.address
+                              ?.street &&
+                              `${(order.shipping_address as any).relay.address.street}, `}
+                            {(order.shipping_address as any).relay.address
+                              ?.zipCode ||
+                              (order.shipping_address as any).relay.address
+                                ?.zip_code}{" "}
+                            {(order.shipping_address as any).relay.address?.city}
                           </>
                         ) : (
                           <>
