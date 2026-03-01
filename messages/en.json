@@ -385,6 +385,12 @@
     "orders_export": "Export (XLSX)",
     "orders_detail_title": "Order #{id}",
     "orders_items": "Items",
+    "orders_edit_items": "Edit items",
+    "orders_save_items": "Save",
+    "orders_add_item": "Add an item",
+    "orders_item_name": "Name",
+    "orders_item_price": "Price",
+    "orders_item_quantity": "Quantity",
     "orders_ship": "Ship",
     "orders_refund": "Refund",
     "orders_notes": "Notes",
@@ -705,5 +711,22 @@
     "preset_social": "Social Media",
     "preset_web": "Web",
     "preset_print": "Print"
+  },
+  "subscribe": {
+    "title": "Complete my subscription",
+    "auth_required": "Log in to continue",
+    "already_subscribed_title": "Existing subscription",
+    "already_subscribed_desc": "You already have an active subscription.",
+    "manage_subscription": "Manage my subscription",
+    "product_unavailable": "No product available.",
+    "subscription_summary": "Summary",
+    "step_payment": "Proceed to payment",
+    "pay_button": "Confirm — {amount}€/quarter",
+    "success_title": "Subscription confirmed!",
+    "success_message": "Your subscription has been created. You will receive your first box at the next billing date.",
+    "success_manage": "Manage my subscription",
+    "error_subscription": "Unable to create subscription.",
+    "error_confirm": "Confirmation failed.",
+    "per_quarter": "/quarter"
   }
 }

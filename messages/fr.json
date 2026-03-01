@@ -385,6 +385,12 @@
     "orders_export": "Exporter (XLSX)",
     "orders_detail_title": "Commande #{id}",
     "orders_items": "Articles",
+    "orders_edit_items": "Modifier les articles",
+    "orders_save_items": "Enregistrer",
+    "orders_add_item": "Ajouter un article",
+    "orders_item_name": "Nom",
+    "orders_item_price": "Prix",
+    "orders_item_quantity": "Quantité",
     "orders_ship": "Expédier",
     "orders_refund": "Rembourser",
     "orders_notes": "Notes",
@@ -705,5 +711,22 @@
     "preset_social": "Réseaux sociaux",
     "preset_web": "Web",
     "preset_print": "Impression"
+  },
+  "subscribe": {
+    "title": "Finaliser mon abonnement",
+    "auth_required": "Connectez-vous pour continuer",
+    "already_subscribed_title": "Abonnement existant",
+    "already_subscribed_desc": "Vous avez déjà un abonnement actif.",
+    "manage_subscription": "Gérer mon abonnement",
+    "product_unavailable": "Aucun produit disponible.",
+    "subscription_summary": "Récapitulatif",
+    "step_payment": "Passer au paiement",
+    "pay_button": "Confirmer — {amount}€/trimestre",
+    "success_title": "Abonnement confirmé !",
+    "success_message": "Votre abonnement a été créé. Vous recevrez votre première box lors de la prochaine échéance.",
+    "success_manage": "Gérer mon abonnement",
+    "error_subscription": "Impossible de créer l'abonnement.",
+    "error_confirm": "La confirmation a échoué.",
+    "per_quarter": "/trimestre"
   }
 }

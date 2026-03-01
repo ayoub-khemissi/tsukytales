@@ -385,6 +385,12 @@
     "orders_export": "Esporta (XLSX)",
     "orders_detail_title": "Ordine #{id}",
     "orders_items": "Articoli",
+    "orders_edit_items": "Modifica articoli",
+    "orders_save_items": "Salva",
+    "orders_add_item": "Aggiungi un articolo",
+    "orders_item_name": "Nome",
+    "orders_item_price": "Prezzo",
+    "orders_item_quantity": "Quantità",
     "orders_ship": "Spedisci",
     "orders_refund": "Rimborsa",
     "orders_notes": "Note",
@@ -700,5 +706,22 @@
     "preset_social": "Social media",
     "preset_web": "Web",
     "preset_print": "Stampa"
+  },
+  "subscribe": {
+    "title": "Completa il mio abbonamento",
+    "auth_required": "Accedi per continuare",
+    "already_subscribed_title": "Abbonamento esistente",
+    "already_subscribed_desc": "Hai già un abbonamento attivo.",
+    "manage_subscription": "Gestisci il mio abbonamento",
+    "product_unavailable": "Nessun prodotto disponibile.",
+    "subscription_summary": "Riepilogo",
+    "step_payment": "Procedi al pagamento",
+    "pay_button": "Conferma — {amount}€/trimestre",
+    "success_title": "Abbonamento confermato!",
+    "success_message": "Il tuo abbonamento è stato creato. Riceverai la tua prima box alla prossima data di fatturazione.",
+    "success_manage": "Gestisci il mio abbonamento",
+    "error_subscription": "Impossibile creare l'abbonamento.",
+    "error_confirm": "La conferma non è riuscita.",
+    "per_quarter": "/trimestre"
   }
 }

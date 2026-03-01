@@ -6,6 +6,7 @@ import { stripe } from "@/lib/services/payment.service";
 import { orderRepository } from "@/lib/repositories/order.repository";
 import { customerRepository } from "@/lib/repositories/customer.repository";
 import { productRepository } from "@/lib/repositories/product.repository";
+import { addressRepository } from "@/lib/repositories/address.repository";
 import { discountRepository } from "@/lib/repositories/discount.repository";
 import { invalidateMany, invalidateByPrefix } from "@/lib/cache";
 import * as mailService from "@/lib/mail";
@@ -292,27 +293,51 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        const productId = foundCustomer.metadata?.subscription_product_id as
-          | string
-          | undefined;
+        // Use the currently active subscription product (not the one from signup)
+        const activeProduct =
+          await productRepository.findActiveSubscriptionProduct();
+        const productId = activeProduct?.id
+          ? String(activeProduct.id)
+          : (foundCustomer.metadata?.subscription_product_id as
+              | string
+              | undefined);
+        const productName =
+          activeProduct?.name ||
+          invoice.lines?.data?.[0]?.description ||
+          "Abonnement trimestriel";
+
         const shippingInfo = (foundCustomer.metadata?.subscription_shipping ||
           {}) as Record<string, unknown>;
         const amount = (invoice.amount_paid as number) / 100;
+
+        // Use customer's default address
+        const addresses = await addressRepository.findByCustomerId(
+          foundCustomer.id,
+        );
+        const defaultAddress = addresses[0] ?? null;
+        const shippingAddress = defaultAddress
+          ? {
+              first_name: defaultAddress.first_name,
+              last_name: defaultAddress.last_name,
+              street: defaultAddress.street,
+              zip_code: defaultAddress.zip_code,
+              city: defaultAddress.city,
+              country: defaultAddress.country,
+              phone: defaultAddress.phone || "",
+              ...(shippingInfo.relay ? { relay: shippingInfo.relay } : {}),
+            }
+          : shippingInfo.shipping_address ||
+            (shippingInfo.relay ? { relay: shippingInfo.relay } : null);
 
         const orderId = await orderRepository.create({
           email: foundCustomer.email,
           customer_id: foundCustomer.id,
           total: amount,
-          shipping_address: JSON.stringify(
-            shippingInfo.shipping_address ||
-              (shippingInfo.relay ? { relay: shippingInfo.relay } : null),
-          ),
+          shipping_address: JSON.stringify(shippingAddress),
           items: JSON.stringify([
             {
               id: productId ? parseInt(productId) : null,
-              name:
-                invoice.lines?.data?.[0]?.description ||
-                "Abonnement trimestriel",
+              name: productName,
               price: amount,
               quantity: 1,
             },

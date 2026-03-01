@@ -390,6 +390,12 @@
     "orders_export": "Exportieren (XLSX)",
     "orders_detail_title": "Bestellung #{id}",
     "orders_items": "Artikel",
+    "orders_edit_items": "Artikel bearbeiten",
+    "orders_save_items": "Speichern",
+    "orders_add_item": "Artikel hinzufügen",
+    "orders_item_name": "Name",
+    "orders_item_price": "Preis",
+    "orders_item_quantity": "Menge",
     "orders_ship": "Versenden",
     "orders_refund": "Erstatten",
     "orders_notes": "Notizen",
@@ -705,5 +711,22 @@
     "preset_social": "Soziale Medien",
     "preset_web": "Web",
     "preset_print": "Druck"
+  },
+  "subscribe": {
+    "title": "Mein Abonnement abschließen",
+    "auth_required": "Melden Sie sich an, um fortzufahren",
+    "already_subscribed_title": "Bestehendes Abonnement",
+    "already_subscribed_desc": "Sie haben bereits ein aktives Abonnement.",
+    "manage_subscription": "Mein Abonnement verwalten",
+    "product_unavailable": "Kein Produkt verfügbar.",
+    "subscription_summary": "Zusammenfassung",
+    "step_payment": "Zur Zahlung",
+    "pay_button": "Bestätigen — {amount}€/Quartal",
+    "success_title": "Abonnement bestätigt!",
+    "success_message": "Ihr Abonnement wurde erstellt. Sie erhalten Ihre erste Box zum nächsten Abrechnungstermin.",
+    "success_manage": "Mein Abonnement verwalten",
+    "error_subscription": "Abonnement konnte nicht erstellt werden.",
+    "error_confirm": "Die Bestätigung ist fehlgeschlagen.",
+    "per_quarter": "/Quartal"
   }
 }

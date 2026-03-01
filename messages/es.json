@@ -385,6 +385,12 @@
     "orders_export": "Exportar (XLSX)",
     "orders_detail_title": "Pedido #{id}",
     "orders_items": "Artículos",
+    "orders_edit_items": "Editar artículos",
+    "orders_save_items": "Guardar",
+    "orders_add_item": "Añadir un artículo",
+    "orders_item_name": "Nombre",
+    "orders_item_price": "Precio",
+    "orders_item_quantity": "Cantidad",
     "orders_ship": "Enviar",
     "orders_refund": "Reembolsar",
     "orders_notes": "Notas",
@@ -700,5 +706,22 @@
     "preset_social": "Redes sociales",
     "preset_web": "Web",
     "preset_print": "Impresión"
+  },
+  "subscribe": {
+    "title": "Finalizar mi suscripción",
+    "auth_required": "Inicia sesión para continuar",
+    "already_subscribed_title": "Suscripción existente",
+    "already_subscribed_desc": "Ya tienes una suscripción activa.",
+    "manage_subscription": "Gestionar mi suscripción",
+    "product_unavailable": "Ningún producto disponible.",
+    "subscription_summary": "Resumen",
+    "step_payment": "Proceder al pago",
+    "pay_button": "Confirmar — {amount}€/trimestre",
+    "success_title": "¡Suscripción confirmada!",
+    "success_message": "Tu suscripción ha sido creada. Recibirás tu primera caja en la próxima fecha de facturación.",
+    "success_manage": "Gestionar mi suscripción",
+    "error_subscription": "No se pudo crear la suscripción.",
+    "error_confirm": "La confirmación ha fallado.",
+    "per_quarter": "/trimestre"
   }
 }

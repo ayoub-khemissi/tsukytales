@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Divider } from "@heroui/divider";
 import { Spinner } from "@heroui/spinner";
-import { Textarea } from "@heroui/input";
+import { Input, Textarea } from "@heroui/input";
 import {
   Modal,
   ModalContent,
@@ -114,6 +114,9 @@ export default function OrderDetailPage() {
     color: "primary" | "warning" | "danger";
     confirmLabel: string;
   } | null>(null);
+  const [editingItems, setEditingItems] = useState(false);
+  const [editItems, setEditItems] = useState<OrderItem[]>([]);
+  const [savingItems, setSavingItems] = useState(false);
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
   const fetchOrder = useCallback(async () => {
@@ -253,6 +256,73 @@ export default function OrderDetailPage() {
     }
   };
 
+  const startEditItems = () => {
+    if (order) {
+      setEditItems(order.items.map((item) => ({ ...item })));
+      setEditingItems(true);
+    }
+  };
+
+  const cancelEditItems = () => {
+    setEditingItems(false);
+    setEditItems([]);
+  };
+
+  const updateEditItem = (
+    index: number,
+    field: keyof OrderItem,
+    value: string | number,
+  ) => {
+    setEditItems((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+    );
+  };
+
+  const removeEditItem = (index: number) => {
+    setEditItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addEditItem = () => {
+    setEditItems((prev) => [
+      ...prev,
+      { id: 0, name: "", price: 0, quantity: 1 },
+    ]);
+  };
+
+  const saveItems = async () => {
+    setSavingItems(true);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: editItems }),
+      });
+
+      if (res.ok) {
+        setEditingItems(false);
+        await fetchOrder();
+      } else {
+        const data = await res.json();
+
+        setActionError(data.message || data.error || "Erreur sauvegarde");
+      }
+    } catch {
+      setActionError("Erreur réseau");
+    } finally {
+      setSavingItems(false);
+    }
+  };
+
+  const editTotal = useMemo(
+    () =>
+      editItems.reduce(
+        (sum, item) => sum + Number(item.price) * Number(item.quantity),
+        0,
+      ),
+    [editItems],
+  );
+
   if (loading) {
     return (
       <div className="flex justify-center py-32">
@@ -330,38 +400,116 @@ export default function OrderDetailPage() {
         {/* Items */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="admin-glass rounded-xl">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <h2 className="font-heading font-semibold text-lg">
                 {t("orders_items")}
               </h2>
+              {!editingItems && (
+                <Button size="sm" variant="flat" onPress={startEditItems}>
+                  {t("orders_edit_items")}
+                </Button>
+              )}
             </CardHeader>
             <CardBody className="space-y-3">
-              {order.items.map((item, i) => (
-                <div
-                  key={item.id || i}
-                  className="flex items-center justify-between"
-                >
-                  <div>
-                    <span className="font-medium">{item.name}</span>
-                    <span className="text-default-500 ml-2">
-                      x{item.quantity}
+              {editingItems ? (
+                <>
+                  {editItems.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Input
+                        className="flex-1"
+                        label={t("orders_item_name")}
+                        size="sm"
+                        value={item.name}
+                        onValueChange={(v) => updateEditItem(i, "name", v)}
+                      />
+                      <Input
+                        className="w-24"
+                        label={t("orders_item_price")}
+                        min={0}
+                        size="sm"
+                        step={0.01}
+                        type="number"
+                        value={String(item.price)}
+                        onValueChange={(v) =>
+                          updateEditItem(i, "price", parseFloat(v) || 0)
+                        }
+                      />
+                      <Input
+                        className="w-20"
+                        label={t("orders_item_quantity")}
+                        min={1}
+                        size="sm"
+                        type="number"
+                        value={String(item.quantity)}
+                        onValueChange={(v) =>
+                          updateEditItem(i, "quantity", parseInt(v) || 1)
+                        }
+                      />
+                      <Button
+                        isIconOnly
+                        color="danger"
+                        size="sm"
+                        variant="light"
+                        onPress={() => removeEditItem(i)}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
+                  <Button size="sm" variant="flat" onPress={addEditItem}>
+                    + {t("orders_add_item")}
+                  </Button>
+                  <Divider />
+                  <div className="flex items-center justify-between text-lg font-bold">
+                    <span>{common("total")}</span>
+                    <span className="text-primary">
+                      {editTotal.toFixed(2)}
+                      {common("currency")}
                     </span>
                   </div>
-                  <span className="font-medium">
-                    {/* A5: item.price already contains unit_price * quantity */}
-                    {Number(item.price).toFixed(2)}
-                    {common("currency")}
-                  </span>
-                </div>
-              ))}
-              <Divider />
-              <div className="flex items-center justify-between text-lg font-bold">
-                <span>{common("total")}</span>
-                <span className="text-primary">
-                  {Number(order.total).toFixed(2)}
-                  {common("currency")}
-                </span>
-              </div>
+                  <div className="flex gap-2">
+                    <Button
+                      color="primary"
+                      isLoading={savingItems}
+                      size="sm"
+                      onPress={saveItems}
+                    >
+                      {t("orders_save_items")}
+                    </Button>
+                    <Button size="sm" variant="light" onPress={cancelEditItems}>
+                      {common("cancel")}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {order.items.map((item, i) => (
+                    <div
+                      key={item.id || i}
+                      className="flex items-center justify-between"
+                    >
+                      <div>
+                        <span className="font-medium">{item.name}</span>
+                        <span className="text-default-500 ml-2">
+                          x{item.quantity}
+                        </span>
+                      </div>
+                      <span className="font-medium">
+                        {Number(item.price).toFixed(2)}
+                        {common("currency")}
+                      </span>
+                    </div>
+                  ))}
+                  <Divider />
+                  <div className="flex items-center justify-between text-lg font-bold">
+                    <span>{common("total")}</span>
+                    <span className="text-primary">
+                      {Number(order.total).toFixed(2)}
+                      {common("currency")}
+                    </span>
+                  </div>
+                </>
+              )}
             </CardBody>
           </Card>
 

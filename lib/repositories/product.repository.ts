@@ -62,6 +62,14 @@ class ProductRepository extends BaseRepository<ProductRow> {
     await pool.execute("UPDATE products SET is_active = 0 WHERE is_active = 1");
   }
 
+  async findActiveSubscriptionProduct(): Promise<ProductRow | null> {
+    const [rows] = await pool.execute<ProductRow[]>(
+      "SELECT * FROM products WHERE is_active = 1 AND (is_deleted = 0 OR is_deleted IS NULL) ORDER BY createdAt DESC LIMIT 1",
+    );
+
+    return rows[0] ?? null;
+  }
+
   async decrementStock(id: number, amount: number = 1): Promise<boolean> {
     const [result] = await pool.execute<ResultSetHeader>(
       "UPDATE products SET stock = GREATEST(0, stock - ?) WHERE id = ? AND stock > 0",

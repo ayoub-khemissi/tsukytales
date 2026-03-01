@@ -252,7 +252,7 @@ function SubscriptionCard({
         <Button
           as={Link}
           className="btn-brand bg-primary font-semibold w-full"
-          href={session?.user ? `/product/${product.slug}` : "/login"}
+          href={session?.user ? `/subscribe` : "/login"}
           isDisabled={isOutOfStock}
           size="lg"
         >
