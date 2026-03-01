@@ -17,22 +17,46 @@ const addressSchema = z.object({
   phone: optStr,
 });
 
-export const createOrderSchema = z.object({
-  items: z
-    .array(
-      z.object({
-        product_id: z.number().int().positive(),
-        quantity: z.number().int().positive(),
-      }),
-    )
-    .min(1, "Au moins un article est requis"),
-  shipping_address: addressSchema,
-  billing_address: addressSchema.optional(),
-  shipping_method: z.enum(["relay", "home"]),
-  relay_code: z.string().optional(),
-  discount_code: z.string().optional(),
-  guest_email: z.string().email("Email invalide").optional(),
-});
+/** Fields required for home delivery. */
+const HOME_REQUIRED_FIELDS = [
+  "first_name",
+  "last_name",
+  "street",
+  "zip_code",
+  "city",
+  "phone",
+] as const;
+
+export const createOrderSchema = z
+  .object({
+    items: z
+      .array(
+        z.object({
+          product_id: z.number().int().positive(),
+          quantity: z.number().int().positive(),
+        }),
+      )
+      .min(1, "Au moins un article est requis"),
+    shipping_address: addressSchema,
+    billing_address: addressSchema.optional(),
+    shipping_method: z.enum(["relay", "home"]),
+    relay_code: z.string().optional(),
+    discount_code: z.string().optional(),
+    guest_email: z.string().email("Email invalide").optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.shipping_method !== "home") return true;
+      return HOME_REQUIRED_FIELDS.every(
+        (f) => data.shipping_address[f] && data.shipping_address[f]!.length > 0,
+      );
+    },
+    {
+      message:
+        "Tous les champs d'adresse sont requis pour la livraison à domicile",
+      path: ["shipping_address"],
+    },
+  );
 
 export const confirmOrderSchema = z.object({
   payment_intent_id: z.string().min(1, "ID de paiement requis"),
