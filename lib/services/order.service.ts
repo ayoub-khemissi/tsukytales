@@ -234,7 +234,17 @@ export async function createOrder(
     const normalizedEmail = resolvedEmail!.toLowerCase().trim();
     const shippingAddress = data.shipping_address;
 
-    // 9. Create order
+    // 9. Get/Create Stripe customer BEFORE inserting order.
+    //    INSERT orders places a FK shared lock on the customers row;
+    //    getOrCreateStripeCustomer may UPDATE customers metadata via pool,
+    //    which needs an exclusive lock — so it must run first.
+    const customer = await customerRepository.findById(resolvedCustomerId!);
+
+    if (!customer) throw new AppError("Client introuvable", 404);
+    const stripeCustomerId =
+      await stripeCustomerService.getOrCreateStripeCustomer(customer);
+
+    // 10. Create order
     const [result] = await connection.execute<ResultSetHeader>(
       `INSERT INTO orders (email, customer_id, total, shipping_address, items, status, payment_status, metadata)
        VALUES (?, ?, ?, ?, ?, 'pending', 'awaiting', ?)`,
@@ -280,13 +290,6 @@ export async function createOrder(
       order.metadata = JSON.parse(order.metadata);
     if (typeof order.shipping_address === "string")
       order.shipping_address = JSON.parse(order.shipping_address);
-
-    // 10. Get Stripe customer
-    const customer = await customerRepository.findById(resolvedCustomerId!);
-
-    if (!customer) throw new AppError("Client introuvable", 404);
-    const stripeCustomerId =
-      await stripeCustomerService.getOrCreateStripeCustomer(customer);
 
     // 11. Create PaymentIntent with server-calculated total
     const paymentResult = await paymentService.createPaymentIntent({
