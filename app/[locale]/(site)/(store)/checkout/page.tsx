@@ -104,6 +104,12 @@ function PaymentForm({
     if (result.error) {
       setError(result.error.message || t("error_payment"));
       setLoading(false);
+    } else if (
+      "paymentIntent" in result &&
+      result.paymentIntent?.status === "succeeded"
+    ) {
+      // Saved card paid without redirect (no 3DS required)
+      window.location.href = returnUrl.toString();
     }
   };
 
