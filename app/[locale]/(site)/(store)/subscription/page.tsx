@@ -65,7 +65,7 @@ export default function SubscriptionPage() {
 
   // Check if already subscribed
   useEffect(() => {
-    if (!session?.user) return;
+    if (session?.user?.role !== "customer") return;
     fetch("/api/store/subscriptions/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -277,7 +277,7 @@ function SubscriptionCard({
           <Button
             as={Link}
             className="btn-brand bg-primary font-semibold w-full"
-            href={session?.user ? `/subscribe` : "/login"}
+            href={session?.user?.role === "customer" ? `/subscribe` : "/login"}
             isDisabled={isOutOfStock}
             size="lg"
           >

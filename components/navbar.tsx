@@ -111,7 +111,7 @@ export const Navbar = () => {
               </Button>
             </Badge>
           </Link>
-          {session?.user ? (
+          {session?.user?.role === "customer" ? (
             <Dropdown placement="bottom-end">
               <DropdownTrigger>
                 <Button
@@ -209,7 +209,7 @@ export const Navbar = () => {
       {/* Mobile menu */}
       <NavbarMenu>
         <div className="mx-4 mt-2 flex flex-col gap-2">
-          {session?.user ? (
+          {session?.user?.role === "customer" ? (
             <>
               <NavbarMenuItem>
                 <Link
@@ -295,7 +295,7 @@ export const Navbar = () => {
               {t("subscription")}
             </Link>
           </NavbarMenuItem>
-          {session?.user ? (
+          {session?.user?.role === "customer" ? (
             <>
               <Divider className="my-2" />
               <NavbarMenuItem>

@@ -45,13 +45,16 @@ export default async function middleware(req: NextRequest) {
         req.url,
       );
 
-    // Logged-in users cannot access login/register → redirect to account
-    if (isGuestOnly && session?.user) {
+    // Logged-in customers cannot access login/register → redirect to account
+    if (isGuestOnly && session?.user?.role === "customer") {
       return Response.redirect(buildUrl("/account"));
     }
 
-    // Non-logged-in users cannot access /account → redirect to login
-    if (strippedPath.startsWith("/account") && !session?.user) {
+    // Non-customer users cannot access /account → redirect to login
+    if (
+      strippedPath.startsWith("/account") &&
+      session?.user?.role !== "customer"
+    ) {
       const loginUrl = buildUrl("/login");
 
       loginUrl.searchParams.set("callbackUrl", pathname);

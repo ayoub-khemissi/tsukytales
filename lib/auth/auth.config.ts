@@ -13,12 +13,11 @@ export const authConfig = {
   providers: [], // Added in auth.ts
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
       const pathname = nextUrl.pathname;
 
-      // Protected customer routes
+      // Protected customer routes — only customers can access
       if (pathname.startsWith("/compte")) {
-        return isLoggedIn;
+        return auth?.user?.role === "customer";
       }
 
       // Protected admin routes

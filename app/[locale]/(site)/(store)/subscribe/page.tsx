@@ -190,12 +190,12 @@ export default function SubscribePage() {
   const [totalPerQuarter, setTotalPerQuarter] = useState(0);
   const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
 
-  // Auth guard
+  // Auth guard — only customers can subscribe
   useEffect(() => {
-    if (sessionStatus === "unauthenticated") {
+    if (sessionStatus !== "loading" && session?.user?.role !== "customer") {
       router.push("/register?callbackUrl=/subscribe");
     }
-  }, [sessionStatus, router]);
+  }, [sessionStatus, session?.user?.role, router]);
 
   // Load product
   useEffect(() => {
@@ -211,7 +211,7 @@ export default function SubscribePage() {
 
   // Check if already subscribed
   useEffect(() => {
-    if (!session?.user) return;
+    if (session?.user?.role !== "customer") return;
     fetch("/api/store/subscriptions/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -222,7 +222,7 @@ export default function SubscribePage() {
 
   // Fetch saved addresses + customer profile + payment methods
   useEffect(() => {
-    if (!session?.user) return;
+    if (session?.user?.role !== "customer") return;
     Promise.all([
       fetch("/api/store/addresses/me").then((r) => (r.ok ? r.json() : [])),
       fetch("/api/store/customer/me").then((r) => (r.ok ? r.json() : null)),
@@ -541,31 +541,32 @@ export default function SubscribePage() {
               <CardBody className="p-6 space-y-4">
                 <h3 className="font-semibold">{ct("shipping_address")}</h3>
 
-                {session?.user && savedAddresses.length > 0 && (
-                  <RadioGroup
-                    label={ct("saved_addresses")}
-                    value={addressMode}
-                    onValueChange={selectSavedAddress}
-                  >
-                    {savedAddresses.map((addr) => (
-                      <Radio key={addr.id} value={String(addr.id)}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{addr.label}</span>
-                          {!!addr.is_default && (
-                            <Chip color="primary" size="sm" variant="flat">
-                              {ct("default_badge")}
-                            </Chip>
-                          )}
-                        </div>
-                        <span className="text-sm text-default-500">
-                          {addr.first_name} {addr.last_name} — {addr.street},{" "}
-                          {addr.zip_code} {addr.city}
-                        </span>
-                      </Radio>
-                    ))}
-                    <Radio value="new">{ct("new_address")}</Radio>
-                  </RadioGroup>
-                )}
+                {session?.user?.role === "customer" &&
+                  savedAddresses.length > 0 && (
+                    <RadioGroup
+                      label={ct("saved_addresses")}
+                      value={addressMode}
+                      onValueChange={selectSavedAddress}
+                    >
+                      {savedAddresses.map((addr) => (
+                        <Radio key={addr.id} value={String(addr.id)}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{addr.label}</span>
+                            {!!addr.is_default && (
+                              <Chip color="primary" size="sm" variant="flat">
+                                {ct("default_badge")}
+                              </Chip>
+                            )}
+                          </div>
+                          <span className="text-sm text-default-500">
+                            {addr.first_name} {addr.last_name} — {addr.street},{" "}
+                            {addr.zip_code} {addr.city}
+                          </span>
+                        </Radio>
+                      ))}
+                      <Radio value="new">{ct("new_address")}</Radio>
+                    </RadioGroup>
+                  )}
 
                 {(savedAddresses.length === 0 || addressMode === "new") && (
                   <div className="space-y-4">

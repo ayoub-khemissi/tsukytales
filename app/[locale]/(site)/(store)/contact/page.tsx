@@ -32,7 +32,7 @@ export default function ContactPage() {
   const [fileError, setFileError] = useState("");
 
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user?.role === "customer") {
       setForm((prev) => ({
         ...prev,
         name: prev.name || session.user.name || "",

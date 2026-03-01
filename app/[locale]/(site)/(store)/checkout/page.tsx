@@ -173,7 +173,7 @@ export default function CheckoutPage() {
 
   // Fetch saved addresses + customer profile + payment methods for logged-in users
   useEffect(() => {
-    if (!session?.user) return;
+    if (session?.user?.role !== "customer") return;
     Promise.all([
       fetch("/api/store/addresses/me").then((r) => (r.ok ? r.json() : [])),
       fetch("/api/store/customer/me").then((r) => (r.ok ? r.json() : null)),
@@ -346,7 +346,8 @@ export default function CheckoutPage() {
           shipping_address: shippingAddress,
           shipping_method: shippingMethod,
           relay_code: selectedRelay?.code,
-          guest_email: !session?.user ? orderEmail : undefined,
+          guest_email:
+            session?.user?.role !== "customer" ? orderEmail : undefined,
         }),
       });
       const data = await res.json();
@@ -412,7 +413,7 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           {/* Email for guests */}
-          {!session?.user && (
+          {session?.user?.role !== "customer" && (
             <Card className="border border-divider">
               <CardBody className="p-6">
                 <Input
@@ -477,34 +478,35 @@ export default function CheckoutPage() {
                 <h3 className="font-semibold">{t("shipping_address")}</h3>
 
                 {/* Saved addresses picker (logged-in users only) */}
-                {session?.user && savedAddresses.length > 0 && (
-                  <RadioGroup
-                    label={t("saved_addresses")}
-                    value={addressMode}
-                    onValueChange={selectSavedAddress}
-                  >
-                    {savedAddresses.map((addr) => (
-                      <Radio key={addr.id} value={String(addr.id)}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{addr.label}</span>
-                          {!!addr.is_default && (
-                            <Chip color="primary" size="sm" variant="flat">
-                              {t("default_badge")}
-                            </Chip>
-                          )}
-                        </div>
-                        <span className="text-sm text-default-500">
-                          {addr.first_name} {addr.last_name} — {addr.street},{" "}
-                          {addr.zip_code} {addr.city}
-                        </span>
-                      </Radio>
-                    ))}
-                    <Radio value="new">{t("new_address")}</Radio>
-                  </RadioGroup>
-                )}
+                {session?.user?.role === "customer" &&
+                  savedAddresses.length > 0 && (
+                    <RadioGroup
+                      label={t("saved_addresses")}
+                      value={addressMode}
+                      onValueChange={selectSavedAddress}
+                    >
+                      {savedAddresses.map((addr) => (
+                        <Radio key={addr.id} value={String(addr.id)}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{addr.label}</span>
+                            {!!addr.is_default && (
+                              <Chip color="primary" size="sm" variant="flat">
+                                {t("default_badge")}
+                              </Chip>
+                            )}
+                          </div>
+                          <span className="text-sm text-default-500">
+                            {addr.first_name} {addr.last_name} — {addr.street},{" "}
+                            {addr.zip_code} {addr.city}
+                          </span>
+                        </Radio>
+                      ))}
+                      <Radio value="new">{t("new_address")}</Radio>
+                    </RadioGroup>
+                  )}
 
                 {/* Address form (always shown for guests, shown when "new" selected for logged-in) */}
-                {(!session?.user ||
+                {(session?.user?.role !== "customer" ||
                   savedAddresses.length === 0 ||
                   addressMode === "new") && (
                   <div className="space-y-4">
