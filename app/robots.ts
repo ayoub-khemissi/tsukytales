@@ -31,6 +31,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: "https://tsukytales.com/sitemap.xml",
+    sitemap: `${process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com"}/sitemap.xml`,
   };
 }

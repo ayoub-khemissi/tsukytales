@@ -37,7 +37,9 @@ export async function generateMetadata({
       template: "%s | Tsuky Tales",
     },
     description: t("home_description"),
-    metadataBase: new URL("https://tsukytales.com"),
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com",
+    ),
     icons: { icon: "/favicon.ico" },
     openGraph: {
       type: "website",
@@ -46,7 +48,7 @@ export async function generateMetadata({
       alternateLocale: Object.entries(localeMap)
         .filter(([k]) => k !== locale)
         .map(([, v]) => v),
-      url: "https://tsukytales.com",
+      url: process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com",
       title: t("home_title"),
       description: t("home_description"),
       images: [{ url: OG_IMAGE_URL, width: 1200, height: 630 }],
@@ -88,8 +90,8 @@ export default async function LocaleLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Tsuky Tales",
-    url: "https://tsukytales.com",
-    logo: "https://tsukytales.com/favicon.ico",
+    url: process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com",
+    logo: `${process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com"}/favicon.ico`,
     sameAs: ["https://www.instagram.com/tsukytales"],
   };
 
@@ -97,7 +99,7 @@ export default async function LocaleLayout({
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Tsuky Tales",
-    url: "https://tsukytales.com",
+    url: process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com",
   };
 
   return (

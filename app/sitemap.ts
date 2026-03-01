@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { productRepository } from "@/lib/repositories/product.repository";
 
-const BASE_URL = "https://tsukytales.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com";
 
 const STATIC_ROUTES = ["/", "/about", "/subscription", "/contact", "/branding"];
 

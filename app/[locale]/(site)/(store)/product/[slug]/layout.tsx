@@ -69,7 +69,7 @@ export default async function ProductLayout({
         product.stock > 0
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
-      url: `https://tsukytales.com/product/${slug}`,
+      url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com"}/product/${slug}`,
     },
   };
 

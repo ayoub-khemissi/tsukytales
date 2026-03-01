@@ -1,6 +1,6 @@
 import { routing } from "@/i18n/routing";
 
-const BASE_URL = "https://tsukytales.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://tsukytales.com";
 
 export const OG_IMAGE_URL = `${BASE_URL}/og-image.jpg`;
 
