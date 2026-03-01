@@ -46,8 +46,9 @@ export function AdminTableFilters({ search, filters }: AdminTableFiltersProps) {
           selectedKeys={[filter.value]}
           size="md"
           onSelectionChange={(keys) => {
-            const val = Array.from(keys)[0] as string;
+            const val = Array.from(keys)[0] as string | undefined;
 
+            if (!val) return;
             filter.onChange(val);
           }}
         >
