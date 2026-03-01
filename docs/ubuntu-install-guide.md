@@ -222,6 +222,7 @@ DB_QUEUE_LIMIT="200"
 ```env
 NEXTAUTH_URL="https://tsukytales.com"
 NEXTAUTH_SECRET=""   # Generate with: openssl rand -base64 32
+AUTH_TRUST_HOST="true"   # Required when behind a reverse proxy (Nginx)
 ```
 
 ### Stripe
@@ -688,6 +689,15 @@ mysql -u tsukytales -p -e "SELECT 1;"
 # Check file permissions
 ls -la /var/www/tsukytales/
 ```
+
+### AuthJS "UntrustedHost" error
+
+If you see `UntrustedHost: Host must be trusted` in PM2 error logs, it means NextAuth doesn't trust the host behind the Nginx reverse proxy. This is handled by:
+
+1. `trustHost: true` in `lib/auth/auth.config.ts` (already set)
+2. `AUTH_TRUST_HOST="true"` in `.env.local`
+
+After adding/changing these values, rebuild (`pnpm build`) and reload (`pm2 reload tsukytales`).
 
 ### 502 Bad Gateway
 

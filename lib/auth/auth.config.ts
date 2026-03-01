@@ -6,6 +6,7 @@ import type { NextAuthConfig } from "next-auth";
  * Providers are added in auth.ts (Node.js runtime only).
  */
 export const authConfig = {
+  trustHost: true,
   pages: {
     signIn: "/connexion",
   },
