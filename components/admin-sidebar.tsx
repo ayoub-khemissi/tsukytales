@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
 import { Button } from "@heroui/button";
+import Image from "next/image";
 
 import { Link, usePathname } from "@/i18n/navigation";
 
@@ -265,9 +266,13 @@ export function AdminSidebar() {
     <aside className="flex flex-col h-screen w-64 bg-[#1a0a1f] text-white shrink-0 overflow-y-auto">
       {/* Branding */}
       <div className="flex items-center gap-3 px-5 py-6 border-b border-[#D4AF37]/20">
-        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#F2D479] flex items-center justify-center text-sm font-bold text-[#1a0a1f]">
-          T
-        </div>
+        <Image
+          alt="Tsuky Tales"
+          className="w-10 h-10 rounded-lg"
+          height={40}
+          src="/assets/img/logo-round.svg"
+          width={40}
+        />
         <div>
           <p className="font-heading italic text-sm tracking-wide">
             Tsuky Tales
