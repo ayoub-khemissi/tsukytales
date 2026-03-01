@@ -32,7 +32,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       >(
         `SELECT
         COALESCE(SUM(CASE WHEN payment_status = 'captured' THEN total ELSE 0 END), 0) as revenue,
-        COUNT(*) as orders_count,
+        SUM(CASE WHEN payment_status = 'captured' THEN 1 ELSE 0 END) as orders_count,
         COALESCE(SUM(CASE WHEN payment_status = 'refunded' THEN total ELSE 0 END), 0) as refunds,
         COALESCE(SUM(CASE WHEN payment_status = 'captured' AND is_subscription_order = 1 THEN total ELSE 0 END), 0) as subscription_revenue,
         COALESCE(SUM(CASE WHEN payment_status = 'captured' AND is_subscription_order = 0 THEN total ELSE 0 END), 0) as oneoff_revenue,
