@@ -27,7 +27,7 @@ export function shippingNotificationHtml({
         <div style="font-size: 32px; font-weight: 800; color: #2d0b35; margin: 15px 0; font-family: monospace; letter-spacing: 1px; background: #ffffff; padding: 15px; border-radius: 8px; border: 1px dashed #d4b5db;">${trackingNumber}</div>
       </div>
       <div style="text-align: center; margin-top: 40px;">
-        <a href="${BASE_URL}/compte" style="background: linear-gradient(135deg, #581668 0%, #7a218f 100%); color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block; box-shadow: 0 10px 20px rgba(88, 22, 104, 0.2); width: 250px;">Suivre ma commande</a>
+        <a href="${BASE_URL}/account?tab=orders" style="background: linear-gradient(135deg, #581668 0%, #7a218f 100%); color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block; box-shadow: 0 10px 20px rgba(88, 22, 104, 0.2); width: 250px;">Suivre ma commande</a>
         ${labelUrl ? `<br><a href="${labelUrl}" style="color: #581668; font-size: 0.9rem; text-decoration: underline; font-weight: 600; margin-top: 15px; display: inline-block;">T&eacute;l&eacute;charger mon &eacute;tiquette</a>` : ""}
       </div>`,
   });

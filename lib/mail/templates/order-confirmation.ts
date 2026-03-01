@@ -53,7 +53,7 @@ export function orderConfirmationHtml({
         </table>
       </div>
       <div style="text-align: center; margin-top: 40px;">
-        <a href="${BASE_URL}/compte" style="background: linear-gradient(135deg, #581668 0%, #7a218f 100%); color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block; box-shadow: 0 10px 20px rgba(88, 22, 104, 0.2);">Suivre ma commande</a>
+        <a href="${BASE_URL}/account?tab=orders" style="background: linear-gradient(135deg, #581668 0%, #7a218f 100%); color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: 700; display: inline-block; box-shadow: 0 10px 20px rgba(88, 22, 104, 0.2);">Suivre ma commande</a>
       </div>`,
   });
 }
