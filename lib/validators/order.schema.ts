@@ -1,14 +1,20 @@
 import { z } from "zod/v4";
 
+/** Treat empty strings as undefined so `.optional()` accepts them. */
+const optStr = z.preprocess(
+  (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+  z.string().min(1).optional(),
+);
+
 const addressSchema = z.object({
-  first_name: z.string().min(1).optional(),
-  last_name: z.string().min(1).optional(),
-  street: z.string().min(1).optional(),
+  first_name: optStr,
+  last_name: optStr,
+  street: optStr,
   street_complement: z.string().optional(),
-  zip_code: z.string().min(1).optional(),
-  city: z.string().min(1).optional(),
+  zip_code: optStr,
+  city: optStr,
   country: z.string().max(2).optional(),
-  phone: z.string().min(1).optional(),
+  phone: optStr,
 });
 
 export const createOrderSchema = z.object({

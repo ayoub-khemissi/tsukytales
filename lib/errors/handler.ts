@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { z } from "zod/v4";
+
 import { AppError } from "./app-error";
 
 import { logger } from "@/lib/utils/logger";
@@ -20,6 +22,13 @@ export function withErrorHandler(handler: RouteHandler): RouteHandler {
         return NextResponse.json(
           { error: error.message },
           { status: error.statusCode },
+        );
+      }
+
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: "Données invalides", details: error.issues },
+          { status: 400 },
         );
       }
 
