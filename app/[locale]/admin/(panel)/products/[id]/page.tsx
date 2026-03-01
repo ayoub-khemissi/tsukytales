@@ -20,6 +20,7 @@ interface ProductForm {
   slug: string;
   description: string;
   price: number;
+  stock: number;
   weight: number;
   is_active: boolean;
   is_preorder: boolean;
@@ -39,6 +40,7 @@ const INITIAL_FORM: ProductForm = {
   slug: "",
   description: "",
   price: 0,
+  stock: 0,
   weight: 0,
   is_active: false,
   is_preorder: false,
@@ -75,6 +77,7 @@ export default function ProductEditPage() {
           slug: data.slug || "",
           description: data.description || "",
           price: data.price || 0,
+          stock: data.stock ?? 0,
           weight: data.weight || 0,
           is_active: !!data.is_active,
           is_preorder: !!data.is_preorder,
@@ -106,8 +109,8 @@ export default function ProductEditPage() {
   }, [isNew, fetchProduct]);
 
   useEffect(() => {
-    if (!form.is_preorder) fetchSubDates();
-  }, [form.is_preorder, fetchSubDates]);
+    fetchSubDates();
+  }, [fetchSubDates]);
 
   const updateField = <K extends keyof ProductForm>(
     key: K,
@@ -273,7 +276,7 @@ export default function ProductEditPage() {
                 value={form.slug}
                 onValueChange={(v) => updateField("slug", v)}
               />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <Input
                   isRequired
                   endContent={
@@ -285,6 +288,13 @@ export default function ProductEditPage() {
                   type="number"
                   value={String(form.price)}
                   onValueChange={(v) => updateField("price", Number(v))}
+                />
+                <Input
+                  label={t("products_stock")}
+                  min={0}
+                  type="number"
+                  value={String(form.stock)}
+                  onValueChange={(v) => updateField("stock", Number(v))}
                 />
                 <Input
                   endContent={
@@ -387,39 +397,37 @@ export default function ProductEditPage() {
           </Card>
 
           {/* Subscription dates — read-only info */}
-          {!form.is_preorder && (
-            <Card className="admin-glass rounded-xl">
-              <CardHeader>
-                <h2 className="font-heading font-semibold text-lg">
-                  {t("sub_dates_title")}
-                </h2>
-              </CardHeader>
-              <CardBody className="space-y-3">
-                {subDates.length > 0 ? (
-                  <ul className="space-y-1">
-                    {subDates.map((d) => (
-                      <li key={d} className="text-sm text-default-600">
-                        {new Date(d + "T00:00:00").toLocaleDateString("fr-FR")}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-default-400">
-                    {t("sub_dates_empty")}
-                  </p>
-                )}
-                <Button
-                  as={Link}
-                  color="primary"
-                  href="/admin/settings"
-                  size="sm"
-                  variant="flat"
-                >
-                  {t("sub_dates_go_settings")}
-                </Button>
-              </CardBody>
-            </Card>
-          )}
+          <Card className="admin-glass rounded-xl">
+            <CardHeader>
+              <h2 className="font-heading font-semibold text-lg">
+                {t("sub_dates_title")}
+              </h2>
+            </CardHeader>
+            <CardBody className="space-y-3">
+              {subDates.length > 0 ? (
+                <ul className="space-y-1">
+                  {subDates.map((d) => (
+                    <li key={d} className="text-sm text-default-600">
+                      {new Date(d + "T00:00:00").toLocaleDateString("fr-FR")}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-default-400">
+                  {t("sub_dates_empty")}
+                </p>
+              )}
+              <Button
+                as={Link}
+                color="primary"
+                href="/admin/settings"
+                size="sm"
+                variant="flat"
+              >
+                {t("sub_dates_go_settings")}
+              </Button>
+            </CardBody>
+          </Card>
 
           {/* Save */}
           <Button

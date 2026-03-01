@@ -198,9 +198,9 @@ function SubscriptionCard({
         <Image
           alt="Tsuky Tales"
           className="rounded-full"
-          height={56}
+          height={80}
           src="/assets/img/logo-round.svg"
-          width={56}
+          width={80}
         />
         <h3 className="font-heading text-[1.3rem] sm:text-[1.5rem] font-bold text-text-brand dark:text-white tracking-[2px] uppercase">
           {t("card_sub_title")}
@@ -285,9 +285,8 @@ function PreorderCard({
   }) => void;
   router: ReturnType<typeof useRouter>;
 }) {
-  const isActive = product.is_preorder;
+  const isActive = !!product.is_preorder;
   const isOutOfStock = isActive && product.stock === 0;
-  const isLowStock = isActive && product.stock > 0 && product.stock < 10;
 
   return (
     <div className="step-card relative bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-full min-h-[550px] sm:min-h-[620px] px-5 pt-14 pb-8 sm:px-10 sm:pt-18 sm:pb-12">
@@ -296,12 +295,7 @@ function PreorderCard({
         {common("preorder")}
       </span>
 
-      {/* Stock badge — only when preorder is active */}
-      {isLowStock && (
-        <span className="absolute top-5 right-5 z-10 bg-warning text-white text-[0.7rem] font-semibold px-3 py-1 rounded-full">
-          {t("stock_low", { count: product.stock })}
-        </span>
-      )}
+      {/* Stock badge — only when out of stock */}
       {isOutOfStock && (
         <span className="absolute top-5 right-5 z-10 bg-danger text-white text-[0.7rem] font-semibold px-3 py-1 rounded-full">
           {t("stock_out")}
@@ -313,9 +307,9 @@ function PreorderCard({
         <Image
           alt="Tsuky Tales"
           className="rounded-full"
-          height={56}
+          height={80}
           src="/assets/img/logo-round.svg"
-          width={56}
+          width={80}
         />
         <h3 className="font-heading text-[1.3rem] sm:text-[1.5rem] font-bold text-text-brand dark:text-white tracking-[2px] uppercase">
           {t("preorder_title")}
@@ -356,7 +350,7 @@ function PreorderCard({
             }}
           >
             <FontAwesomeIcon className="mr-2" icon={faShoppingCart} />
-            {isOutOfStock ? t("stock_out") : t("add_to_cart")}
+            {isOutOfStock ? common("out_of_stock") : t("add_to_cart")}
           </Button>
         ) : (
           <Button
