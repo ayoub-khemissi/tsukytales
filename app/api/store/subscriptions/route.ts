@@ -51,6 +51,32 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const subscriptionDates =
     (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
 
+  // Build compact shipping metadata (Stripe limits values to 500 chars)
+  const shippingData = shipping || {};
+  const shippingAddr = shippingData.shipping_address || {};
+  const relay = shippingData.relay || shippingAddr.relay;
+  const compactShipping: Record<string, unknown> = {
+    method: shippingData.method,
+    country: shippingData.country,
+    address: {
+      first_name: shippingAddr.first_name,
+      last_name: shippingAddr.last_name,
+      street: shippingAddr.street,
+      zip_code: shippingAddr.zip_code,
+      city: shippingAddr.city,
+      country: shippingAddr.country,
+      phone: shippingAddr.phone,
+    },
+  };
+
+  if (relay) {
+    compactShipping.relay = {
+      code: relay.code,
+      name: relay.name,
+      network: relay.network,
+    };
+  }
+
   // Create SetupIntent
   const setupIntent = await stripe.setupIntents.create({
     customer: stripeCustomerId,
@@ -59,7 +85,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       product_id: String(product.id),
       stripe_price_id: stripePrice.id,
       subscription_dates: JSON.stringify(subscriptionDates),
-      shipping: JSON.stringify(shipping || {}),
+      shipping: JSON.stringify(compactShipping),
     },
   });
 
