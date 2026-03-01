@@ -641,7 +641,7 @@ export default function AccountPage() {
                         {t("subscription_dates_label")}
                       </p>
                       <div className="space-y-2">
-                        {subscription.phases!.map((phase) => {
+                        {subscription.phases!.slice(0, 4).map((phase) => {
                           const phaseDate = new Date(phase.start + "T00:00:00");
                           const isPast = phaseDate.getTime() < Date.now();
                           const isFuture24h =
