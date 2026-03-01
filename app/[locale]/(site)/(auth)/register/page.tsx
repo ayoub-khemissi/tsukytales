@@ -181,7 +181,14 @@ export default function RegisterPage() {
           </Button>
           <p className="text-sm text-center mt-6 text-default-500">
             {t("has_account")}{" "}
-            <Link className="text-primary font-medium" href="/login">
+            <Link
+              className="text-primary font-medium"
+              href={
+                callbackUrl !== "/account"
+                  ? `/login?callbackUrl=${callbackUrl}`
+                  : "/login"
+              }
+            >
               {t("login_button")}
             </Link>
           </p>
