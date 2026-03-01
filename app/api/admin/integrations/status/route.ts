@@ -6,8 +6,8 @@ import { stripe } from "@/lib/services/payment.service";
 import { transport } from "@/lib/mail";
 
 interface IntegrationResult {
-  status: "ok" | "error";
-  message: string;
+  connected: boolean;
+  error?: string;
 }
 
 export const GET = withErrorHandler(async () => {
@@ -18,11 +18,11 @@ export const GET = withErrorHandler(async () => {
   // Stripe
   try {
     await stripe.accounts.retrieve();
-    results.stripe = { status: "ok", message: "Connecté" };
+    results.stripe = { connected: true };
   } catch (e) {
     results.stripe = {
-      status: "error",
-      message: (e instanceof Error ? e.message : String(e)).substring(0, 100),
+      connected: false,
+      error: (e instanceof Error ? e.message : String(e)).substring(0, 100),
     };
   }
 
@@ -31,6 +31,8 @@ export const GET = withErrorHandler(async () => {
     const creds = Buffer.from(
       `${process.env.BOXTAL_CLIENT_ID}:${process.env.BOXTAL_CLIENT_SECRET}`,
     ).toString("base64");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     const tokenRes = await fetch(
       "https://api.boxtal.com/iam/account-app/token",
       {
@@ -39,27 +41,34 @@ export const GET = withErrorHandler(async () => {
           Authorization: `Basic ${creds}`,
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
       },
     );
 
+    clearTimeout(timeout);
     results.boxtal = tokenRes.ok
-      ? { status: "ok", message: "Connecté" }
-      : { status: "error", message: `HTTP ${tokenRes.status}` };
+      ? { connected: true }
+      : { connected: false, error: `HTTP ${tokenRes.status}` };
   } catch (e) {
     results.boxtal = {
-      status: "error",
-      message: (e instanceof Error ? e.message : String(e)).substring(0, 100),
+      connected: false,
+      error: (e instanceof Error ? e.message : String(e)).substring(0, 100),
     };
   }
 
   // Mail (SMTP)
   try {
-    await transport.verify();
-    results.mail = { status: "ok", message: "Connecté" };
+    await Promise.race([
+      transport.verify(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("SMTP timeout")), 10000),
+      ),
+    ]);
+    results.mail = { connected: true };
   } catch (e) {
     results.mail = {
-      status: "error",
-      message: (e instanceof Error ? e.message : String(e)).substring(0, 100),
+      connected: false,
+      error: (e instanceof Error ? e.message : String(e)).substring(0, 100),
     };
   }
 
