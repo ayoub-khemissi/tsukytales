@@ -1,14 +1,24 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Login",
-  description: "Log in to your Tsuky Tales account.",
-  robots: { index: false },
-  openGraph: {
-    title: "Login | Tsuky Tales",
-    description: "Log in to your Tsuky Tales account.",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  return {
+    title: t("login_title"),
+    description: t("login_description"),
+    robots: { index: false },
+    openGraph: {
+      title: `${t("login_title")} | Tsuky Tales`,
+      description: t("login_description"),
+    },
+  };
+}
 
 export default function LoginLayout({
   children,

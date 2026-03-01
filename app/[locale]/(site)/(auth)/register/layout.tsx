@@ -1,13 +1,24 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Sign Up",
-  description: "Create your Tsuky Tales account and start exploring.",
-  openGraph: {
-    title: "Sign Up | Tsuky Tales",
-    description: "Create your Tsuky Tales account and start exploring.",
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  return {
+    title: t("register_title"),
+    description: t("register_description"),
+    robots: { index: false },
+    openGraph: {
+      title: `${t("register_title")} | Tsuky Tales`,
+      description: t("register_description"),
+    },
+  };
+}
 
 export default function RegisterLayout({
   children,

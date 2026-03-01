@@ -721,7 +721,17 @@
     "legal_title": "Legal Notice — Tsuky Tales",
     "legal_description": "Legal notice for the Tsuky Tales website: publisher, host, intellectual property and liability.",
     "privacy_title": "Privacy Policy — Tsuky Tales",
-    "privacy_description": "Learn how Tsuky Tales collects, uses and protects your personal data in compliance with the GDPR."
+    "privacy_description": "Learn how Tsuky Tales collects, uses and protects your personal data in compliance with the GDPR.",
+    "checkout_title": "Checkout",
+    "checkout_description": "Complete your order securely.",
+    "subscribe_title": "Subscribe",
+    "subscribe_description": "Complete your Tsuky Tales quarterly subscription.",
+    "login_title": "Login",
+    "login_description": "Log in to your Tsuky Tales account.",
+    "register_title": "Sign Up",
+    "register_description": "Create your Tsuky Tales account and start exploring.",
+    "account_title": "My Account",
+    "account_description": "Manage your Tsuky Tales account and orders."
   },
   "terms": {
     "title": "Terms &",

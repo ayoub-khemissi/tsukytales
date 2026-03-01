@@ -714,7 +714,17 @@
     "legal_title": "Avviso Legale — Tsuky Tales",
     "legal_description": "Avviso legale del sito Tsuky Tales: editore, hosting, proprietà intellettuale e responsabilità.",
     "privacy_title": "Informativa sulla Privacy — Tsuky Tales",
-    "privacy_description": "Scopri come Tsuky Tales raccoglie, utilizza e protegge i tuoi dati personali in conformità al GDPR."
+    "privacy_description": "Scopri come Tsuky Tales raccoglie, utilizza e protegge i tuoi dati personali in conformità al GDPR.",
+    "checkout_title": "Pagamento",
+    "checkout_description": "Completa il tuo ordine in sicurezza.",
+    "subscribe_title": "Abbonati",
+    "subscribe_description": "Completa il tuo abbonamento trimestrale Tsuky Tales.",
+    "login_title": "Accedi",
+    "login_description": "Accedi al tuo account Tsuky Tales.",
+    "register_title": "Crea un account",
+    "register_description": "Crea il tuo account Tsuky Tales e inizia a esplorare.",
+    "account_title": "Il mio account",
+    "account_description": "Gestisci il tuo account e i tuoi ordini Tsuky Tales."
   },
   "terms": {
     "title": "Condizioni Generali",
