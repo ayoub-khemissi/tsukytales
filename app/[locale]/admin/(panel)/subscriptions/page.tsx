@@ -36,7 +36,7 @@ interface Subscription {
   next_billing_date: string | null;
   cancel_at_period_end: boolean;
   orders_count: number;
-  last_order_date: string;
+  last_shipment_date: string | null;
   amount: number;
   total_spent: number;
   created_at: string;
@@ -139,7 +139,9 @@ export default function SubscriptionsPage() {
             ? ` (${t("subscriptions_cancel_pending")})`
             : ""),
         new Date(s.created_at).toLocaleDateString(),
-        new Date(s.last_order_date).toLocaleDateString(),
+        s.last_shipment_date
+          ? new Date(s.last_shipment_date).toLocaleDateString()
+          : "—",
         s.stripe_status || "—",
         s.next_billing_date
           ? new Date(s.next_billing_date).toLocaleDateString()
@@ -318,7 +320,9 @@ export default function SubscriptionsPage() {
                       {new Date(sub.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-default-500">
-                      {new Date(sub.last_order_date).toLocaleDateString()}
+                      {sub.last_shipment_date
+                        ? new Date(sub.last_shipment_date).toLocaleDateString()
+                        : "—"}
                     </TableCell>
                     <TableCell>
                       {sub.stripe_status ? (

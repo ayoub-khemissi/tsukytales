@@ -23,10 +23,18 @@ interface SubscriptionItem {
   next_billing_date: string | null;
   cancel_at_period_end: boolean;
   orders_count: number;
-  last_order_date: string;
+  last_shipment_date: string | null;
   amount: number;
   total_spent: number;
   created_at: string;
+}
+
+/** Extract the "shipped" date from an order's metadata.history array */
+function getShippedDate(metadata: any): string | null {
+  const history = metadata?.history as { date: string; status: string }[] | undefined;
+  if (!history) return null;
+  const shipped = history.find((h) => h.status === "shipped");
+  return shipped?.date ?? null;
 }
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
@@ -142,7 +150,32 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       }
     }
 
-    // 4. Build items — start from subscribers (customers with schedules)
+    // 4. Collect all subscriber emails and find the last shipment date
+    //    from non-preorder orders (subscription orders with status "shipped" in history)
+    const allEmails = new Set<string>();
+    for (const c of subscriberRows) allEmails.add(c.email);
+    for (const e of Array.from(ordersByEmail.keys())) allEmails.add(e);
+
+    // Find last shipped date per email from ALL orders (not just subscription ones)
+    const lastShipmentByEmail = new Map<string, string>();
+    if (allEmails.size > 0) {
+      const emailArr = Array.from(allEmails);
+      const placeholders = emailArr.map(() => "?").join(",");
+      const [allOrders] = await pool.execute<any[]>(
+        `SELECT email, metadata FROM orders
+         WHERE email IN (${placeholders}) AND is_subscription_order = 1
+         ORDER BY createdAt DESC`,
+        emailArr,
+      );
+
+      for (const o of allOrders) {
+        if (lastShipmentByEmail.has(o.email)) continue;
+        const shipped = getShippedDate(o.metadata);
+        if (shipped) lastShipmentByEmail.set(o.email, shipped);
+      }
+    }
+
+    // 5. Build items — start from subscribers (customers with schedules)
     const seenEmails = new Set<string>();
     const items: SubscriptionItem[] = [];
 
@@ -153,7 +186,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       const customerOrders = ordersByEmail.get(customer.email) || [];
       const latest = customerOrders[0];
 
-      // Determine status from Stripe schedule
       let status = "active";
       if (scheduleInfo) {
         status = scheduleInfo.status;
@@ -181,14 +213,14 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           : null,
         cancel_at_period_end: scheduleInfo?.cancel_at_period_end ?? false,
         orders_count: customerOrders.length,
-        last_order_date: latest ? latest.createdAt.toISOString() : customer.createdAt.toISOString(),
+        last_shipment_date: lastShipmentByEmail.get(customer.email) ?? null,
         amount: latest ? Number(latest.total) : 0,
         total_spent,
         created_at: customer.createdAt.toISOString(),
       });
     }
 
-    // 5. Also add entries from subscription orders whose email isn't already covered
+    // 6. Also add entries from subscription orders whose email isn't already covered
     for (const [email, customerOrders] of Array.from(ordersByEmail.entries())) {
       if (seenEmails.has(email)) continue;
 
@@ -231,7 +263,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           : null,
         cancel_at_period_end: stripeInfo?.cancel_at_period_end ?? false,
         orders_count: customerOrders.length,
-        last_order_date: latest.createdAt.toISOString(),
+        last_shipment_date: lastShipmentByEmail.get(email) ?? null,
         amount: Number(latest.total),
         total_spent,
         created_at: oldest.createdAt.toISOString(),
@@ -261,7 +293,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const allowedSort = [
     "customer_email",
     "amount",
-    "last_order_date",
+    "last_shipment_date",
     "total_spent",
     "created_at",
   ];

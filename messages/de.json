@@ -674,7 +674,7 @@
     "subscriptions_filter_status": "Status",
     "subscriptions_total_spent": "Gesamtausgaben",
     "subscriptions_created_at": "Abonniert am",
-    "subscriptions_last_order": "Letzte Lieferung",
+    "subscriptions_last_order": "Letzte Sendung",
     "subscriptions_cancel_pending": "Kündigung ausstehend",
     "preorders_search": "Vorbestellungen suchen...",
     "preorders_filter_fulfillment": "Versand",

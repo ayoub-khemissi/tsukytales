@@ -675,7 +675,7 @@
     "subscriptions_filter_status": "Estado",
     "subscriptions_total_spent": "Total gastado",
     "subscriptions_created_at": "Suscrito el",
-    "subscriptions_last_order": "Última entrega",
+    "subscriptions_last_order": "Último envío",
     "subscriptions_cancel_pending": "Cancelación pendiente",
     "preorders_search": "Buscar preventas...",
     "preorders_filter_fulfillment": "Envío",
