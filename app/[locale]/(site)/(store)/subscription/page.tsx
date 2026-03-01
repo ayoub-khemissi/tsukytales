@@ -398,10 +398,10 @@ function DetailSection({
 
   return (
     <div className="step-card bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden h-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-        {/* Gallery */}
+      <div className="grid grid-cols-1 md:grid-cols-3 h-full">
+        {/* Gallery — 1/3 */}
         {gallery.length > 0 && (
-          <div className="relative group h-full">
+          <div className="relative group h-full md:col-span-1">
             <div
               ref={scrollRef}
               className="flex overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory h-full"
@@ -416,7 +416,7 @@ function DetailSection({
                     fill
                     alt={`${product.name} ${i + 1}`}
                     className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     src={img.startsWith("http") ? img : `/${img}`}
                   />
                 </div>
@@ -444,10 +444,10 @@ function DetailSection({
           </div>
         )}
 
-        {/* Text content */}
-        <div className="p-6 sm:p-10 flex flex-col justify-center overflow-hidden">
-          <p className="text-sm font-medium uppercase tracking-widest text-accent-gold mb-2 flex-shrink-0">
-            {t("detail_title")}
+        {/* Text content — 2/3 */}
+        <div className="md:col-span-2 p-6 sm:p-10 flex flex-col justify-center overflow-hidden">
+          <p className="text-sm font-medium uppercase tracking-widest mb-2 flex-shrink-0">
+            <span className="magic-text">{t("detail_title")}</span>
           </p>
           <h3 className="font-heading text-[1.5rem] sm:text-[2rem] font-bold text-text-brand dark:text-white mb-4 flex-shrink-0">
             {product.name}
