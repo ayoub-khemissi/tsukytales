@@ -147,6 +147,10 @@ export default function SubscribePage() {
   });
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [addressMode, setAddressMode] = useState<string>("new");
+  const [customerName, setCustomerName] = useState({
+    first_name: "",
+    last_name: "",
+  });
 
   const [relayPrice, setRelayPrice] = useState(4.9);
   const [homePrice, setHomePrice] = useState(7.5);
@@ -172,28 +176,44 @@ export default function SubscribePage() {
       .finally(() => setProductLoading(false));
   }, [locale]);
 
-  // Fetch saved addresses
+  // Fetch saved addresses + customer profile
   useEffect(() => {
     if (!session?.user) return;
-    fetch("/api/store/addresses/me")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: SavedAddress[]) => {
-        setSavedAddresses(data);
-        const defaultAddr = data.find((a) => a.is_default) || data[0];
+    Promise.all([
+      fetch("/api/store/addresses/me").then((r) => (r.ok ? r.json() : [])),
+      fetch("/api/store/customer/me").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(
+        ([addresses, profile]: [
+          SavedAddress[],
+          Record<string, string> | null,
+        ]) => {
+          const name = {
+            first_name: profile?.first_name || "",
+            last_name: profile?.last_name || "",
+          };
 
-        if (defaultAddr) {
-          setAddressMode(String(defaultAddr.id));
-          setAddress({
-            first_name: defaultAddr.first_name,
-            last_name: defaultAddr.last_name,
-            street: defaultAddr.street,
-            zip_code: defaultAddr.zip_code,
-            city: defaultAddr.city,
-            country: defaultAddr.country,
-            phone: defaultAddr.phone || "",
-          });
-        }
-      })
+          setCustomerName(name);
+          setSavedAddresses(addresses);
+          const defaultAddr =
+            addresses.find((a) => a.is_default) || addresses[0];
+
+          if (defaultAddr) {
+            setAddressMode(String(defaultAddr.id));
+            setAddress({
+              first_name: defaultAddr.first_name,
+              last_name: defaultAddr.last_name,
+              street: defaultAddr.street,
+              zip_code: defaultAddr.zip_code,
+              city: defaultAddr.city,
+              country: defaultAddr.country,
+              phone: defaultAddr.phone || "",
+            });
+          } else {
+            setAddress((prev) => ({ ...prev, ...name }));
+          }
+        },
+      )
       .catch(() => {});
   }, [session?.user]);
 
@@ -266,8 +286,8 @@ export default function SubscribePage() {
     setAddressMode(addrId);
     if (addrId === "new") {
       setAddress({
-        first_name: "",
-        last_name: "",
+        first_name: customerName.first_name,
+        last_name: customerName.last_name,
         street: "",
         zip_code: "",
         city: "",
