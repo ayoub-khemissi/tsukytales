@@ -43,10 +43,7 @@ export default function CartPage() {
         {/* Cart items */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
-            <Card
-              key={item.variantId ?? item.id}
-              className="border border-divider"
-            >
+            <Card key={item.id} className="border border-divider">
               <CardBody className="p-4">
                 <div className="flex gap-4">
                   <div className="w-20 h-28 bg-default-100 rounded-lg overflow-hidden relative flex-shrink-0">
@@ -84,11 +81,7 @@ export default function CartPage() {
                           size="sm"
                           variant="flat"
                           onPress={() =>
-                            updateQuantity(
-                              item.id,
-                              item.quantity - 1,
-                              item.variantId,
-                            )
+                            updateQuantity(item.id, item.quantity - 1)
                           }
                         >
                           -
@@ -101,11 +94,7 @@ export default function CartPage() {
                           size="sm"
                           variant="flat"
                           onPress={() =>
-                            updateQuantity(
-                              item.id,
-                              item.quantity + 1,
-                              item.variantId,
-                            )
+                            updateQuantity(item.id, item.quantity + 1)
                           }
                         >
                           +
@@ -121,7 +110,7 @@ export default function CartPage() {
                           color="danger"
                           size="sm"
                           variant="light"
-                          onPress={() => removeItem(item.id, item.variantId)}
+                          onPress={() => removeItem(item.id)}
                         >
                           <TrashIcon size={16} />
                         </Button>

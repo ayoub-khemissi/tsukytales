@@ -44,7 +44,7 @@ export interface ProductResponse {
 
 // --- Orders ---
 export interface CreateOrderRequest {
-  items: { product_id: number; variant_id?: number; quantity: number }[];
+  items: { product_id: number; quantity: number }[];
   shipping_address: OrderAddress;
   billing_address?: OrderAddress;
   shipping_method: "relay" | "home";

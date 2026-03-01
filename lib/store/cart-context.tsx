@@ -11,7 +11,6 @@ import {
 
 export interface CartItem {
   id: number;
-  variantId?: number;
   name: string;
   price: number;
   quantity: number;
@@ -23,8 +22,8 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => void;
-  removeItem: (id: number, variantId?: number) => void;
-  updateQuantity: (id: number, quantity: number, variantId?: number) => void;
+  removeItem: (id: number) => void;
+  updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
   itemCount: number;
   total: number;
@@ -66,12 +65,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity"> & { quantity?: number }) => {
       setItems((prev) => {
-        const key = newItem.variantId ?? newItem.id;
-        const existing = prev.find((i) => (i.variantId ?? i.id) === key);
+        const existing = prev.find((i) => i.id === newItem.id);
 
         if (existing) {
           return prev.map((i) =>
-            (i.variantId ?? i.id) === key
+            i.id === newItem.id
               ? { ...i, quantity: i.quantity + (newItem.quantity || 1) }
               : i,
           );
@@ -83,23 +81,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const removeItem = useCallback((id: number, variantId?: number) => {
-    setItems((prev) =>
-      prev.filter((i) => !((i.variantId ?? i.id) === (variantId ?? id))),
-    );
+  const removeItem = useCallback((id: number) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
   const updateQuantity = useCallback(
-    (id: number, quantity: number, variantId?: number) => {
+    (id: number, quantity: number) => {
       if (quantity <= 0) {
-        removeItem(id, variantId);
+        removeItem(id);
 
         return;
       }
       setItems((prev) =>
-        prev.map((i) =>
-          (i.variantId ?? i.id) === (variantId ?? id) ? { ...i, quantity } : i,
-        ),
+        prev.map((i) => (i.id === id ? { ...i, quantity } : i)),
       );
     },
     [removeItem],

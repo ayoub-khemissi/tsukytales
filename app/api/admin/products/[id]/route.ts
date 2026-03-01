@@ -38,7 +38,6 @@ export const PUT = withErrorHandler(async (req: NextRequest, context) => {
     "products:list",
     "product:slug",
     "product:active-subscription",
-    "variants:product",
     "admin:stats",
   );
 

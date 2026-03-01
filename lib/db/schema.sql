@@ -66,21 +66,6 @@ CREATE TABLE IF NOT EXISTS `products` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- Product Variants
--- ============================================================
-CREATE TABLE IF NOT EXISTS `product_variants` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `product_id` INT NOT NULL,
-  `title` VARCHAR(255) NOT NULL,
-  `sku` VARCHAR(255) DEFAULT NULL UNIQUE,
-  `inventory_quantity` INT NOT NULL DEFAULT 0,
-  `price` DECIMAL(10,2) NOT NULL,
-  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `fk_variant_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================
 -- Orders
 -- ============================================================
 CREATE TABLE IF NOT EXISTS `orders` (

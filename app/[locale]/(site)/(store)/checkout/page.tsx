@@ -340,7 +340,6 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           items: items.map((i) => ({
             product_id: i.id,
-            variant_id: i.variantId,
             quantity: i.quantity,
           })),
           shipping_address: shippingAddress,
@@ -626,10 +625,7 @@ export default function CheckoutPage() {
             <CardBody className="p-6 space-y-3">
               <h3 className="font-semibold text-lg">{t("order_summary")}</h3>
               {items.map((item) => (
-                <div
-                  key={item.variantId ?? item.id}
-                  className="flex justify-between text-sm"
-                >
+                <div key={item.id} className="flex justify-between text-sm">
                   <span className="text-default-600">
                     {item.name} x{item.quantity}
                   </span>

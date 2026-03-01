@@ -64,18 +64,6 @@ export interface ProductRow extends RowDataPacket {
   updatedAt: Date;
 }
 
-// --- Product Variants ---
-export interface ProductVariantRow extends RowDataPacket {
-  id: number;
-  product_id: number;
-  title: string;
-  sku: string | null;
-  inventory_quantity: number;
-  price: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 // --- Orders ---
 export type OrderStatus =
   | "pending"
@@ -119,7 +107,6 @@ export interface OrderAddress {
 export interface OrderItem {
   product_id?: number;
   id?: number;
-  variant_id?: number;
   name: string;
   quantity: number;
   price: number;
@@ -182,7 +169,7 @@ export interface ContactMessageRow extends RowDataPacket {
 
 // --- Carts ---
 export interface CartItem {
-  variant_id: number;
+  product_id: number;
   quantity: number;
   metadata?: Record<string, unknown>;
 }

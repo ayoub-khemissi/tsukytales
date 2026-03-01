@@ -16,7 +16,6 @@ export const createOrderSchema = z.object({
     .array(
       z.object({
         product_id: z.number().int().positive(),
-        variant_id: z.number().int().positive().optional(),
         quantity: z.number().int().positive(),
       }),
     )

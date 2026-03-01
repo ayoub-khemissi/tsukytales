@@ -3,7 +3,7 @@ import type { CartItem } from "@/types/db.types";
 import { v4 as uuid } from "uuid";
 
 import { cartRepository } from "@/lib/repositories/cart.repository";
-import { productVariantRepository } from "@/lib/repositories/product-variant.repository";
+import { productRepository } from "@/lib/repositories/product.repository";
 import { discountRepository } from "@/lib/repositories/discount.repository";
 import { AppError } from "@/lib/errors/app-error";
 
@@ -31,21 +31,21 @@ export async function retrieve(cartId: string) {
 
 export async function addLineItem(
   cartId: string,
-  variantId: number,
+  productId: number,
   quantity: number,
 ) {
   const cart = await retrieve(cartId);
-  const variant = await productVariantRepository.findById(variantId);
+  const product = await productRepository.findById(productId);
 
-  if (!variant) throw new AppError("Variante introuvable", 404);
+  if (!product) throw new AppError("Produit introuvable", 404);
 
   const items: CartItem[] = Array.isArray(cart.items) ? [...cart.items] : [];
-  const idx = items.findIndex((item) => item.variant_id === variantId);
+  const idx = items.findIndex((item) => item.product_id === productId);
 
   if (idx > -1) {
     items[idx].quantity += quantity;
   } else {
-    items.push({ variant_id: variantId, quantity });
+    items.push({ product_id: productId, quantity });
   }
 
   await cartRepository.update(cartId, { items: JSON.stringify(items) });
