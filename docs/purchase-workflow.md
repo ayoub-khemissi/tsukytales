@@ -63,7 +63,7 @@ completed/captured → canceled/refunded   (admin refund)
 | `payment_intent.succeeded` | Confirms the order (status=completed, payment_status=captured), increments discount usage, sends email, triggers auto-shipment |
 | `payment_intent.payment_failed` | Cancels the order + restores stock |
 | `payment_intent.canceled` | Cancels the order + restores stock (PI expired after 7 days) |
-| `invoice.paid` | Creates a subscription order (with deduplication by invoice_id) |
+| `invoice.paid` | Creates a subscription order (with deduplication by invoice_id). Uses the **currently active product** (not the one from signup) and the customer's **current default address**. See [subscription-workflow.md](./subscription-workflow.md) for details. |
 | `subscription_schedule.canceled` | Cleans up customer metadata |
 
 ### Webhook Security

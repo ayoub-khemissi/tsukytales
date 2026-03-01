@@ -104,8 +104,27 @@ This rule is enforced in:
 - **Re-ship**: cancels previous shipment, creates new one
 - **Retry**: retries after shipping failure
 - **Refund**: Stripe refund + stock restoration + status update
+- **Edit items**: modify order items (name, price, quantity), add or remove items
 - **Notes**: add internal notes to the order
 - **Shipping info**: method, cost, carrier, relay point, tracking, label download
+
+### Editing Order Items
+
+The admin can modify the items of any order from the order detail page:
+
+1. Click **"Modifier les articles"** in the Items card header
+2. Edit name, unit price, and quantity for each item
+3. Add new items with the **"+ Ajouter un article"** button
+4. Remove items with the **✕** button
+5. The total is recalculated client-side as a preview
+6. Click **"Enregistrer"** to save → `PATCH /api/admin/orders/{id}`
+
+**API:** `PATCH /api/admin/orders/{id}`
+
+- **Auth:** requires admin session
+- **Body:** `{ items: [{ name, price, quantity }, ...] }`
+- **Validation:** items must be a non-empty array, each item must have name, price, and quantity
+- **Effect:** updates the `items` JSON column in the orders table (does not recalculate the order total)
 
 ## Audit Trail
 
