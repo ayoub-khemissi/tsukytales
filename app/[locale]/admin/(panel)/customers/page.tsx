@@ -29,8 +29,15 @@ interface Customer {
   first_name: string | null;
   last_name: string | null;
   email: string;
+  has_account: boolean;
+  metadata: {
+    phone?: string;
+    city?: string;
+    [key: string]: unknown;
+  } | null;
   createdAt: string;
   orders_count: number;
+  total_spent: number;
 }
 
 interface CustomersResponse {
@@ -42,6 +49,8 @@ interface CustomersResponse {
 
 export default function CustomersPage() {
   const t = useTranslations("admin");
+
+  const common = useTranslations("common");
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -106,14 +115,18 @@ export default function CustomersPage() {
       const headers = [
         t("customers_name"),
         t("customers_email"),
+        t("customers_filter_account"),
         t("customers_orders_count"),
+        t("customers_total_spent"),
         t("customers_created"),
       ];
 
       const rows = items.map((c) => [
         [c.first_name, c.last_name].filter(Boolean).join(" ") || "—",
         c.email,
+        c.has_account ? t("customers_account_yes") : t("customers_account_no"),
         String(c.orders_count ?? 0),
+        `${Number(c.total_spent ?? 0).toFixed(2)}${common("currency")}`,
         new Date(c.createdAt).toLocaleDateString(),
       ]);
 
@@ -199,7 +212,25 @@ export default function CustomersPage() {
                     onSort={handleSort}
                   />
                 </TableColumn>
-                <TableColumn>{t("customers_orders_count")}</TableColumn>
+                <TableColumn>{t("customers_filter_account")}</TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="orders_count"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("customers_orders_count")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="total_spent"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("customers_total_spent")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
                 <TableColumn>
                   <SortableColumn
                     column="createdAt"
@@ -222,14 +253,45 @@ export default function CustomersPage() {
                           .filter(Boolean)
                           .join(" ") || "—"}
                       </Link>
+                      {customer.metadata?.city && (
+                        <p className="text-xs text-default-400">
+                          {customer.metadata.city}
+                        </p>
+                      )}
                     </TableCell>
-                    <TableCell className="text-default-600">
-                      {customer.email}
+                    <TableCell>
+                      <div>
+                        <span className="text-default-600">
+                          {customer.email}
+                        </span>
+                        {customer.metadata?.phone && (
+                          <p className="text-xs text-default-400">
+                            {customer.metadata.phone}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        color={customer.has_account ? "success" : "default"}
+                        size="sm"
+                        variant="dot"
+                      >
+                        {t(
+                          customer.has_account
+                            ? "customers_account_yes"
+                            : "customers_account_no",
+                        )}
+                      </Chip>
                     </TableCell>
                     <TableCell>
                       <Chip color="primary" size="sm" variant="flat">
                         {customer.orders_count ?? 0}
                       </Chip>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {Number(customer.total_spent ?? 0).toFixed(2)}
+                      {common("currency")}
                     </TableCell>
                     <TableCell className="text-default-500">
                       {new Date(customer.createdAt).toLocaleDateString()}

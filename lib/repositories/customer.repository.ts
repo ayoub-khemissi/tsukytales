@@ -62,20 +62,40 @@ class CustomerRepository extends BaseRepository<CustomerRow> {
 
     const where = conditions.length ? conditions.join(" AND ") : "1=1";
 
-    const allowedSort = ["email", "createdAt"];
-    let orderClause = "createdAt DESC";
+    const allowedSort = ["email", "createdAt", "orders_count", "total_spent"];
+    let orderClause = "c.createdAt DESC";
 
     if (options.sortBy && allowedSort.includes(options.sortBy)) {
       const dir = options.sortOrder === "asc" ? "ASC" : "DESC";
+      const col = ["orders_count", "total_spent"].includes(options.sortBy)
+        ? options.sortBy
+        : `c.${options.sortBy}`;
 
-      orderClause = `${options.sortBy} ${dir}`;
+      orderClause = `${col} ${dir}`;
     }
+
+    // Prefix conditions with table alias
+    const aliasedWhere = where
+      .replace(/\b(email)\b/g, "c.$1")
+      .replace(/\b(first_name)\b/g, "c.$1")
+      .replace(/\b(last_name)\b/g, "c.$1")
+      .replace(/\b(has_account)\b/g, "c.$1");
 
     const [[countRow]] = await pool.execute<
       (RowDataPacket & { total: number })[]
-    >(`SELECT COUNT(*) as total FROM customers WHERE ${where}`, params);
+    >(
+      `SELECT COUNT(*) as total FROM customers c WHERE ${aliasedWhere}`,
+      params,
+    );
     const [rows] = await pool.execute<CustomerRow[]>(
-      `SELECT id, first_name, last_name, email, has_account, metadata, createdAt, updatedAt FROM customers WHERE ${where} ORDER BY ${orderClause} LIMIT ? OFFSET ?`,
+      `SELECT c.id, c.first_name, c.last_name, c.email, c.has_account, c.metadata, c.createdAt, c.updatedAt,
+              COUNT(o.id) AS orders_count,
+              COALESCE(SUM(o.total), 0) AS total_spent
+       FROM customers c
+       LEFT JOIN orders o ON o.customer_id = c.id
+       WHERE ${aliasedWhere}
+       GROUP BY c.id
+       ORDER BY ${orderClause} LIMIT ? OFFSET ?`,
       [...params, String(limit), String(offset)],
     );
 
