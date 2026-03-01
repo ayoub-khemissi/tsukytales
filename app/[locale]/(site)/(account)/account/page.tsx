@@ -80,7 +80,11 @@ interface SubscriptionData {
   status?: string;
   product_name?: string;
   product_price?: number | null;
-  shipping_cost?: number;
+  is_preorder?: boolean;
+  show_product_detail?: boolean;
+  product_image?: string | null;
+  product_images?: string[] | null;
+  product_description?: string | null;
   total_per_quarter?: number;
   shipping_method?: string;
   skipped_phases?: string[];
@@ -651,14 +655,16 @@ export default function AccountPage() {
 
                   {/* Product & pricing */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <p className="text-sm text-text-light dark:text-gray-400">
-                        {t("subscription_product")}
-                      </p>
-                      <p className="font-semibold text-text-brand dark:text-white">
-                        {subscription.product_name || "—"}
-                      </p>
-                    </div>
+                    {subscription.is_preorder && (
+                      <div>
+                        <p className="text-sm text-text-light dark:text-gray-400">
+                          {t("subscription_product")}
+                        </p>
+                        <p className="font-semibold text-text-brand dark:text-white">
+                          {subscription.product_name || "—"}
+                        </p>
+                      </div>
+                    )}
                     <div>
                       <p className="text-sm text-text-light dark:text-gray-400">
                         {t("subscription_price_label")}
@@ -777,6 +783,44 @@ export default function AccountPage() {
                     </Button>
                   </div>
                 </div>
+
+                {/* Product detail card ("encart de présentation") */}
+                {subscription.is_preorder &&
+                  subscription.show_product_detail &&
+                  (subscription.product_image ||
+                    subscription.product_description) && (
+                    <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] overflow-hidden">
+                      <div className="grid grid-cols-1 md:grid-cols-3">
+                        {subscription.product_image && (
+                          <div className="relative md:col-span-1 aspect-square">
+                            <Image
+                              fill
+                              alt={subscription.product_name || ""}
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 33vw"
+                              src={
+                                subscription.product_image.startsWith("http")
+                                  ? subscription.product_image
+                                  : `/${subscription.product_image}`
+                              }
+                            />
+                          </div>
+                        )}
+                        <div
+                          className={`${subscription.product_image ? "md:col-span-2" : "md:col-span-3"} p-6 sm:p-10 flex flex-col justify-center`}
+                        >
+                          <h3 className="font-heading text-xl sm:text-2xl font-bold text-text-brand dark:text-white mb-4">
+                            {subscription.product_name}
+                          </h3>
+                          {subscription.product_description && (
+                            <p className="text-text-light dark:text-gray-400 leading-relaxed whitespace-pre-line">
+                              {subscription.product_description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
               </>
             )}
           </div>

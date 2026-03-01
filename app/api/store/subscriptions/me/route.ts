@@ -32,33 +32,24 @@ export const GET = withErrorHandler(async () => {
       ? await productRepository.findById(parseInt(productId as string))
       : null;
 
-    const priceId = schedule.phases?.[0]?.items?.[0]?.price;
     const productPrice = product
       ? Number(product.subscription_price ?? product.price)
       : 35;
-    let totalPerQuarter = productPrice;
-    let shippingCost = 0;
 
-    if (typeof priceId === "string") {
-      try {
-        const stripePrice = await stripe.prices.retrieve(priceId);
-
-        totalPerQuarter = (stripePrice.unit_amount || 0) / 100;
-        shippingCost = totalPerQuarter - productPrice;
-      } catch {
-        /* ignore */
-      }
-    }
+    const showProductDetail =
+      (await settingsRepository.get<boolean>("show_product_detail")) ?? true;
 
     return NextResponse.json({
       active: schedule.status === "active" || schedule.status === "not_started",
       status: schedule.status,
-      product_name: product?.name,
-      product_price: product
-        ? Number(product.subscription_price ?? product.price)
-        : null,
-      shipping_cost: shippingCost,
-      total_per_quarter: totalPerQuarter,
+      product_name: product?.name ?? null,
+      product_price: productPrice,
+      is_preorder: product?.is_preorder ?? false,
+      show_product_detail: showProductDetail,
+      product_image: product?.image ?? null,
+      product_images: product?.images ?? null,
+      product_description: product?.description ?? null,
+      total_per_quarter: productPrice,
       shipping_method: shippingInfo.method,
       skipped_phases: skippedPhases,
       phases: schedule.phases.map((p) => ({
@@ -93,13 +84,19 @@ export const GET = withErrorHandler(async () => {
     : null;
   const dates: string[] =
     (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
+  const showProductDetail =
+    (await settingsRepository.get<boolean>("show_product_detail")) ?? true;
 
   return NextResponse.json({
     active: true,
     status: "active",
     product_name: product?.name ?? null,
     product_price: subscriptionPrice,
-    shipping_cost: 0,
+    is_preorder: product?.is_preorder ?? false,
+    show_product_detail: showProductDetail,
+    product_image: product?.image ?? null,
+    product_images: product?.images ?? null,
+    product_description: product?.description ?? null,
     total_per_quarter: subscriptionPrice,
     shipping_method: shippingInfo.method ?? null,
     skipped_phases: skippedPhases,

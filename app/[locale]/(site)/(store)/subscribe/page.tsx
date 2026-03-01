@@ -151,9 +151,6 @@ export default function SubscribePage() {
     last_name: "",
   });
 
-  const [relayPrice, setRelayPrice] = useState(4.9);
-  const [homePrice, setHomePrice] = useState(7.5);
-  const [shippingCost, setShippingCost] = useState(4.9);
   const [totalPerQuarter, setTotalPerQuarter] = useState(0);
 
   // Auth guard
@@ -216,33 +213,12 @@ export default function SubscribePage() {
       .catch(() => {});
   }, [session?.user]);
 
-  // Fetch shipping rates
+  // Compute total (no shipping cost for subscriptions)
   useEffect(() => {
-    if (!product) return;
-    const weight = Number(product.price > 0 ? 1.0 : 0.3);
-
-    fetch(
-      `/api/store/shipping/rates?weight=${weight}&country=${address.country}`,
-    )
-      .then((r) => r.json())
-      .then((data) => {
-        setRelayPrice(data.relay?.price || 4.9);
-        setHomePrice(data.home?.price || 7.5);
-      })
-      .catch(() => {});
-  }, [product, address.country]);
-
-  // Compute shipping cost and total
-  useEffect(() => {
-    const cost = shippingMethod === "relay" ? relayPrice : homePrice;
-
-    setShippingCost(cost);
     if (product) {
-      const price = product.subscription_price ?? product.price;
-
-      setTotalPerQuarter(price + cost);
+      setTotalPerQuarter(product.subscription_price ?? product.price);
     }
-  }, [shippingMethod, relayPrice, homePrice, product]);
+  }, [product]);
 
   // Handle 3D Secure redirect
   const confirmSubscription = useCallback(
@@ -374,7 +350,6 @@ export default function SubscribePage() {
       }
       setClientSecret(data.client_secret);
       setSetupIntentId(data.setup_intent_id);
-      if (data.shipping_cost != null) setShippingCost(data.shipping_cost);
       if (data.total_per_quarter != null)
         setTotalPerQuarter(data.total_per_quarter);
     } catch (err) {
@@ -479,16 +454,8 @@ export default function SubscribePage() {
                 value={shippingMethod}
                 onValueChange={handleShippingMethodChange}
               >
-                <Radio value="relay">
-                  {ct("shipping_relay")} —{" "}
-                  {relayPrice.toFixed(2).replace(".", ",")}
-                  {common("currency")}
-                </Radio>
-                <Radio value="home">
-                  {ct("shipping_home")} —{" "}
-                  {homePrice.toFixed(2).replace(".", ",")}
-                  {common("currency")}
-                </Radio>
+                <Radio value="relay">{ct("shipping_relay")}</Radio>
+                <Radio value="home">{ct("shipping_home")}</Radio>
               </RadioGroup>
 
               {shippingMethod === "relay" && (
@@ -700,20 +667,6 @@ export default function SubscribePage() {
                   {common("currency")}
                 </span>
               </div>
-
-              <div className="flex justify-between text-sm">
-                <span>{common("shipping")}</span>
-                <span>
-                  {shippingCost.toFixed(2)}
-                  {common("currency")}
-                </span>
-              </div>
-
-              {selectedRelay && (
-                <div className="text-xs text-default-500">
-                  {selectedRelay.name} — {selectedRelay.address.city}
-                </div>
-              )}
 
               <Divider />
 

@@ -5,7 +5,6 @@ import { requireCustomer } from "@/lib/auth/helpers";
 import { productRepository } from "@/lib/repositories/product.repository";
 import { customerRepository } from "@/lib/repositories/customer.repository";
 import * as stripeCustomerService from "@/lib/services/stripe-customer.service";
-import { getShippingRates } from "@/lib/services/shipping.service";
 import { stripe } from "@/lib/services/payment.service";
 import { AppError } from "@/lib/errors/app-error";
 import { settingsRepository } from "@/lib/repositories/settings.repository";
@@ -32,19 +31,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const stripeCustomerId =
     await stripeCustomerService.getOrCreateStripeCustomer(customer);
 
-  // Calculate shipping
-  const shipCountry = (shipping?.country || "FR").toUpperCase();
-  const shipMethod = shipping?.method || "home";
-  const shippingRates = await getShippingRates(
-    Number(product.weight) || 1.0,
-    shipCountry,
-  );
-  const shippingCost =
-    shipMethod === "home" || !shippingRates.relay
-      ? shippingRates.home.price
-      : shippingRates.relay.price;
+  // Subscription = free shipping
   const productPrice = Number(product.subscription_price ?? product.price);
-  const totalPerQuarter = productPrice + shippingCost;
+  const totalPerQuarter = productPrice;
 
   // Create Stripe product + price
   const stripeProduct = await stripe.products.create({
@@ -80,7 +69,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     setup_intent_id: setupIntent.id,
     price_id: stripePrice.id,
     dates: subscriptionDates,
-    shipping_cost: shippingCost,
     total_per_quarter: totalPerQuarter,
   });
 });
