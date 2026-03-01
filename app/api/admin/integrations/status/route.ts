@@ -34,7 +34,7 @@ export const GET = withErrorHandler(async () => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     const tokenRes = await fetch(
-      "https://api.boxtal.com/iam/account-app/token",
+      `${process.env.BOXTAL_API_URL || "https://api.boxtal.com"}/iam/account-app/token`,
       {
         method: "POST",
         headers: {

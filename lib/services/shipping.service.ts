@@ -8,7 +8,7 @@ import { orderRepository } from "@/lib/repositories/order.repository";
 import { settingsRepository } from "@/lib/repositories/settings.repository";
 import { logger } from "@/lib/utils/logger";
 
-const BASE_URL = "https://api.boxtal.com";
+const BASE_URL = process.env.BOXTAL_API_URL || "https://api.boxtal.com";
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 

@@ -41,6 +41,7 @@ const envSchema = z.object({
   STRIPE_ACCOUNT_ID: optStr,
 
   // Boxtal
+  BOXTAL_API_URL: optUrl,
   BOXTAL_CLIENT_ID: optStr,
   BOXTAL_CLIENT_SECRET: optStr,
   BOXTAL_WEBHOOK_SECRET: optStr,
