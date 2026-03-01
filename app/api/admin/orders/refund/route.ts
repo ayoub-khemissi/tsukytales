@@ -9,6 +9,7 @@ import { pushOrderHistory, restoreStock } from "@/lib/services/order.service";
 import { withTransaction } from "@/lib/db/connection";
 import { AppError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
+import { invalidateMany } from "@/lib/cache";
 import * as mailService from "@/lib/mail";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
@@ -100,6 +101,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       500,
     );
   }
+
+  await invalidateMany("admin:stats", "admin:financial", "products:list");
 
   // Send refund confirmation email (fire-and-forget)
   mailService

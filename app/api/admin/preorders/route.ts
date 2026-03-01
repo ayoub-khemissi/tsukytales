@@ -31,8 +31,11 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Build conditions
-  const conditions: string[] = ["status != ?", "is_subscription_order = 0"];
-  const params: any[] = ["canceled"];
+  const conditions: string[] = [
+    "(status != ? OR payment_status = ?)",
+    "is_subscription_order = 0",
+  ];
+  const params: any[] = ["canceled", "refunded"];
 
   if (search) {
     const numericId = parseInt(search.replace(/[^0-9]/g, ""), 10);
