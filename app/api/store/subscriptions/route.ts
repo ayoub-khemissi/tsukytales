@@ -43,7 +43,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     shipMethod === "home" || !shippingRates.relay
       ? shippingRates.home.price
       : shippingRates.relay.price;
-  const totalPerQuarter = Number(product.subscription_price) + shippingCost;
+  const productPrice = Number(product.subscription_price ?? product.price);
+  const totalPerQuarter = productPrice + shippingCost;
 
   // Create Stripe product + price
   const stripeProduct = await stripe.products.create({

@@ -33,7 +33,10 @@ export const GET = withErrorHandler(async () => {
       : null;
 
     const priceId = schedule.phases?.[0]?.items?.[0]?.price;
-    let totalPerQuarter = product ? Number(product.subscription_price) : 35;
+    const productPrice = product
+      ? Number(product.subscription_price ?? product.price)
+      : 35;
+    let totalPerQuarter = productPrice;
     let shippingCost = 0;
 
     if (typeof priceId === "string") {
@@ -41,8 +44,7 @@ export const GET = withErrorHandler(async () => {
         const stripePrice = await stripe.prices.retrieve(priceId);
 
         totalPerQuarter = (stripePrice.unit_amount || 0) / 100;
-        shippingCost =
-          totalPerQuarter - (product ? Number(product.subscription_price) : 35);
+        shippingCost = totalPerQuarter - productPrice;
       } catch {
         /* ignore */
       }
@@ -52,7 +54,9 @@ export const GET = withErrorHandler(async () => {
       active: schedule.status === "active" || schedule.status === "not_started",
       status: schedule.status,
       product_name: product?.name,
-      product_price: product ? Number(product.subscription_price) : null,
+      product_price: product
+        ? Number(product.subscription_price ?? product.price)
+        : null,
       shipping_cost: shippingCost,
       total_per_quarter: totalPerQuarter,
       shipping_method: shippingInfo.method,
@@ -84,7 +88,9 @@ export const GET = withErrorHandler(async () => {
   const product = subProductId
     ? await productRepository.findById(parseInt(subProductId as string))
     : null;
-  const subscriptionPrice = product ? Number(product.subscription_price) : null;
+  const subscriptionPrice = product
+    ? Number(product.subscription_price ?? product.price)
+    : null;
   const dates: string[] =
     (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
 
