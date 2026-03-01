@@ -127,7 +127,7 @@ export default function SubscriptionPage() {
         className="section-reveal min-h-screen flex flex-col items-center justify-center py-16"
         id="plans"
       >
-        <div className="container mx-auto max-w-[1200px]">
+        <div className="container mx-auto max-w-[1200px] px-4">
           {loading ? (
             <div className="flex justify-center py-20">
               <Spinner color="primary" size="lg" />
