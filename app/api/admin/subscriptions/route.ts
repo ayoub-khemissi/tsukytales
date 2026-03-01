@@ -93,8 +93,15 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         ? `https://dashboard.stripe.com/${env.STRIPE_ACCOUNT_ID}/subscriptions/${stripeSubId}`
         : null;
 
+    const total_spent = customerOrders.reduce(
+      (sum, o) => sum + Number(o.total),
+      0,
+    );
+    const oldest = customerOrders[customerOrders.length - 1];
+
     return {
       id: stripeSubId || `db_${latest.id}`,
+      customer_id: customer?.id ?? null,
       customer_email: email,
       customer_name: customer
         ? [customer.first_name, customer.last_name].filter(Boolean).join(" ") ||
@@ -111,6 +118,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       orders_count: customerOrders.length,
       last_order_date: latest.createdAt,
       amount: Number(latest.total),
+      total_spent,
+      created_at: oldest.createdAt,
     };
   });
 
@@ -129,7 +138,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   // 6. In-memory sorting
-  const allowedSort = ["customer_email", "amount", "last_order_date"];
+  const allowedSort = [
+    "customer_email",
+    "amount",
+    "last_order_date",
+    "total_spent",
+    "created_at",
+  ];
 
   if (sortBy && allowedSort.includes(sortBy)) {
     const dir = sortOrder === "asc" ? 1 : -1;

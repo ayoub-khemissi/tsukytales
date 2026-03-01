@@ -16,6 +16,7 @@ import {
 } from "@heroui/table";
 import { useTranslations } from "next-intl";
 
+import { Link } from "@/i18n/navigation";
 import { AdminTableFilters } from "@/components/admin/AdminTableFilters";
 import {
   SortableColumn,
@@ -25,6 +26,7 @@ import { downloadCSV } from "@/lib/utils/export-csv";
 
 interface Subscription {
   id: string;
+  customer_id: number | null;
   customer_email: string;
   customer_name: string | null;
   plan_name: string;
@@ -36,6 +38,8 @@ interface Subscription {
   orders_count: number;
   last_order_date: string;
   amount: number;
+  total_spent: number;
+  created_at: string;
 }
 
 const statusColorMap: Record<
@@ -115,7 +119,10 @@ export default function SubscriptionsPage() {
         t("subscriptions_customer"),
         t("subscriptions_plan"),
         common("total"),
+        t("subscriptions_total_spent"),
         t("subscriptions_status"),
+        t("subscriptions_created_at"),
+        t("subscriptions_last_order"),
         "Stripe",
         t("subscriptions_next_billing"),
         t("subscriptions_deliveries"),
@@ -126,7 +133,13 @@ export default function SubscriptionsPage() {
         s.customer_name || "—",
         s.plan_name,
         `${s.amount.toFixed(2)}${common("currency")}`,
-        t(`subscriptions_status_${s.status}` as any),
+        `${s.total_spent.toFixed(2)}${common("currency")}`,
+        t(`subscriptions_status_${s.status}` as any) +
+          (s.cancel_at_period_end
+            ? ` (${t("subscriptions_cancel_pending")})`
+            : ""),
+        new Date(s.created_at).toLocaleDateString(),
+        new Date(s.last_order_date).toLocaleDateString(),
         s.stripe_status || "—",
         s.next_billing_date
           ? new Date(s.next_billing_date).toLocaleDateString()
@@ -218,6 +231,25 @@ export default function SubscriptionsPage() {
                 </TableColumn>
                 <TableColumn>{t("subscriptions_plan")}</TableColumn>
                 <TableColumn>{t("subscriptions_status")}</TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="total_spent"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("subscriptions_total_spent")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>
+                  <SortableColumn
+                    column="created_at"
+                    currentDirection={sortDirection}
+                    currentSort={sortBy}
+                    label={t("subscriptions_created_at")}
+                    onSort={handleSort}
+                  />
+                </TableColumn>
+                <TableColumn>{t("subscriptions_last_order")}</TableColumn>
                 <TableColumn>Stripe</TableColumn>
                 <TableColumn>{t("subscriptions_next_billing")}</TableColumn>
               </TableHeader>
@@ -225,16 +257,32 @@ export default function SubscriptionsPage() {
                 {subscriptions.map((sub) => (
                   <TableRow key={sub.id}>
                     <TableCell>
-                      <div>
-                        <span className="font-medium">
-                          {sub.customer_email}
-                        </span>
-                        {sub.customer_name && (
-                          <p className="text-sm text-default-500">
-                            {sub.customer_name}
-                          </p>
-                        )}
-                      </div>
+                      {sub.customer_id ? (
+                        <Link
+                          className="hover:underline"
+                          href={`/admin/customers/${sub.customer_id}`}
+                        >
+                          <span className="text-primary font-medium">
+                            {sub.customer_email}
+                          </span>
+                          {sub.customer_name && (
+                            <p className="text-sm text-default-500">
+                              {sub.customer_name}
+                            </p>
+                          )}
+                        </Link>
+                      ) : (
+                        <div>
+                          <span className="font-medium">
+                            {sub.customer_email}
+                          </span>
+                          {sub.customer_name && (
+                            <p className="text-sm text-default-500">
+                              {sub.customer_name}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div>
@@ -247,13 +295,30 @@ export default function SubscriptionsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        color={statusColorMap[sub.status] || "default"}
-                        size="sm"
-                        variant="flat"
-                      >
-                        {t(`subscriptions_status_${sub.status}`)}
-                      </Chip>
+                      <div className="flex items-center gap-1.5">
+                        <Chip
+                          color={statusColorMap[sub.status] || "default"}
+                          size="sm"
+                          variant="flat"
+                        >
+                          {t(`subscriptions_status_${sub.status}`)}
+                        </Chip>
+                        {sub.cancel_at_period_end && (
+                          <Chip color="warning" size="sm" variant="flat">
+                            {t("subscriptions_cancel_pending")}
+                          </Chip>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-default-500">
+                      {sub.total_spent.toFixed(2)}
+                      {common("currency")}
+                    </TableCell>
+                    <TableCell className="text-default-500">
+                      {new Date(sub.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-default-500">
+                      {new Date(sub.last_order_date).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       {sub.stripe_status ? (

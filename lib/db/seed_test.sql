@@ -465,10 +465,10 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
   DATE_SUB(@now, INTERVAL 5 DAY)
 );
 
--- Order 9: Marie — subscription order, delivered
+-- Order 9: Marie — subscription order #1 (oldest = created_at), delivered
 INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
 (9, 1009, 1, 'marie.dupont@test.com',
-  'completed', 'delivered', 'captured', 29.80, 'eur',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
   JSON_OBJECT(
     'first_name', 'Marie', 'last_name', 'Dupont',
     'street', '12 Rue de Rivoli', 'zip_code', '75001',
@@ -480,7 +480,7 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_009',
@@ -491,12 +491,284 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'tracking_number', 'FR777888999',
     'total_weight', 0.45,
     'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 6 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 6 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 6 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
+  ),
+  DATE_SUB(@now, INTERVAL 6 MONTH)
+);
+
+-- Order 10: Marie — subscription order #2, delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(10, 1010, 1, 'marie.dupont@test.com',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Marie', 'last_name', 'Dupont',
+    'street', '12 Rue de Rivoli', 'zip_code', '75001',
+    'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Marie', 'last_name', 'Dupont',
+    'street', '12 Rue de Rivoli', 'zip_code', '75001',
+    'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_010',
+    'stripe_subscription_id', 'sub_test_marie_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR777889000',
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
       JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 3 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
       JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 3 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
       JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 3 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
     )
   ),
   DATE_SUB(@now, INTERVAL 3 MONTH)
+);
+
+-- Order 11: Marie — subscription order #3 (latest), delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(11, 1011, 1, 'marie.dupont@test.com',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Marie', 'last_name', 'Dupont',
+    'street', '12 Rue de Rivoli', 'zip_code', '75001',
+    'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Marie', 'last_name', 'Dupont',
+    'street', '12 Rue de Rivoli', 'zip_code', '75001',
+    'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_011',
+    'stripe_subscription_id', 'sub_test_marie_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR777889001',
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 2 WEEK), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 WEEK), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 WEEK), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
+  ),
+  DATE_SUB(@now, INTERVAL 2 WEEK)
+);
+
+-- Order 12: Emma — subscription order #1 (oldest), delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(12, 1012, 3, 'emma.bernard@test.com',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Emma', 'last_name', 'Bernard',
+    'street', '25 Boulevard Gambetta', 'zip_code', '34000',
+    'city', 'Montpellier', 'country', 'FR', 'phone', '+33611223344'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Emma', 'last_name', 'Bernard',
+    'street', '25 Boulevard Gambetta', 'zip_code', '34000',
+    'city', 'Montpellier', 'country', 'FR', 'phone', '+33611223344'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_012',
+    'stripe_subscription_id', 'sub_test_emma_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR888111222',
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 8 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 8 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 8 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
+  ),
+  DATE_SUB(@now, INTERVAL 8 MONTH)
+);
+
+-- Order 13: Emma — subscription order #2 (latest), delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(13, 1013, 3, 'emma.bernard@test.com',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Emma', 'last_name', 'Bernard',
+    'street', '25 Boulevard Gambetta', 'zip_code', '34000',
+    'city', 'Montpellier', 'country', 'FR', 'phone', '+33611223344'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Emma', 'last_name', 'Bernard',
+    'street', '25 Boulevard Gambetta', 'zip_code', '34000',
+    'city', 'Montpellier', 'country', 'FR', 'phone', '+33611223344'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_013',
+    'stripe_subscription_id', 'sub_test_emma_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR888111333',
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 5 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 5 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 5 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
+  ),
+  DATE_SUB(@now, INTERVAL 5 MONTH)
+);
+
+-- Order 14: Chloe — subscription order #1 (oldest), delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(14, 1014, 5, 'chloe.moreau@test.com',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Chloe', 'last_name', 'Moreau',
+    'street', '14 Rue Sainte-Catherine', 'zip_code', '33000',
+    'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Chloe', 'last_name', 'Moreau',
+    'street', '14 Rue Sainte-Catherine', 'zip_code', '33000',
+    'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_014',
+    'stripe_subscription_id', 'sub_test_chloe_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR999111222',
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 10 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 10 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 10 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
+  ),
+  DATE_SUB(@now, INTERVAL 10 MONTH)
+);
+
+-- Order 15: Chloe — subscription order #2, delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(15, 1015, 5, 'chloe.moreau@test.com',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Chloe', 'last_name', 'Moreau',
+    'street', '14 Rue Sainte-Catherine', 'zip_code', '33000',
+    'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Chloe', 'last_name', 'Moreau',
+    'street', '14 Rue Sainte-Catherine', 'zip_code', '33000',
+    'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_015',
+    'stripe_subscription_id', 'sub_test_chloe_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR999111333',
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 7 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 7 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 7 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
+  ),
+  DATE_SUB(@now, INTERVAL 7 MONTH)
+);
+
+-- Order 16: Chloe — subscription order #3, delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(16, 1016, 5, 'chloe.moreau@test.com',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Chloe', 'last_name', 'Moreau',
+    'street', '14 Rue Sainte-Catherine', 'zip_code', '33000',
+    'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Chloe', 'last_name', 'Moreau',
+    'street', '14 Rue Sainte-Catherine', 'zip_code', '33000',
+    'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_016',
+    'stripe_subscription_id', 'sub_test_chloe_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR999111444',
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 4 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 4 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 4 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
+  ),
+  DATE_SUB(@now, INTERVAL 4 MONTH)
+);
+
+-- Order 17: Chloe — subscription order #4 (latest), delivered
+INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `fulfillment_status`, `payment_status`, `total`, `currency_code`, `billing_address`, `shipping_address`, `items`, `metadata`, `createdAt`) VALUES
+(17, 1017, 5, 'chloe.moreau@test.com',
+  'completed', 'delivered', 'captured', 24.90, 'eur',
+  JSON_OBJECT(
+    'first_name', 'Chloe', 'last_name', 'Moreau',
+    'street', '14 Rue Sainte-Catherine', 'zip_code', '33000',
+    'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
+  ),
+  JSON_OBJECT(
+    'first_name', 'Chloe', 'last_name', 'Moreau',
+    'street', '14 Rue Sainte-Catherine', 'zip_code', '33000',
+    'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
+  ),
+  JSON_ARRAY(
+    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+  ),
+  JSON_OBJECT(
+    'payment_intent_id', 'pi_test_017',
+    'stripe_subscription_id', 'sub_test_chloe_001',
+    'subscription', true,
+    'shipping_method', 'home',
+    'shipping_cost', 4.90,
+    'tracking_number', 'FR999111555',
+    'total_weight', 0.45,
+    'history', JSON_ARRAY(
+      JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 1 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 2 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'shipped'),
+      JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'delivered')
+    )
+  ),
+  DATE_SUB(@now, INTERVAL 1 MONTH)
 );
 
 -- ============================================================
