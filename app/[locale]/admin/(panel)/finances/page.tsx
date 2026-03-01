@@ -6,7 +6,7 @@ import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { useTranslations } from "next-intl";
 
-import { Link } from "@/i18n/navigation";
+import { downloadCSV } from "@/lib/utils/export-csv";
 
 interface MonthlyTrend {
   month: string;
@@ -39,6 +39,7 @@ export default function FinancesPage() {
   const common = useTranslations("common");
   const [report, setReport] = useState<FinancialReport | null>(null);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [months, setMonths] = useState(6);
 
   const periodLabels: Record<number, string> = {
@@ -61,6 +62,70 @@ export default function FinancesPage() {
   useEffect(() => {
     fetchReport(months);
   }, [months, fetchReport]);
+
+  const handleExportCSV = async () => {
+    if (!report) return;
+    setExporting(true);
+    try {
+      const headers = [
+        t("finances_revenue"),
+        t("finances_subscription_revenue"),
+        t("finances_oneoff_revenue"),
+        t("finances_net_revenue"),
+        t("finances_orders_count"),
+        t("finances_average_order"),
+        t("finances_pending"),
+        t("finances_refunds"),
+        t("finances_discounts"),
+        t("finances_subscription_count"),
+        t("finances_churn"),
+        t("finances_mrr"),
+      ];
+
+      const rows = [
+        [
+          report.revenue.toFixed(2),
+          report.subscription_revenue.toFixed(2),
+          report.oneoff_revenue.toFixed(2),
+          report.net_revenue.toFixed(2),
+          String(report.orders_count),
+          report.average_order.toFixed(2),
+          `${report.pending_amount.toFixed(2)} (${report.pending_count})`,
+          report.refunds.toFixed(2),
+          report.discount_total.toFixed(2),
+          String(report.subscription_count),
+          `${report.churned_count} (${report.churn_rate.toFixed(1)}%)`,
+          report.mrr.toFixed(2),
+        ],
+      ];
+
+      if (report.monthly_trend.length > 0) {
+        rows.push([]);
+        rows.push([
+          t("finances_month"),
+          t("finances_revenue"),
+          t("finances_orders_count"),
+        ]);
+        for (const row of report.monthly_trend) {
+          rows.push([
+            row.month,
+            row.revenue.toFixed(2),
+            String(row.orders_count),
+          ]);
+        }
+      }
+
+      const periodSuffix = months > 0 ? `${months}m` : "all";
+
+      downloadCSV(
+        `finances-${periodSuffix}-${new Date().toISOString().slice(0, 10)}.csv`,
+        headers,
+        rows,
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const cur = common("currency");
 
@@ -134,12 +199,13 @@ export default function FinancesPage() {
           {t("finances_title")}
         </h1>
         <Button
-          as={Link}
           color="primary"
-          href="/api/admin/financial-report?export=xlsx"
+          isLoading={exporting}
+          size="sm"
           variant="flat"
+          onPress={handleExportCSV}
         >
-          {t("finances_export")}
+          {t("export_csv")}
         </Button>
       </div>
 
