@@ -27,10 +27,14 @@ interface LogEntry {
   timestamp: string;
 }
 
-const levelColorMap: Record<string, "danger" | "warning" | "primary"> = {
+const levelColorMap: Record<
+  string,
+  "danger" | "warning" | "primary" | "default"
+> = {
   error: "danger",
   warn: "warning",
   info: "primary",
+  debug: "default",
 };
 
 export default function LogsPage() {
@@ -95,9 +99,10 @@ export default function LogsPage() {
             label: t("logs_filter_level"),
             options: [
               { key: "all", label: t("filter_all") },
-              { key: "error", label: "Error" },
-              { key: "warn", label: "Warning" },
-              { key: "info", label: "Info" },
+              { key: "error", label: t("logs_level_error") },
+              { key: "warn", label: t("logs_level_warn") },
+              { key: "info", label: t("logs_level_info") },
+              { key: "debug", label: t("logs_level_debug") },
             ],
             value: levelFilter,
             onChange: (v) => {
