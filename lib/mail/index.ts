@@ -27,7 +27,7 @@ export async function sendOrderConfirmation(params: {
   total: number;
   country?: string;
 }) {
-  const t = getEmailT(params.country || "FR");
+  const t = getEmailT(params.country || "");
 
   await sendMail({
     to: params.email,
@@ -54,7 +54,7 @@ export async function sendShippingNotification(params: {
   labelUrl?: string;
   country?: string;
 }) {
-  const t = getEmailT(params.country || "FR");
+  const t = getEmailT(params.country || "");
 
   await sendMail({
     to: params.email,
@@ -105,7 +105,7 @@ export async function sendBillingReminder(params: {
   accountUrl: string;
   country?: string;
 }) {
-  const t = getEmailT(params.country || "FR");
+  const t = getEmailT(params.country || "");
 
   await sendMail({
     to: params.email,
@@ -127,7 +127,7 @@ export async function sendRefundConfirmation(params: {
   total: number;
   country?: string;
 }) {
-  const t = getEmailT(params.country || "FR");
+  const t = getEmailT(params.country || "");
 
   await sendMail({
     to: params.email,
@@ -148,7 +148,7 @@ export async function sendPaymentFailed(params: {
   hostedInvoiceUrl: string;
   country?: string;
 }) {
-  const t = getEmailT(params.country || "FR");
+  const t = getEmailT(params.country || "");
 
   await sendMail({
     to: params.email,

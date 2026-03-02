@@ -116,7 +116,7 @@ async function sendBillingReminders() {
             "SELECT country FROM addresses WHERE customer_id = ? LIMIT 1",
             [customer.id],
           );
-          const country = (addrRows[0]?.country as string) || "FR";
+          const country = (addrRows[0]?.country as string) || "";
           const dateLocale = getDateLocale(country);
 
           const formattedDate = new Date(phaseStart).toLocaleDateString(

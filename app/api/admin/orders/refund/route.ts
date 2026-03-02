@@ -108,7 +108,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const refundCountry =
     (order.metadata?.shipping_country as string) ||
     (order.shipping_address as any)?.country ||
-    "FR";
+    "";
 
   mailService
     .sendRefundConfirmation({

@@ -608,7 +608,7 @@ export async function handleStatusUpdate(
     const country =
       (addr as any).country ||
       (order.metadata?.shipping_country as string) ||
-      "FR";
+      "";
 
     mailService
       .sendShippingNotification({

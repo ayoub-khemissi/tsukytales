@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
         const orderCountry =
           (order.metadata?.shipping_country as string) ||
           (order.shipping_address as any)?.country ||
-          "FR";
+          "";
 
         mailService
           .sendOrderConfirmation({
@@ -260,7 +260,7 @@ export async function POST(req: NextRequest) {
           const refundCountry =
             (order.metadata?.shipping_country as string) ||
             (order.shipping_address as any)?.country ||
-            "FR";
+            "";
 
           mailService
             .sendRefundConfirmation({
@@ -462,7 +462,7 @@ export async function POST(req: NextRequest) {
           const subOrderCountry =
             (order.metadata?.shipping_country as string) ||
             (order.shipping_address as any)?.country ||
-            "FR";
+            "";
 
           mailService
             .sendOrderConfirmation({
@@ -517,7 +517,7 @@ export async function POST(req: NextRequest) {
             const addresses = await addressRepository.findByCustomerId(
               customer.id,
             );
-            const paymentCountry = addresses[0]?.country || "FR";
+            const paymentCountry = addresses[0]?.country || "";
 
             mailService
               .sendPaymentFailed({

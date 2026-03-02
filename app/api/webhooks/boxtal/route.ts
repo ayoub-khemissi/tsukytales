@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
           const shippingCountry =
             (shippingAddr as any).country ||
             (order.metadata?.shipping_country as string) ||
-            "FR";
+            "";
 
           mailService
             .sendShippingNotification({

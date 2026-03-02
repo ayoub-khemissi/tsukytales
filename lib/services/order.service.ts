@@ -368,6 +368,11 @@ export async function confirmOrder(orderId: number, customerId: number | null) {
     metadata: updatedMetadata,
   };
 
+  const confirmCountry =
+    (orderData.metadata?.shipping_country as string) ||
+    (order.shipping_address as any)?.country ||
+    "";
+
   mailService
     .sendOrderConfirmation({
       email: orderData.email,
@@ -378,6 +383,7 @@ export async function confirmOrder(orderId: number, customerId: number | null) {
           ? Number(orderData.metadata.shipping_cost)
           : undefined,
       total: orderData.total,
+      country: confirmCountry,
     })
     .catch((err) =>
       logger.error(
