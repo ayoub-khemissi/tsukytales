@@ -188,6 +188,7 @@ export default function SubscribePage() {
   });
 
   const [totalPerQuarter, setTotalPerQuarter] = useState(0);
+  const [shippingCost, setShippingCost] = useState(0);
   const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
 
   // Auth guard — only customers can subscribe
@@ -266,12 +267,33 @@ export default function SubscribePage() {
       .catch(() => {});
   }, [session?.user]);
 
-  // Compute total (no shipping cost for subscriptions)
+  // Fetch shipping rates and compute total
   useEffect(() => {
-    if (product) {
-      setTotalPerQuarter(product.subscription_price ?? product.price);
-    }
-  }, [product]);
+    if (!product) return;
+    const productPrice = product.subscription_price ?? product.price;
+
+    fetch(`/api/store/shipping/rates?weight=1&country=${address.country}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((rates) => {
+        if (!rates) {
+          setShippingCost(0);
+          setTotalPerQuarter(productPrice);
+
+          return;
+        }
+        const cost =
+          shippingMethod === "relay" && rates.relay
+            ? rates.relay.price
+            : rates.home.price;
+
+        setShippingCost(cost);
+        setTotalPerQuarter(productPrice + cost);
+      })
+      .catch(() => {
+        setShippingCost(0);
+        setTotalPerQuarter(productPrice);
+      });
+  }, [product, address.country, shippingMethod]);
 
   // Handle 3D Secure redirect
   const confirmSubscription = useCallback(
@@ -738,6 +760,14 @@ export default function SubscribePage() {
                 <span>{common("subtotal")}</span>
                 <span>
                   {price.toFixed(2)}
+                  {common("currency")}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span>{common("shipping")}</span>
+                <span>
+                  {shippingCost.toFixed(2)}
                   {common("currency")}
                 </span>
               </div>

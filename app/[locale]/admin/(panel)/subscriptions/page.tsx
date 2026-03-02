@@ -38,6 +38,7 @@ interface Subscription {
   orders_count: number;
   last_shipment_date: string | null;
   amount: number;
+  shipping_cost: number;
   total_spent: number;
   created_at: string;
 }
@@ -291,7 +292,17 @@ export default function SubscriptionsPage() {
                         <span>{sub.plan_name}</span>
                         <p className="text-sm text-default-500">
                           {sub.amount.toFixed(2)}
-                          {common("currency")} &middot; {sub.orders_count}{" "}
+                          {common("currency")}
+                          {sub.shipping_cost > 0 && (
+                            <span className="text-default-400">
+                              {" "}
+                              ({(sub.amount - sub.shipping_cost).toFixed(
+                                2,
+                              )} + {sub.shipping_cost.toFixed(2)}
+                              {common("currency")} livr.)
+                            </span>
+                          )}{" "}
+                          &middot; {sub.orders_count}{" "}
                           {t("subscriptions_deliveries")}
                         </p>
                       </div>

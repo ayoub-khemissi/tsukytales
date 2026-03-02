@@ -8,6 +8,7 @@ import * as stripeCustomerService from "@/lib/services/stripe-customer.service";
 import { stripe } from "@/lib/services/payment.service";
 import { AppError } from "@/lib/errors/app-error";
 import { settingsRepository } from "@/lib/repositories/settings.repository";
+import { getShippingRates } from "@/lib/services/shipping.service";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await requireCustomer();
@@ -31,9 +32,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const stripeCustomerId =
     await stripeCustomerService.getOrCreateStripeCustomer(customer);
 
-  // Subscription = free shipping
   const productPrice = Number(product.subscription_price ?? product.price);
-  const totalPerQuarter = productPrice;
+
+  // Calculate shipping cost (1kg rate based on destination country)
+  const shippingData = shipping || {};
+  const country = shippingData.country || "FR";
+  const rates = await getShippingRates(1, country);
+  const shippingCost =
+    shippingData.method === "relay" && rates.relay
+      ? rates.relay.price
+      : rates.home.price;
+  const totalPerQuarter = productPrice + shippingCost;
 
   // Create Stripe product + price
   const stripeProduct = await stripe.products.create({
@@ -52,7 +61,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
 
   // Build compact shipping metadata (Stripe limits values to 500 chars)
-  const shippingData = shipping || {};
   const shippingAddr = shippingData.shipping_address || {};
   const relay = shippingData.relay || shippingAddr.relay;
   const compactShipping: Record<string, unknown> = {
@@ -86,6 +94,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       stripe_price_id: stripePrice.id,
       subscription_dates: JSON.stringify(subscriptionDates),
       shipping: JSON.stringify(compactShipping),
+      shipping_cost: String(shippingCost),
     },
   });
 
@@ -96,5 +105,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     price_id: stripePrice.id,
     dates: subscriptionDates,
     total_per_quarter: totalPerQuarter,
+    shipping_cost: shippingCost,
   });
 });

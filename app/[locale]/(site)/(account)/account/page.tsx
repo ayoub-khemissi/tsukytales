@@ -93,6 +93,7 @@ interface SubscriptionData {
   status?: string;
   product_name?: string;
   product_price?: number | null;
+  shipping_cost?: number;
   is_preorder?: boolean;
   show_product_detail?: boolean;
   product_image?: string | null;
@@ -720,9 +721,35 @@ export default function AccountPage() {
                         </p>
                       </div>
                     )}
+                    {subscription.product_price != null && (
+                      <div>
+                        <p className="text-sm text-text-light dark:text-muted">
+                          {t("subscription_price_label")}
+                        </p>
+                        <p className="font-semibold text-text-brand dark:text-white">
+                          {subscription.product_price
+                            .toFixed(2)
+                            .replace(".", ",")}
+                          {common("currency")}
+                        </p>
+                      </div>
+                    )}
+                    {!!subscription.shipping_cost && (
+                      <div>
+                        <p className="text-sm text-text-light dark:text-muted">
+                          {t("subscription_shipping_label")}
+                        </p>
+                        <p className="font-semibold text-text-brand dark:text-white">
+                          {subscription.shipping_cost
+                            .toFixed(2)
+                            .replace(".", ",")}
+                          {common("currency")}
+                        </p>
+                      </div>
+                    )}
                     <div>
                       <p className="text-sm text-text-light dark:text-muted">
-                        {t("subscription_price_label")}
+                        {common("total")}
                       </p>
                       <p className="font-semibold text-primary">
                         {subscription.total_per_quarter

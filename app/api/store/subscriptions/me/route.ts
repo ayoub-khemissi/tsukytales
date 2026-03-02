@@ -126,6 +126,8 @@ export const GET = withErrorHandler(async () => {
       ? Number(product.subscription_price ?? product.price)
       : 35;
 
+    const shippingCost = Number(shippingInfo.cost) || 0;
+
     const showProductDetail =
       (await settingsRepository.get<boolean>("show_product_detail")) ?? true;
 
@@ -134,12 +136,13 @@ export const GET = withErrorHandler(async () => {
       status: schedule.status,
       product_name: product?.name ?? null,
       product_price: productPrice,
+      shipping_cost: shippingCost,
       is_preorder: product?.is_preorder ?? false,
       show_product_detail: showProductDetail,
       product_image: product?.image ?? null,
       product_images: product?.images ?? null,
       product_description: product?.description ?? null,
-      total_per_quarter: productPrice,
+      total_per_quarter: productPrice + shippingCost,
       shipping_method: shippingInfo.method,
       skipped_phases: skippedPhases,
       phases: schedule.phases.map((p) => ({
@@ -172,6 +175,7 @@ export const GET = withErrorHandler(async () => {
   const subscriptionPrice = product
     ? Number(product.subscription_price ?? product.price)
     : null;
+  const fallbackShippingCost = Number(shippingInfo.cost) || 0;
   const dates: string[] =
     (await settingsRepository.get<string[]>("subscription_dates")) ?? [];
   const showProductDetail =
@@ -182,12 +186,15 @@ export const GET = withErrorHandler(async () => {
     status: "active",
     product_name: product?.name ?? null,
     product_price: subscriptionPrice,
+    shipping_cost: fallbackShippingCost,
     is_preorder: product?.is_preorder ?? false,
     show_product_detail: showProductDetail,
     product_image: product?.image ?? null,
     product_images: product?.images ?? null,
     product_description: product?.description ?? null,
-    total_per_quarter: subscriptionPrice,
+    total_per_quarter: subscriptionPrice
+      ? subscriptionPrice + fallbackShippingCost
+      : subscriptionPrice,
     shipping_method: shippingInfo.method ?? null,
     skipped_phases: skippedPhases,
     phases: dates.map((d) => ({

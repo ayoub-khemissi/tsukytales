@@ -58,6 +58,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Store in customer metadata
   const shippingInfo = meta.shipping ? JSON.parse(meta.shipping) : {};
 
+  if (meta.shipping_cost) {
+    shippingInfo.cost = parseFloat(meta.shipping_cost);
+  }
+
   await customerRepository.updateMetadata(customerId, {
     ...(customer.metadata || {}),
     subscription_schedule_id: schedule.id,

@@ -25,6 +25,7 @@ interface SubscriptionItem {
   orders_count: number;
   last_shipment_date: string | null;
   amount: number;
+  shipping_cost: number;
   total_spent: number;
   created_at: string;
 }
@@ -223,6 +224,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         0,
       );
 
+      const subShipping = (customer.metadata?.subscription_shipping ||
+        {}) as Record<string, unknown>;
+
       items.push({
         id: scheduleId || `db_${customer.id}`,
         customer_id: customer.id,
@@ -241,6 +245,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         orders_count: customerOrders.length,
         last_shipment_date: lastShipmentByEmail.get(customer.email) ?? null,
         amount: latest ? Number(latest.total) : 0,
+        shipping_cost: Number(subShipping.cost) || 0,
         total_spent,
         created_at: customer.createdAt.toISOString(),
       });
@@ -279,6 +284,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       );
       const oldest = customerOrders[customerOrders.length - 1];
 
+      const orderSubShipping = customer
+        ? ((customer.metadata?.subscription_shipping || {}) as Record<
+            string,
+            unknown
+          >)
+        : {};
+
       items.push({
         id: stripeSubId || `db_${latest.id}`,
         customer_id: customer?.id ?? null,
@@ -299,6 +311,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         orders_count: customerOrders.length,
         last_shipment_date: lastShipmentByEmail.get(email) ?? null,
         amount: Number(latest.total),
+        shipping_cost: Number(orderSubShipping.cost) || 0,
         total_spent,
         created_at: oldest.createdAt.toISOString(),
       });
