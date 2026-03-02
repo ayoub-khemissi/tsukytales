@@ -165,7 +165,8 @@
     "relay_select": "Punto de recogida seleccionado",
     "relay_required": "Por favor selecciona un punto de recogida",
     "relay_hours": "Horario de apertura",
-    "error_phone": "Número de teléfono inválido"
+    "error_phone": "Número de teléfono inválido",
+    "error_fields_required": "Por favor complete todos los campos obligatorios"
   },
   "contact": {
     "title": "Contácta",

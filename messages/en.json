@@ -165,7 +165,8 @@
     "relay_select": "Selected pickup point",
     "relay_required": "Please select a pickup point",
     "relay_hours": "Opening hours",
-    "error_phone": "Invalid phone number"
+    "error_phone": "Invalid phone number",
+    "error_fields_required": "Please fill in all required fields"
   },
   "contact": {
     "title": "Contact ",

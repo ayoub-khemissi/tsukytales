@@ -351,6 +351,25 @@ export default function SubscribePage() {
 
       return;
     }
+    if (shippingMethod === "home") {
+      if (
+        !address.first_name ||
+        !address.last_name ||
+        !address.street ||
+        !address.zip_code ||
+        !address.city ||
+        !address.phone
+      ) {
+        setOrderError(ct("error_fields_required"));
+
+        return;
+      }
+      if (!isValidPhoneNumber(address.phone, address.country as any)) {
+        setOrderError(ct("error_phone"));
+
+        return;
+      }
+    }
     setLoading(true);
     setOrderError("");
 

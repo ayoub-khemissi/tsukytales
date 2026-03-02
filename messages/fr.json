@@ -165,7 +165,8 @@
     "relay_select": "Point relais sélectionné",
     "relay_required": "Veuillez sélectionner un point relais",
     "relay_hours": "Horaires d'ouverture",
-    "error_phone": "Numéro de téléphone invalide"
+    "error_phone": "Numéro de téléphone invalide",
+    "error_fields_required": "Veuillez remplir tous les champs obligatoires"
   },
   "contact": {
     "title": "Contactez-",
