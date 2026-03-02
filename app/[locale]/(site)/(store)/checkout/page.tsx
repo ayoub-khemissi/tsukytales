@@ -5,6 +5,7 @@ import type { RelayPoint } from "@/components/store/relay-picker";
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 import { Button } from "@heroui/button";
 import { Radio, RadioGroup } from "@heroui/radio";
 import { Divider } from "@heroui/divider";
@@ -24,6 +25,7 @@ import dynamic from "next/dynamic";
 
 import { Link } from "@/i18n/navigation";
 import { useCart } from "@/lib/store/cart-context";
+import { EUROPEAN_COUNTRIES, countryFlag } from "@/lib/constants/countries";
 import {
   SavedCardPicker,
   type SavedCard,
@@ -150,6 +152,7 @@ function PaymentForm({
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
   const common = useTranslations("common");
+  const countriesT = useTranslations("countries");
   const { data: session } = useSession();
   const { items, total, clearCart } = useCart();
   const [shippingMethod, setShippingMethod] = useState("relay");
@@ -589,6 +592,22 @@ export default function CheckoutPage() {
                         onValueChange={updateAddress("city")}
                       />
                     </div>
+                    <Select
+                      isRequired
+                      label={t("country")}
+                      selectedKeys={new Set([address.country])}
+                      onSelectionChange={(keys) => {
+                        const value = [...keys][0] as string;
+
+                        if (value) updateAddress("country")(value);
+                      }}
+                    >
+                      {EUROPEAN_COUNTRIES.map((code) => (
+                        <SelectItem key={code}>
+                          {countryFlag(code)} {countriesT(code)}
+                        </SelectItem>
+                      ))}
+                    </Select>
                     <Input
                       isRequired
                       errorMessage={t("error_phone")}

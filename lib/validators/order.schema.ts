@@ -1,5 +1,7 @@
 import { z } from "zod/v4";
 
+import { EUROPEAN_COUNTRIES } from "@/lib/constants/countries";
+
 /** Treat empty strings as undefined so `.optional()` accepts them. */
 const optStr = z.preprocess(
   (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
@@ -22,7 +24,7 @@ const addressSchema = z.object({
   street_complement: z.string().optional(),
   zip_code: optStr,
   city: optStr,
-  country: z.string().max(2).optional(),
+  country: z.enum(EUROPEAN_COUNTRIES).optional(),
   phone: optStr,
   relay: relaySchema,
 });

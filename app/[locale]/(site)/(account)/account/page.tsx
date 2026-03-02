@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Spinner } from "@heroui/spinner";
@@ -32,6 +33,7 @@ import { isValidPhoneNumber } from "libphonenumber-js";
 import PaymentMethodsTab from "@/components/account/payment-methods-tab";
 import { Link } from "@/i18n/navigation";
 import { useScrollReveal } from "@/lib/hooks/use-scroll-reveal";
+import { EUROPEAN_COUNTRIES, countryFlag } from "@/lib/constants/countries";
 
 interface CustomerProfile {
   id: number;
@@ -113,6 +115,7 @@ export default function AccountPage() {
   const nav = useTranslations("nav");
   const st = useTranslations("status");
   const common = useTranslations("common");
+  const countriesT = useTranslations("countries");
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
@@ -1121,19 +1124,24 @@ export default function AccountPage() {
                       setAddressForm((f) => ({ ...f, city: v }))
                     }
                   />
-                  <Input
+                  <Select
                     isRequired
                     className="w-full"
                     label={t("addresses_country")}
-                    maxLength={2}
-                    value={addressForm.country}
-                    onValueChange={(v) =>
-                      setAddressForm((f) => ({
-                        ...f,
-                        country: v.toUpperCase(),
-                      }))
-                    }
-                  />
+                    selectedKeys={new Set([addressForm.country])}
+                    onSelectionChange={(keys) => {
+                      const value = [...keys][0] as string;
+
+                      if (value)
+                        setAddressForm((f) => ({ ...f, country: value }));
+                    }}
+                  >
+                    {EUROPEAN_COUNTRIES.map((code) => (
+                      <SelectItem key={code}>
+                        {countryFlag(code)} {countriesT(code)}
+                      </SelectItem>
+                    ))}
+                  </Select>
                   <Input
                     isRequired
                     className="w-full"
@@ -1312,19 +1320,27 @@ export default function AccountPage() {
                             setAddressForm((f) => ({ ...f, city: v }))
                           }
                         />
-                        <Input
+                        <Select
                           isRequired
                           className="w-full"
                           label={t("addresses_country")}
-                          maxLength={2}
-                          value={addressForm.country}
-                          onValueChange={(v) =>
-                            setAddressForm((f) => ({
-                              ...f,
-                              country: v.toUpperCase(),
-                            }))
-                          }
-                        />
+                          selectedKeys={new Set([addressForm.country])}
+                          onSelectionChange={(keys) => {
+                            const value = [...keys][0] as string;
+
+                            if (value)
+                              setAddressForm((f) => ({
+                                ...f,
+                                country: value,
+                              }));
+                          }}
+                        >
+                          {EUROPEAN_COUNTRIES.map((code) => (
+                            <SelectItem key={code}>
+                              {countriesT(code)}
+                            </SelectItem>
+                          ))}
+                        </Select>
                         <Input
                           isRequired
                           className="w-full"

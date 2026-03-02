@@ -166,7 +166,8 @@
     "relay_required": "Veuillez sélectionner un point relais",
     "relay_hours": "Horaires d'ouverture",
     "error_phone": "Numéro de téléphone invalide",
-    "error_fields_required": "Veuillez remplir tous les champs obligatoires"
+    "error_fields_required": "Veuillez remplir tous les champs obligatoires",
+    "country": "Pays"
   },
   "contact": {
     "title": "Contactez-",
@@ -315,7 +316,7 @@
     "addresses_street": "Adresse",
     "addresses_zip_code": "Code postal",
     "addresses_city": "Ville",
-    "addresses_country": "Pays (ex: FR)",
+    "addresses_country": "Pays",
     "addresses_phone": "Téléphone",
     "addresses_error_phone": "Numéro de téléphone invalide",
     "profile_error": "Erreur lors de la mise à jour du profil",
@@ -848,5 +849,39 @@
     "error_subscription": "Impossible de créer l'abonnement.",
     "error_confirm": "La confirmation a échoué.",
     "per_quarter": "/trimestre"
+  },
+  "countries": {
+    "FR": "France",
+    "AT": "Autriche",
+    "BE": "Belgique",
+    "BG": "Bulgarie",
+    "CH": "Suisse",
+    "CY": "Chypre",
+    "CZ": "Tchéquie",
+    "DE": "Allemagne",
+    "DK": "Danemark",
+    "EE": "Estonie",
+    "ES": "Espagne",
+    "FI": "Finlande",
+    "GB": "Royaume-Uni",
+    "GR": "Grèce",
+    "HR": "Croatie",
+    "HU": "Hongrie",
+    "IE": "Irlande",
+    "IS": "Islande",
+    "IT": "Italie",
+    "LI": "Liechtenstein",
+    "LT": "Lituanie",
+    "LU": "Luxembourg",
+    "LV": "Lettonie",
+    "MT": "Malte",
+    "NL": "Pays-Bas",
+    "NO": "Norvège",
+    "PL": "Pologne",
+    "PT": "Portugal",
+    "RO": "Roumanie",
+    "SE": "Suède",
+    "SI": "Slovénie",
+    "SK": "Slovaquie"
   }
 }

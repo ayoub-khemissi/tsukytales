@@ -166,7 +166,8 @@
     "relay_required": "Please select a pickup point",
     "relay_hours": "Opening hours",
     "error_phone": "Invalid phone number",
-    "error_fields_required": "Please fill in all required fields"
+    "error_fields_required": "Please fill in all required fields",
+    "country": "Country"
   },
   "contact": {
     "title": "Contact ",
@@ -315,7 +316,7 @@
     "addresses_street": "Street",
     "addresses_zip_code": "Zip code",
     "addresses_city": "City",
-    "addresses_country": "2-letter country code (e.g. FR)",
+    "addresses_country": "Country",
     "addresses_phone": "Phone",
     "addresses_error_phone": "Invalid phone number",
     "profile_error": "Failed to update profile",
@@ -848,5 +849,39 @@
     "error_subscription": "Unable to create subscription.",
     "error_confirm": "Confirmation failed.",
     "per_quarter": "/quarter"
+  },
+  "countries": {
+    "FR": "France",
+    "AT": "Austria",
+    "BE": "Belgium",
+    "BG": "Bulgaria",
+    "CH": "Switzerland",
+    "CY": "Cyprus",
+    "CZ": "Czechia",
+    "DE": "Germany",
+    "DK": "Denmark",
+    "EE": "Estonia",
+    "ES": "Spain",
+    "FI": "Finland",
+    "GB": "United Kingdom",
+    "GR": "Greece",
+    "HR": "Croatia",
+    "HU": "Hungary",
+    "IE": "Ireland",
+    "IS": "Iceland",
+    "IT": "Italy",
+    "LI": "Liechtenstein",
+    "LT": "Lithuania",
+    "LU": "Luxembourg",
+    "LV": "Latvia",
+    "MT": "Malta",
+    "NL": "Netherlands",
+    "NO": "Norway",
+    "PL": "Poland",
+    "PT": "Portugal",
+    "RO": "Romania",
+    "SE": "Sweden",
+    "SI": "Slovenia",
+    "SK": "Slovakia"
   }
 }

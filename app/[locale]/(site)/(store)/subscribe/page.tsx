@@ -5,6 +5,7 @@ import type { RelayPoint } from "@/components/store/relay-picker";
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 import { Button } from "@heroui/button";
 import { Radio, RadioGroup } from "@heroui/radio";
 import { Divider } from "@heroui/divider";
@@ -25,6 +26,7 @@ import { isValidPhoneNumber } from "libphonenumber-js";
 import dynamic from "next/dynamic";
 
 import { Link, useRouter } from "@/i18n/navigation";
+import { EUROPEAN_COUNTRIES, countryFlag } from "@/lib/constants/countries";
 import {
   SavedCardPicker,
   type SavedCard,
@@ -157,6 +159,7 @@ export default function SubscribePage() {
   const t = useTranslations("subscribe");
   const ct = useTranslations("checkout");
   const common = useTranslations("common");
+  const countriesT = useTranslations("countries");
   const locale = useLocale();
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
@@ -666,6 +669,22 @@ export default function SubscribePage() {
                         onValueChange={updateAddress("city")}
                       />
                     </div>
+                    <Select
+                      isRequired
+                      label={ct("country")}
+                      selectedKeys={new Set([address.country])}
+                      onSelectionChange={(keys) => {
+                        const value = [...keys][0] as string;
+
+                        if (value) updateAddress("country")(value);
+                      }}
+                    >
+                      {EUROPEAN_COUNTRIES.map((code) => (
+                        <SelectItem key={code}>
+                          {countryFlag(code)} {countriesT(code)}
+                        </SelectItem>
+                      ))}
+                    </Select>
                     <Input
                       isRequired
                       errorMessage={ct("error_phone")}

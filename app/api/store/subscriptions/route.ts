@@ -9,6 +9,7 @@ import { stripe } from "@/lib/services/payment.service";
 import { AppError } from "@/lib/errors/app-error";
 import { settingsRepository } from "@/lib/repositories/settings.repository";
 import { getShippingRates } from "@/lib/services/shipping.service";
+import { EUROPEAN_COUNTRIES } from "@/lib/constants/countries";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await requireCustomer();
@@ -36,7 +37,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Calculate shipping cost (1kg rate based on destination country)
   const shippingData = shipping || {};
-  const country = shippingData.country || "FR";
+  const rawCountry = shippingData.country || "FR";
+  const country = (EUROPEAN_COUNTRIES as readonly string[]).includes(rawCountry)
+    ? rawCountry
+    : "FR";
   const rates = await getShippingRates(1, country);
   const shippingCost =
     shippingData.method === "relay" && rates.relay

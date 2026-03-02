@@ -1,5 +1,7 @@
 import { z } from "zod/v4";
 
+import { EUROPEAN_COUNTRIES } from "@/lib/constants/countries";
+
 export const createAddressSchema = z.object({
   label: z.string().min(1, "Le libellé est requis"),
   first_name: z.string().min(1, "Le prénom est requis"),
@@ -8,7 +10,7 @@ export const createAddressSchema = z.object({
   street_complement: z.string().optional(),
   zip_code: z.string().min(1, "Le code postal est requis"),
   city: z.string().min(1, "La ville est requise"),
-  country: z.string().length(2).default("FR"),
+  country: z.enum(EUROPEAN_COUNTRIES).default("FR"),
   phone: z.string().min(1, "Le téléphone est requis"),
   is_default: z.boolean().default(false),
 });
