@@ -27,6 +27,7 @@ interface ActiveProduct {
   name: string;
   slug: string;
   price: number;
+  weight: number;
   stock: number;
   image: string | null;
   images: string[] | null;
@@ -306,6 +307,7 @@ function PreorderCard({
     id: number;
     name: string;
     price: number;
+    weight?: number;
     quantity?: number;
     image?: string;
     slug: string;
@@ -400,6 +402,7 @@ function PreorderCard({
                 id: product.id,
                 name: product.name,
                 price: product.price,
+                weight: product.weight,
                 quantity: qty,
                 image: product.image || undefined,
                 slug: product.slug,
