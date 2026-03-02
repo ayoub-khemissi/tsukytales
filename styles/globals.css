@@ -170,8 +170,8 @@ body {
 :is(.dark) .btn-brand:hover,
 :is(.dark) .btn-brand[data-hover="true"] {
   background-position: 0% 0 !important;
-  color: #1a1028 !important;
-  -webkit-text-fill-color: #1a1028 !important;
+  color: #c882dc !important;
+  -webkit-text-fill-color: #c882dc !important;
   box-shadow: 0 8px 25px rgba(200, 130, 220, 0.3);
 }
 
