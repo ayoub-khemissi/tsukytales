@@ -9,6 +9,7 @@ import { stripe } from "@/lib/services/payment.service";
 import { AppError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
 import { settingsRepository } from "@/lib/repositories/settings.repository";
+import { sendSubscriptionConfirmation, getDateLocale } from "@/lib/mail";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await requireCustomer();
@@ -75,6 +76,34 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   logger.info(
     `Subscription schedule created: ${schedule.id} for customer ${customerId}`,
   );
+
+  // Send subscription confirmation email
+  const product = await productRepository.findById(parseInt(meta.product_id));
+  const shippingCost = meta.shipping_cost ? parseFloat(meta.shipping_cost) : 0;
+  const country = shippingInfo.country || "";
+  const dateLocale = getDateLocale(country);
+  const formattedDates = dates.map((d) =>
+    new Date(d + "T00:00:00Z").toLocaleDateString(dateLocale, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+  );
+
+  const stripePrice = await stripe.prices.retrieve(priceId);
+  const totalPerQuarter = (stripePrice.unit_amount ?? 0) / 100;
+
+  if (customer.email) {
+    await sendSubscriptionConfirmation({
+      email: customer.email,
+      firstName: customer.first_name,
+      productName: product?.name ?? "Box Tsuky Tales",
+      totalPerQuarter,
+      shippingCost,
+      billingDates: formattedDates,
+      country,
+    });
+  }
 
   return NextResponse.json({ success: true, schedule_id: schedule.id });
 });

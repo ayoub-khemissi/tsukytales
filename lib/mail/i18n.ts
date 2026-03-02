@@ -12,6 +12,7 @@ export interface EmailTranslations {
   subject_billing_reminder: string;
   subject_payment_failed: string;
   subject_refund: string;
+  subject_subscription_confirmation: string;
 
   // Common
   greeting: string;
@@ -56,6 +57,20 @@ export interface EmailTranslations {
   payment_update_card: string;
   payment_error_contact: string;
 
+  // Subscription confirmation
+  sub_badge: string;
+  sub_welcome: string;
+  sub_body: string;
+  sub_summary: string;
+  sub_shipping: string;
+  sub_shipping_free: string;
+  sub_total_quarter: string;
+  sub_schedule_title: string;
+  sub_skip: string;
+  sub_cta: string;
+  sub_closing: string;
+  sub_team: string;
+
   // Refund confirmation
   refund_badge: string;
   refund_title: string;
@@ -78,6 +93,8 @@ const fr: EmailTranslations = {
   subject_payment_failed:
     "Probl\u00e8me de paiement pour votre abonnement Tsuky Tales",
   subject_refund: "Remboursement de votre commande TSK-{orderId} - Tsuky Tales",
+  subject_subscription_confirmation:
+    "Bienvenue dans votre abonnement Tsuky Tales !",
 
   greeting: "Bonjour",
   order_ref: "Commande",
@@ -101,6 +118,22 @@ const fr: EmailTranslations = {
   shipping_tracking: "Num&eacute;ro de suivi",
   shipping_cta: "Suivre ma commande",
   shipping_download_label: "T&eacute;l&eacute;charger mon &eacute;tiquette",
+
+  sub_badge: "Abonnement",
+  sub_welcome:
+    "Votre abonnement Tsuky Tales a bien &eacute;t&eacute; cr&eacute;&eacute; !",
+  sub_body:
+    "Aucun pr&eacute;l&egrave;vement n'a &eacute;t&eacute; effectu&eacute; pour le moment. Votre moyen de paiement sera d&eacute;bit&eacute; automatiquement &agrave; chaque date pr&eacute;vue ci-dessous.",
+  sub_summary: "Votre abonnement",
+  sub_shipping: "Livraison",
+  sub_shipping_free: "Offerte",
+  sub_total_quarter: "Total / trimestre",
+  sub_schedule_title: "&Eacute;ch&eacute;ances de paiement",
+  sub_skip:
+    "Vous pouvez passer un envoi depuis votre espace personnel jusqu'&agrave; 24h avant la date pr&eacute;vue.",
+  sub_cta: "G&eacute;rer mon abonnement",
+  sub_closing: "&Agrave; tr&egrave;s bient&ocirc;t !",
+  sub_team: "L'&eacute;quipe Tsuky Tales",
 
   billing_badge: "Rappel",
   billing_body:
@@ -147,6 +180,8 @@ const en: EmailTranslations = {
   subject_billing_reminder: "Reminder: your next Tsuky Tales box on {date}",
   subject_payment_failed: "Payment issue with your Tsuky Tales subscription",
   subject_refund: "Refund for your order TSK-{orderId} - Tsuky Tales",
+  subject_subscription_confirmation:
+    "Welcome to your Tsuky Tales subscription!",
 
   greeting: "Hello",
   order_ref: "Order",
@@ -170,6 +205,21 @@ const en: EmailTranslations = {
   shipping_tracking: "Tracking number",
   shipping_cta: "Track my order",
   shipping_download_label: "Download my label",
+
+  sub_badge: "Subscription",
+  sub_welcome: "Your Tsuky Tales subscription has been created!",
+  sub_body:
+    "No payment has been charged yet. Your payment method will be automatically debited on each scheduled date below.",
+  sub_summary: "Your subscription",
+  sub_shipping: "Shipping",
+  sub_shipping_free: "Free",
+  sub_total_quarter: "Total / quarter",
+  sub_schedule_title: "Payment schedule",
+  sub_skip:
+    "You can skip a shipment from your account up to 24 hours before the scheduled date.",
+  sub_cta: "Manage my subscription",
+  sub_closing: "See you soon!",
+  sub_team: "The Tsuky Tales Team",
 
   billing_badge: "Reminder",
   billing_body:
@@ -217,6 +267,8 @@ const es: EmailTranslations = {
   subject_payment_failed:
     "Problema de pago con tu suscripci\u00f3n Tsuky Tales",
   subject_refund: "Reembolso de tu pedido TSK-{orderId} - Tsuky Tales",
+  subject_subscription_confirmation:
+    "\u00a1Bienvenido/a a tu suscripci\u00f3n Tsuky Tales!",
 
   greeting: "Hola",
   order_ref: "Pedido",
@@ -240,6 +292,21 @@ const es: EmailTranslations = {
   shipping_tracking: "N&uacute;mero de seguimiento",
   shipping_cta: "Seguir mi pedido",
   shipping_download_label: "Descargar mi etiqueta",
+
+  sub_badge: "Suscripci&oacute;n",
+  sub_welcome: "&iexcl;Tu suscripci&oacute;n Tsuky Tales ha sido creada!",
+  sub_body:
+    "No se ha realizado ning&uacute;n cobro por el momento. Tu m&eacute;todo de pago se cargar&aacute; autom&aacute;ticamente en cada fecha prevista a continuaci&oacute;n.",
+  sub_summary: "Tu suscripci&oacute;n",
+  sub_shipping: "Env&iacute;o",
+  sub_shipping_free: "Gratis",
+  sub_total_quarter: "Total / trimestre",
+  sub_schedule_title: "Calendario de pagos",
+  sub_skip:
+    "Puedes omitir un env&iacute;o desde tu cuenta hasta 24 horas antes de la fecha prevista.",
+  sub_cta: "Gestionar mi suscripci&oacute;n",
+  sub_closing: "&iexcl;Hasta pronto!",
+  sub_team: "El equipo de Tsuky Tales",
 
   billing_badge: "Recordatorio",
   billing_body:
@@ -286,6 +353,8 @@ const de: EmailTranslations = {
   subject_payment_failed: "Zahlungsproblem mit Ihrem Tsuky Tales Abonnement",
   subject_refund:
     "R\u00fcckerstattung Ihrer Bestellung TSK-{orderId} - Tsuky Tales",
+  subject_subscription_confirmation:
+    "Willkommen bei Ihrem Tsuky Tales Abonnement!",
 
   greeting: "Hallo",
   order_ref: "Bestellung",
@@ -309,6 +378,21 @@ const de: EmailTranslations = {
   shipping_tracking: "Sendungsnummer",
   shipping_cta: "Meine Bestellung verfolgen",
   shipping_download_label: "Mein Etikett herunterladen",
+
+  sub_badge: "Abonnement",
+  sub_welcome: "Ihr Tsuky Tales Abonnement wurde erfolgreich erstellt!",
+  sub_body:
+    "Es wurde noch keine Zahlung abgebucht. Ihr Zahlungsmittel wird automatisch zu jedem unten aufgef&uuml;hrten Termin belastet.",
+  sub_summary: "Ihr Abonnement",
+  sub_shipping: "Versand",
+  sub_shipping_free: "Kostenlos",
+  sub_total_quarter: "Gesamt / Quartal",
+  sub_schedule_title: "Zahlungsplan",
+  sub_skip:
+    "Sie k&ouml;nnen eine Lieferung bis 24 Stunden vor dem geplanten Datum in Ihrem Konto &uuml;berspringen.",
+  sub_cta: "Mein Abonnement verwalten",
+  sub_closing: "Bis bald!",
+  sub_team: "Das Tsuky Tales Team",
 
   billing_badge: "Erinnerung",
   billing_body:
@@ -354,6 +438,8 @@ const it: EmailTranslations = {
   subject_payment_failed:
     "Problema di pagamento con il tuo abbonamento Tsuky Tales",
   subject_refund: "Rimborso del tuo ordine TSK-{orderId} - Tsuky Tales",
+  subject_subscription_confirmation:
+    "Benvenuto/a nel tuo abbonamento Tsuky Tales!",
 
   greeting: "Ciao",
   order_ref: "Ordine",
@@ -377,6 +463,21 @@ const it: EmailTranslations = {
   shipping_tracking: "Numero di tracciamento",
   shipping_cta: "Segui il mio ordine",
   shipping_download_label: "Scarica la mia etichetta",
+
+  sub_badge: "Abbonamento",
+  sub_welcome: "Il tuo abbonamento Tsuky Tales &egrave; stato creato!",
+  sub_body:
+    "Nessun addebito &egrave; stato effettuato per il momento. Il tuo metodo di pagamento verr&agrave; addebitato automaticamente ad ogni data prevista qui sotto.",
+  sub_summary: "Il tuo abbonamento",
+  sub_shipping: "Spedizione",
+  sub_shipping_free: "Gratuita",
+  sub_total_quarter: "Totale / trimestre",
+  sub_schedule_title: "Scadenze di pagamento",
+  sub_skip:
+    "Puoi saltare un invio dal tuo account fino a 24 ore prima della data prevista.",
+  sub_cta: "Gestire il mio abbonamento",
+  sub_closing: "A presto!",
+  sub_team: "Il team Tsuky Tales",
 
   billing_badge: "Promemoria",
   billing_body:

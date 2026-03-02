@@ -10,6 +10,7 @@ import { contactHtml } from "./templates/contact";
 import { billingReminderHtml } from "./templates/billing-reminder";
 import { paymentFailedHtml } from "./templates/payment-failed";
 import { refundConfirmationHtml } from "./templates/refund-confirmation";
+import { subscriptionConfirmationHtml } from "./templates/subscription-confirmation";
 
 // ─── Order Confirmation ─────────────────────────────────────────
 
@@ -135,6 +136,33 @@ export async function sendRefundConfirmation(params: {
     html: refundConfirmationHtml({
       orderId: params.orderId,
       total: params.total,
+      t,
+    }),
+  });
+}
+
+// ─── Subscription Confirmation ──────────────────────────────────
+
+export async function sendSubscriptionConfirmation(params: {
+  email: string;
+  firstName?: string | null;
+  productName: string;
+  totalPerQuarter: number;
+  shippingCost: number;
+  billingDates: string[];
+  country?: string;
+}) {
+  const t = getEmailT(params.country || "");
+
+  await sendMail({
+    to: params.email,
+    subject: t.subject_subscription_confirmation,
+    html: subscriptionConfirmationHtml({
+      firstName: params.firstName,
+      productName: params.productName,
+      totalPerQuarter: params.totalPerQuarter,
+      shippingCost: params.shippingCost,
+      billingDates: params.billingDates,
       t,
     }),
   });
