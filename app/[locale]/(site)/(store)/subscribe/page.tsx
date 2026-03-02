@@ -674,7 +674,7 @@ export default function SubscribePage() {
                       label={ct("country")}
                       selectedKeys={new Set([address.country])}
                       onSelectionChange={(keys) => {
-                        const value = [...keys][0] as string;
+                        const value = Array.from(keys)[0] as string;
 
                         if (value) updateAddress("country")(value);
                       }}

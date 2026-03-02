@@ -1130,7 +1130,7 @@ export default function AccountPage() {
                     label={t("addresses_country")}
                     selectedKeys={new Set([addressForm.country])}
                     onSelectionChange={(keys) => {
-                      const value = [...keys][0] as string;
+                      const value = Array.from(keys)[0] as string;
 
                       if (value)
                         setAddressForm((f) => ({ ...f, country: value }));
@@ -1326,7 +1326,7 @@ export default function AccountPage() {
                           label={t("addresses_country")}
                           selectedKeys={new Set([addressForm.country])}
                           onSelectionChange={(keys) => {
-                            const value = [...keys][0] as string;
+                            const value = Array.from(keys)[0] as string;
 
                             if (value)
                               setAddressForm((f) => ({
