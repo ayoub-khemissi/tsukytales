@@ -231,11 +231,11 @@ export default function PaymentMethodsTab() {
                 className="bg-white dark:bg-gray-900 rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-wrap">
                     <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm shrink-0">
                       <FontAwesomeIcon icon={faCreditCard} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <span className="font-semibold text-text-brand dark:text-white capitalize">
                         {card.brand}
                       </span>
@@ -248,7 +248,12 @@ export default function PaymentMethodsTab() {
                       </span>
                     </div>
                     {card.is_default && (
-                      <Chip color="primary" size="sm" variant="flat">
+                      <Chip
+                        className="shrink-0"
+                        color="primary"
+                        size="sm"
+                        variant="flat"
+                      >
                         {t("payments_default")}
                       </Chip>
                     )}

@@ -1072,7 +1072,7 @@ export default function AccountPage() {
                       setAddressForm((f) => ({ ...f, street: v }))
                     }
                   />
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <Input
                       isRequired
                       label={t("addresses_zip_code")}
@@ -1267,7 +1267,7 @@ export default function AccountPage() {
                             setAddressForm((f) => ({ ...f, street: v }))
                           }
                         />
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <Input
                             isRequired
                             label={t("addresses_zip_code")}

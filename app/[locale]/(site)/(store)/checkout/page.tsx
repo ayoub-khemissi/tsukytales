@@ -416,7 +416,7 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold mb-8">{t("title")}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
           {/* Email for guests (hidden if logged in — email comes from session) */}
           {!session?.user && (
             <Card className="border border-divider">
@@ -626,7 +626,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Summary */}
-        <div>
+        <div className="order-1 lg:order-2">
           <Card className="border border-divider sticky top-24">
             <CardBody className="p-6 space-y-3">
               <h3 className="font-semibold text-lg">{t("order_summary")}</h3>
