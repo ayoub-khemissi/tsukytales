@@ -431,7 +431,11 @@ export default function AccountPage() {
       {/* ========== TABS ========== */}
       <div className="mb-8 overflow-x-auto scrollbar-hide -mx-6 px-6">
         <Tabs
-          classNames={{ tabList: "gap-2" }}
+          classNames={{
+            tabList: "gap-2",
+            tabContent:
+              "group-data-[selected=true]:!text-[#B5347A] dark:group-data-[selected=true]:!text-[#EDC8E0]",
+          }}
           color="primary"
           selectedKey={activeTab}
           variant="light"
