@@ -21,6 +21,7 @@ export async function sendOrderConfirmation(params: {
   email: string;
   orderId: number;
   items: OrderItem[];
+  shippingCost?: number;
   total: number;
 }) {
   await sendMail({
@@ -29,6 +30,7 @@ export async function sendOrderConfirmation(params: {
     html: orderConfirmationHtml({
       orderId: params.orderId,
       items: params.items,
+      shippingCost: params.shippingCost,
       total: params.total,
     }),
   });

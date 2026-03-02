@@ -11,12 +11,14 @@ interface OrderItem {
 interface OrderConfirmationParams {
   orderId: number;
   items: OrderItem[];
+  shippingCost?: number;
   total: number;
 }
 
 export function orderConfirmationHtml({
   orderId,
   items,
+  shippingCost,
   total,
 }: OrderConfirmationParams): string {
   const rows = items
@@ -46,6 +48,14 @@ export function orderConfirmationHtml({
         <h3 style="color: #581668; margin-top: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #e8d5eb; padding-bottom: 10px;">R&eacute;capitulatif</h3>
         <table style="width: 100%; border-collapse: collapse;">
           ${rows}
+          ${
+            shippingCost != null
+              ? `<tr>
+            <td style="padding: 12px 0; color: #4a3a4d; font-size: 15px; font-weight: 600;">Livraison</td>
+            <td style="padding: 12px 0; color: #581668; text-align: right; font-weight: 600; font-size: 15px;">${shippingCost === 0 ? "Offerte" : `${shippingCost}&euro;`}</td>
+          </tr>`
+              : ""
+          }
           <tr>
             <td style="padding: 20px 0 0 0; font-weight: 700; color: #2d0b35; font-size: 20px; border-top: 2px solid #e8d5eb;">Total</td>
             <td style="padding: 20px 0 0 0; font-weight: 700; color: #581668; text-align: right; font-size: 22px; border-top: 2px solid #e8d5eb;">${total}&euro;</td>

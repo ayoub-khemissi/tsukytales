@@ -132,6 +132,10 @@ export async function POST(req: NextRequest) {
             email: order.email,
             orderId: order.id,
             items: order.items || [],
+            shippingCost:
+              order.metadata?.shipping_cost != null
+                ? Number(order.metadata.shipping_cost)
+                : undefined,
             total: Number(order.total),
           })
           .catch((err) =>
@@ -448,6 +452,10 @@ export async function POST(req: NextRequest) {
               email: order.email,
               orderId: order.id,
               items: order.items || [],
+              shippingCost:
+                order.metadata?.shipping_cost != null
+                  ? Number(order.metadata.shipping_cost)
+                  : undefined,
               total: Number(order.total),
             })
             .catch((err) =>

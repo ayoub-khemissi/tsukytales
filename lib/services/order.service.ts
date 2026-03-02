@@ -373,6 +373,10 @@ export async function confirmOrder(orderId: number, customerId: number | null) {
       email: orderData.email,
       orderId: orderData.id,
       items: orderData.items,
+      shippingCost:
+        orderData.metadata?.shipping_cost != null
+          ? Number(orderData.metadata.shipping_cost)
+          : undefined,
       total: orderData.total,
     })
     .catch((err) =>
