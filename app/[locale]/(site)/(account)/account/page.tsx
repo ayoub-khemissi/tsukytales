@@ -1132,7 +1132,7 @@ export default function AccountPage() {
                       const code = items[0]?.key as string;
 
                       return code
-                        ? `${countryFlag(code)} ${countriesT(code)}`
+                        ? `${countriesT(code)} ${countryFlag(code)}`
                         : null;
                     }}
                     selectedKeys={[addressForm.country]}
@@ -1144,8 +1144,11 @@ export default function AccountPage() {
                     }}
                   >
                     {EUROPEAN_COUNTRIES.map((code) => (
-                      <SelectItem key={code}>
-                        {countryFlag(code)} {countriesT(code)}
+                      <SelectItem
+                        key={code}
+                        textValue={`${countriesT(code)} ${countryFlag(code)}`}
+                      >
+                        {countriesT(code)} {countryFlag(code)}
                       </SelectItem>
                     ))}
                   </Select>
@@ -1335,7 +1338,7 @@ export default function AccountPage() {
                             const code = items[0]?.key as string;
 
                             return code
-                              ? `${countryFlag(code)} ${countriesT(code)}`
+                              ? `${countriesT(code)} ${countryFlag(code)}`
                               : null;
                           }}
                           selectedKeys={[addressForm.country]}
@@ -1350,8 +1353,11 @@ export default function AccountPage() {
                           }}
                         >
                           {EUROPEAN_COUNTRIES.map((code) => (
-                            <SelectItem key={code}>
-                              {countryFlag(code)} {countriesT(code)}
+                            <SelectItem
+                              key={code}
+                              textValue={`${countriesT(code)} ${countryFlag(code)}`}
+                            >
+                              {countriesT(code)} {countryFlag(code)}
                             </SelectItem>
                           ))}
                         </Select>
