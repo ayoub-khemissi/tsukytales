@@ -127,6 +127,11 @@ export async function POST(req: NextRequest) {
         await invalidateMany("products:list", "admin:stats", "admin:financial");
 
         // Send confirmation email (fire-and-forget)
+        const orderCountry =
+          (order.metadata?.shipping_country as string) ||
+          (order.shipping_address as any)?.country ||
+          "FR";
+
         mailService
           .sendOrderConfirmation({
             email: order.email,
@@ -137,7 +142,7 @@ export async function POST(req: NextRequest) {
                 ? Number(order.metadata.shipping_cost)
                 : undefined,
             total: Number(order.total),
-            country: (order.metadata?.shipping_country as string) || "FR",
+            country: orderCountry,
           })
           .catch((err) =>
             logger.error(
@@ -252,12 +257,17 @@ export async function POST(req: NextRequest) {
 
         // Send refund confirmation email (fire-and-forget)
         if (isFullRefund) {
+          const refundCountry =
+            (order.metadata?.shipping_country as string) ||
+            (order.shipping_address as any)?.country ||
+            "FR";
+
           mailService
             .sendRefundConfirmation({
               email: order.email,
               orderId: order.id,
               total: Number(order.total),
-              country: (order.metadata?.shipping_country as string) || "FR",
+              country: refundCountry,
             })
             .catch((err) =>
               logger.error(
@@ -449,6 +459,11 @@ export async function POST(req: NextRequest) {
         const order = await orderRepository.findById(orderId);
 
         if (order) {
+          const subOrderCountry =
+            (order.metadata?.shipping_country as string) ||
+            (order.shipping_address as any)?.country ||
+            "FR";
+
           mailService
             .sendOrderConfirmation({
               email: order.email,
@@ -459,7 +474,7 @@ export async function POST(req: NextRequest) {
                   ? Number(order.metadata.shipping_cost)
                   : undefined,
               total: Number(order.total),
-              country: (order.metadata?.shipping_country as string) || "FR",
+              country: subOrderCountry,
             })
             .catch((err) =>
               logger.error(

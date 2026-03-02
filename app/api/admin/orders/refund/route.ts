@@ -105,12 +105,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   await invalidateMany("admin:stats", "admin:financial", "products:list");
 
   // Send refund confirmation email (fire-and-forget)
+  const refundCountry =
+    (order.metadata?.shipping_country as string) ||
+    (order.shipping_address as any)?.country ||
+    "FR";
+
   mailService
     .sendRefundConfirmation({
       email: order.email,
       orderId: order.id,
       total: Number(order.total),
-      country: (order.metadata?.shipping_country as string) || "FR",
+      country: refundCountry,
     })
     .catch((err) =>
       logger.error(
