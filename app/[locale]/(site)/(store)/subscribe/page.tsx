@@ -672,6 +672,13 @@ export default function SubscribePage() {
                     <Select
                       isRequired
                       label={ct("country")}
+                      renderValue={(items) => {
+                        const code = items[0]?.key as string;
+
+                        return code
+                          ? `${countryFlag(code)} ${countriesT(code)}`
+                          : null;
+                      }}
                       selectedKeys={[address.country]}
                       onSelectionChange={(keys) => {
                         const value = Array.from(keys)[0] as string;

@@ -595,6 +595,13 @@ export default function CheckoutPage() {
                     <Select
                       isRequired
                       label={t("country")}
+                      renderValue={(items) => {
+                        const code = items[0]?.key as string;
+
+                        return code
+                          ? `${countryFlag(code)} ${countriesT(code)}`
+                          : null;
+                      }}
                       selectedKeys={[address.country]}
                       onSelectionChange={(keys) => {
                         const value = Array.from(keys)[0] as string;
