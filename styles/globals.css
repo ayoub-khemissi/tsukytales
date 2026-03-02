@@ -18,9 +18,23 @@
   --color-accent-gold: #D4AF37;
   --color-accent-gold-light: #F2D479;
   --color-bg-brand: #FDF7FF;
-  --color-bg-dark: #0f0512;
+  --color-bg-dark: #1a1028;
   --color-text-brand: #3D0F48;
   --color-text-light: #4A4A4A;
+
+  --color-surface: #251538;
+  --color-surface-alt: #2e1d42;
+  --color-muted: #c4b5d4;
+  --color-muted-light: #d8cbeb;
+}
+
+/* ========== Dark mode overrides for Tailwind tokens ========== */
+:is(.dark) {
+  --color-primary: #c882dc;
+  --color-primary-light: #d9a5e8;
+  --color-primary-dark: #a86cbf;
+  --color-text-brand: #f0e6f6;
+  --color-text-light: #c4b5d4;
 }
 
 /* ========== Body — moving cloud layer (visible everywhere) ========== */
@@ -33,8 +47,8 @@ body {
 }
 
 :is(.dark) body {
-  background-color: #0f0512;
-  background-image: linear-gradient(rgba(15, 5, 18, 0.92), rgba(15, 5, 18, 0.92)), url("/assets/img/bg.png");
+  background-color: #1a1028;
+  background-image: linear-gradient(rgba(26, 16, 40, 0.92), rgba(26, 16, 40, 0.92)), url("/assets/img/bg.png");
 }
 
 @keyframes fadeInPage {
@@ -67,7 +81,15 @@ body {
 }
 
 :is(.dark) ::-webkit-scrollbar-track {
-  background: #0f0512;
+  background: #1a1028;
+}
+
+:is(.dark) ::-webkit-scrollbar-thumb {
+  background: #c882dc;
+}
+
+:is(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: #d9a5e8;
 }
 
 /* ========== Magic Text (animated gold gradient) ========== */
@@ -136,6 +158,23 @@ body {
   transform: scale(0.98);
 }
 
+:is(.dark) .btn-brand {
+  border-color: #c882dc !important;
+  background: linear-gradient(to right, #1a1028 50%, #c882dc 50%) !important;
+  background-size: 200% 100% !important;
+  background-position: 100% 0 !important;
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+}
+
+:is(.dark) .btn-brand:hover,
+:is(.dark) .btn-brand[data-hover="true"] {
+  background-position: 0% 0 !important;
+  color: #1a1028 !important;
+  -webkit-text-fill-color: #1a1028 !important;
+  box-shadow: 0 8px 25px rgba(200, 130, 220, 0.3);
+}
+
 /* ========== Brand Button — Outline / Secondary (transparent bg, violet text) ========== */
 .btn-brand-outline {
   text-transform: uppercase;
@@ -164,6 +203,23 @@ body {
 
 .btn-brand-outline:active {
   transform: scale(0.98);
+}
+
+:is(.dark) .btn-brand-outline {
+  border-color: #c882dc !important;
+  color: #c882dc !important;
+  -webkit-text-fill-color: #c882dc !important;
+  background: linear-gradient(to right, #c882dc 50%, transparent 50%) !important;
+  background-size: 200% 100% !important;
+  background-position: 100% 0 !important;
+}
+
+:is(.dark) .btn-brand-outline:hover,
+:is(.dark) .btn-brand-outline[data-hover="true"] {
+  background-position: 0% 0 !important;
+  color: #1a1028 !important;
+  -webkit-text-fill-color: #1a1028 !important;
+  box-shadow: 0 8px 25px rgba(200, 130, 220, 0.3);
 }
 
 /* ========== Scroll Reveal Animations ========== */
@@ -208,7 +264,7 @@ body {
 }
 
 :is(.dark) .bg-pattern-overlay {
-  background: linear-gradient(rgba(15, 5, 18, 0.92), rgba(15, 5, 18, 0.92)), url("/assets/img/bg.png");
+  background: linear-gradient(rgba(26, 16, 40, 0.92), rgba(26, 16, 40, 0.92)), url("/assets/img/bg.png");
   background-size: 400px;
 }
 
@@ -221,6 +277,11 @@ body {
   transform: translateY(-15px) scale(1.02);
   box-shadow: 0 30px 60px rgba(88, 22, 104, 0.15);
   border-color: #581668;
+}
+
+:is(.dark) .step-card:hover {
+  box-shadow: 0 30px 60px rgba(200, 130, 220, 0.12);
+  border-color: #c882dc;
 }
 
 .step-card .step-icon {
@@ -249,8 +310,9 @@ body {
 }
 
 :is(.dark) .glass {
-  background: rgba(45, 18, 54, 0.95);
-  border-color: rgba(255, 183, 197, 0.2);
+  background: rgba(55, 30, 70, 0.88);
+  border-color: rgba(180, 150, 210, 0.15);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
 /* ========== Navbar Shrink ========== */
@@ -348,8 +410,8 @@ body {
 }
 
 :is(.dark) .admin-glass {
-  background: rgba(45, 18, 54, 0.92);
-  border-color: rgba(212, 175, 55, 0.12);
+  background: rgba(37, 21, 56, 0.92);
+  border-color: rgba(180, 150, 210, 0.12);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
@@ -372,7 +434,7 @@ body {
 }
 
 :is(.dark) .admin-bg-pattern {
-  background: linear-gradient(rgba(15, 5, 18, 0.97), rgba(15, 5, 18, 0.97)), url("/assets/img/bg.png");
+  background: linear-gradient(rgba(26, 16, 40, 0.97), rgba(26, 16, 40, 0.97)), url("/assets/img/bg.png");
   background-size: auto, 300px;
 }
 

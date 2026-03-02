@@ -206,11 +206,11 @@ export default function PaymentMethodsTab() {
       )}
 
       {cards.length === 0 && !showForm ? (
-        <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] text-center px-5 py-12 sm:px-8 sm:py-16">
+        <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] text-center px-5 py-12 sm:px-8 sm:py-16">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl mx-auto mb-4">
             <FontAwesomeIcon icon={faCreditCard} />
           </div>
-          <p className="text-text-light dark:text-gray-400 mb-4">
+          <p className="text-text-light dark:text-muted mb-4">
             {t("payments_empty")}
           </p>
           <Button
@@ -228,7 +228,7 @@ export default function PaymentMethodsTab() {
             .map((card) => (
               <div
                 key={card.id}
-                className="bg-white dark:bg-gray-900 rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
+                className="bg-white dark:bg-surface rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-wrap">
@@ -239,10 +239,10 @@ export default function PaymentMethodsTab() {
                       <span className="font-semibold text-text-brand dark:text-white capitalize">
                         {card.brand}
                       </span>
-                      <span className="text-text-light dark:text-gray-400 ml-2">
+                      <span className="text-text-light dark:text-muted ml-2">
                         ****{card.last4}
                       </span>
-                      <span className="text-text-light dark:text-gray-400 ml-2 text-sm">
+                      <span className="text-text-light dark:text-muted ml-2 text-sm">
                         {String(card.exp_month).padStart(2, "0")}/
                         {card.exp_year}
                       </span>
@@ -285,7 +285,7 @@ export default function PaymentMethodsTab() {
             ))}
 
           {showForm && clientSecret ? (
-            <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+            <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10">
               <h3 className="font-heading italic text-lg font-bold text-text-brand dark:text-white mb-4">
                 {t("payments_add")}
               </h3>

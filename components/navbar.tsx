@@ -22,10 +22,10 @@ import {
 import { Divider } from "@heroui/divider";
 import { useTranslations } from "next-intl";
 import { useSession, signOut } from "next-auth/react";
-import Image from "next/image";
 
 import { Link } from "@/i18n/navigation";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { ThemedLogo } from "@/components/themed-logo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { useCart } from "@/lib/store/cart-context";
 import { CartIcon, UserIcon } from "@/components/icons";
@@ -45,7 +45,7 @@ export const Navbar = () => {
     <HeroUINavbar
       shouldHideOnScroll
       classNames={{
-        base: "bg-background/90 backdrop-blur-[15px] border-b border-[rgba(88,22,104,0.05)] h-[80px] lg:h-[100px]",
+        base: "bg-background/90 backdrop-blur-[15px] border-b border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.15)] h-[80px] lg:h-[100px]",
       }}
       isMenuOpen={isMenuOpen}
       maxWidth="xl"
@@ -68,12 +68,12 @@ export const Navbar = () => {
       {/* Center: Logo */}
       <NavbarBrand className="flex justify-center">
         <Link className="flex items-center" href="/" onClick={closeMenu}>
-          <Image
+          <ThemedLogo
             priority
             alt="Tsuky Tales"
             className="object-contain"
             height={185}
-            src="/assets/img/logo.svg"
+            variant="logo"
             width={185}
           />
         </Link>

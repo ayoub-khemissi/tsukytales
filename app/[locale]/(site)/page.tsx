@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@heroui/button";
-import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEdit,
@@ -13,6 +12,7 @@ import {
 import { Link } from "@/i18n/navigation";
 import { ChevronDownIcon } from "@/components/icons";
 import { InstagramCarousel } from "@/components/instagram-carousel";
+import { ThemedLogo } from "@/components/themed-logo";
 import { useScrollReveal } from "@/lib/hooks/use-scroll-reveal";
 
 const STEP_ICONS = [faEdit, faBoxOpen, faBookReader] as const;
@@ -37,16 +37,16 @@ export default function HomePage() {
 
             {/* Hero Logo */}
             <div className="flex justify-center -mb-2 mt-4">
-              <Image
+              <ThemedLogo
                 priority
                 alt="Tsuky Tales"
                 className="object-contain"
                 height={200}
-                src="/assets/img/hero-logo.svg"
                 style={{
                   animation: "float 6s ease-in-out infinite",
                   transformOrigin: "center bottom",
                 }}
+                variant="hero-logo"
                 width={200}
               />
             </div>
@@ -123,7 +123,7 @@ export default function HomePage() {
                   className="step-card-reveal pt-5"
                   style={{ transitionDelay: `${index * 0.15}s` }}
                 >
-                  <div className="step-card relative bg-white dark:bg-gray-900 rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 pb-2">
+                  <div className="step-card relative bg-white dark:bg-surface rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 pb-2">
                     {/* Step number badge */}
                     <span className="absolute -top-[17px] left-1/2 -translate-x-1/2 z-10 w-[35px] h-[35px] rounded-full bg-gradient-to-br from-accent-gold to-accent-gold-light flex items-center justify-center text-white font-bold text-sm shadow-md">
                       {step}
@@ -144,18 +144,18 @@ export default function HomePage() {
                     </h3>
 
                     {/* Bubble */}
-                    <div className="mx-4 sm:mx-6 mt-4 p-4 sm:p-5 bg-bg-brand dark:bg-gray-800 rounded-[20px] sm:rounded-[30px] min-h-[140px] sm:min-h-[180px] flex items-center justify-center border border-primary/5">
-                      <p className="text-xs text-text-light dark:text-gray-300 text-center leading-relaxed uppercase tracking-[1px]">
+                    <div className="mx-4 sm:mx-6 mt-4 p-4 sm:p-5 bg-bg-brand dark:bg-surface-alt rounded-[20px] sm:rounded-[30px] min-h-[140px] sm:min-h-[180px] flex items-center justify-center border border-primary/5">
+                      <p className="text-xs text-text-light dark:text-muted-light text-center leading-relaxed uppercase tracking-[1px]">
                         {t(`how_step${step}_bubble`)}
                       </p>
                     </div>
 
                     {/* Footer */}
-                    <div className="px-6 py-6 mt-4 border-t border-gray-100 dark:border-gray-800">
+                    <div className="px-6 py-6 mt-4 border-t border-gray-100 dark:border-surface-alt">
                       <h4 className="font-heading font-semibold text-lg italic text-text-brand dark:text-white">
                         {t(`how_step${step}_footer_title`)}
                       </h4>
-                      <p className="text-sm text-text-light dark:text-gray-400 mt-1">
+                      <p className="text-sm text-text-light dark:text-muted mt-1">
                         {t(`how_step${step}_footer_desc`)}
                       </p>
                     </div>

@@ -59,7 +59,7 @@ export default function OrderTimeline({ history }: OrderTimelineProps) {
             <div key={i} className="relative flex gap-3 items-start">
               {/* Dot */}
               <div
-                className={`absolute -left-6 top-1 w-[11px] h-[11px] rounded-full border-2 border-white dark:border-zinc-900 ${dotColor} shrink-0 z-10`}
+                className={`absolute -left-6 top-1 w-[11px] h-[11px] rounded-full border-2 border-white dark:border-[#1a1028] ${dotColor} shrink-0 z-10`}
               />
 
               <div className="min-w-0">

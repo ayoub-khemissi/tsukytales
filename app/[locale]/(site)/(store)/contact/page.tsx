@@ -102,7 +102,7 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-24">
       <div
-        className="relative w-full max-w-[700px] bg-white dark:bg-gray-900 rounded-[40px] shadow-lg border border-[rgba(88,22,104,0.05)] px-6 py-10 sm:px-12 sm:py-14 overflow-hidden"
+        className="relative w-full max-w-[700px] bg-white dark:bg-surface rounded-[40px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-6 py-10 sm:px-12 sm:py-14 overflow-hidden"
         style={{ animation: "fadeInUp 0.8s ease both" }}
       >
         {/* Top gradient accent bar */}
@@ -118,13 +118,13 @@ export default function ContactPage() {
         </h1>
 
         {/* Subtitle */}
-        <p className="text-center text-text-light dark:text-gray-400 mb-10 text-[1.05rem]">
+        <p className="text-center text-text-light dark:text-muted mb-10 text-[1.05rem]">
           {t("subtitle")}
         </p>
 
         {/* Success message */}
         {status === "success" ? (
-          <div className="bg-bg-brand dark:bg-gray-800 rounded-[20px] border border-primary/10 p-8 text-center">
+          <div className="bg-bg-brand dark:bg-surface-alt rounded-[20px] border border-primary/10 p-8 text-center">
             <FontAwesomeIcon
               className="text-primary text-3xl mb-4 block mx-auto"
               icon={faEnvelopeOpenText}
@@ -132,7 +132,7 @@ export default function ContactPage() {
             <p className="font-semibold text-primary dark:text-white text-lg">
               {t("success_title")}
             </p>
-            <p className="text-text-light dark:text-gray-400 text-sm mt-1">
+            <p className="text-text-light dark:text-muted text-sm mt-1">
               {t("success_desc")}
             </p>
           </div>
@@ -193,18 +193,18 @@ export default function ContactPage() {
 
             {/* Attachment */}
             <div>
-              <label className="block text-sm font-medium text-text-light dark:text-gray-400 mb-1.5">
+              <label className="block text-sm font-medium text-text-light dark:text-muted mb-1.5">
                 {t("attachment")}{" "}
                 <span className="text-xs">({t("attachment_hint")})</span>
               </label>
 
               {attachment ? (
-                <div className="flex items-center gap-3 bg-bg-brand dark:bg-gray-800 rounded-xl px-4 py-3 border border-primary/10">
+                <div className="flex items-center gap-3 bg-bg-brand dark:bg-surface-alt rounded-xl px-4 py-3 border border-primary/10">
                   <FontAwesomeIcon
                     className="text-primary text-sm"
                     icon={faPaperclip}
                   />
-                  <span className="text-sm text-text-light dark:text-gray-300 truncate flex-1">
+                  <span className="text-sm text-text-light dark:text-muted-light truncate flex-1">
                     {attachment.name}{" "}
                     <span className="text-xs opacity-60">
                       ({(attachment.size / 1024 / 1024).toFixed(2)} MB)
@@ -220,7 +220,7 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <button
-                  className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-primary/20 hover:border-primary/40 rounded-xl px-4 py-3 text-sm text-text-light dark:text-gray-400 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-primary/20 hover:border-primary/40 rounded-xl px-4 py-3 text-sm text-text-light dark:text-muted transition-colors cursor-pointer"
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                 >

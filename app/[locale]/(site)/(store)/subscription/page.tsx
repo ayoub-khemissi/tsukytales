@@ -100,7 +100,7 @@ export default function SubscriptionPage() {
               </span>
               {t.has("hero_title_suffix") && <> {t("hero_title_suffix")}</>}
             </h1>
-            <p className="text-base sm:text-[1.2rem] font-normal leading-relaxed max-w-[600px] mx-auto text-primary dark:text-gray-300">
+            <p className="text-base sm:text-[1.2rem] font-normal leading-relaxed max-w-[600px] mx-auto text-primary dark:text-muted-light">
               {t("hero_subtitle")}
             </p>
           </div>
@@ -202,7 +202,7 @@ function SubscriptionCard({
   const upcomingDates = subscriptionDates.filter((d) => d > today).slice(0, 3);
 
   return (
-    <div className="step-card relative bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-full min-h-[550px] sm:min-h-[620px] px-5 pt-14 pb-8 sm:px-10 sm:pt-18 sm:pb-12">
+    <div className="step-card relative bg-white dark:bg-surface rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-full min-h-[550px] sm:min-h-[620px] px-5 pt-14 pb-8 sm:px-10 sm:pt-18 sm:pb-12">
       {/* Badge */}
       <span className="absolute top-5 left-5 z-10 bg-gradient-to-r from-primary to-primary-light text-white text-[0.7rem] font-semibold px-3 py-1 rounded-full">
         {t("badge_subscription")}
@@ -223,8 +223,8 @@ function SubscriptionCard({
       </div>
 
       {/* Description bubble */}
-      <div className="p-4 sm:p-6 bg-bg-brand dark:bg-gray-800 rounded-[20px] sm:rounded-[30px] flex items-center justify-center border border-primary/5 w-full flex-1">
-        <p className="text-[0.85rem] font-medium text-primary dark:text-gray-300 text-center leading-relaxed uppercase tracking-[1px]">
+      <div className="p-4 sm:p-6 bg-bg-brand dark:bg-surface-alt rounded-[20px] sm:rounded-[30px] flex items-center justify-center border border-primary/5 w-full flex-1">
+        <p className="text-[0.85rem] font-medium text-primary dark:text-muted-light text-center leading-relaxed uppercase tracking-[1px]">
           {t("card_sub_desc")}
         </p>
       </div>
@@ -236,14 +236,14 @@ function SubscriptionCard({
             {price.toFixed(2).replace(".", ",")}
             {common("currency")}
           </span>
-          <span className="text-text-light dark:text-gray-400 text-sm ml-1">
+          <span className="text-text-light dark:text-muted text-sm ml-1">
             {t("per_quarter")}
           </span>
         </div>
 
         {upcomingDates.length > 0 && (
           <div className="mb-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-text-light dark:text-gray-400 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-text-light dark:text-muted mb-2">
               <FontAwesomeIcon className="mr-1" icon={faCalendarAlt} />
               {t("billing_dates")}
             </p>
@@ -251,7 +251,7 @@ function SubscriptionCard({
               {upcomingDates.map((d) => (
                 <span
                   key={d}
-                  className="text-xs bg-bg-brand dark:bg-gray-800 text-primary dark:text-gray-300 px-3 py-1 rounded-full"
+                  className="text-xs bg-bg-brand dark:bg-surface-alt text-primary dark:text-muted-light px-3 py-1 rounded-full"
                 >
                   {new Date(d + "T00:00:00").toLocaleDateString(locale, {
                     day: "numeric",
@@ -320,7 +320,7 @@ function PreorderCard({
   const maxQty = Math.max(product.stock, 0);
 
   return (
-    <div className="step-card relative bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-full min-h-[550px] sm:min-h-[620px] px-5 pt-14 pb-8 sm:px-10 sm:pt-18 sm:pb-12">
+    <div className="step-card relative bg-white dark:bg-surface rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden flex flex-col h-full min-h-[550px] sm:min-h-[620px] px-5 pt-14 pb-8 sm:px-10 sm:pt-18 sm:pb-12">
       {/* Badge */}
       <span className="absolute top-5 left-5 z-10 bg-gradient-to-r from-accent-gold to-accent-gold-light text-white text-[0.7rem] font-semibold px-3 py-1 rounded-full">
         {common("preorder")}
@@ -348,8 +348,8 @@ function PreorderCard({
       </div>
 
       {/* Description bubble */}
-      <div className="p-4 sm:p-6 bg-bg-brand dark:bg-gray-800 rounded-[20px] sm:rounded-[30px] flex items-center justify-center border border-primary/5 w-full flex-1">
-        <p className="text-[0.85rem] font-medium text-primary dark:text-gray-300 text-center leading-relaxed uppercase tracking-[1px]">
+      <div className="p-4 sm:p-6 bg-bg-brand dark:bg-surface-alt rounded-[20px] sm:rounded-[30px] flex items-center justify-center border border-primary/5 w-full flex-1">
+        <p className="text-[0.85rem] font-medium text-primary dark:text-muted-light text-center leading-relaxed uppercase tracking-[1px]">
           {t("preorder_desc")}
         </p>
       </div>
@@ -416,7 +416,7 @@ function PreorderCard({
         ) : (
           <Button
             isDisabled
-            className="btn-brand bg-default-200 dark:bg-gray-700 font-semibold w-full text-default-500 dark:text-gray-400"
+            className="btn-brand bg-default-200 dark:bg-surface-alt font-semibold w-full text-default-500 dark:text-muted"
             size="lg"
           >
             {t("coming_soon")}
@@ -458,7 +458,7 @@ function DetailSection({
   const price = product.subscription_price ?? product.price;
 
   return (
-    <div className="step-card bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden h-full">
+    <div className="step-card bg-white dark:bg-surface rounded-[24px] sm:rounded-[40px] shadow-lg border border-white/50 dark:border-white/10 overflow-hidden h-full">
       <div className="grid grid-cols-1 md:grid-cols-3 h-full">
         {/* Gallery — 1/3 */}
         {gallery.length > 0 && (
@@ -519,7 +519,7 @@ function DetailSection({
               {common("currency")}
             </span>
             {!!product.subscription_price && (
-              <span className="text-text-light dark:text-gray-400 text-sm ml-1">
+              <span className="text-text-light dark:text-muted text-sm ml-1">
                 {t("per_quarter")}
               </span>
             )}
@@ -529,7 +529,7 @@ function DetailSection({
               className="overflow-y-auto min-h-0 flex-1"
               style={{ scrollbarWidth: "thin" }}
             >
-              <p className="text-text-light dark:text-gray-400 leading-relaxed whitespace-pre-line">
+              <p className="text-text-light dark:text-muted leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
             </div>

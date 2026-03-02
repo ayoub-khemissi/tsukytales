@@ -75,7 +75,7 @@ export function InstagramCarousel() {
           {t("instagram_universe")}{" "}
           <span className="magic-text">Instagram</span>
         </h2>
-        <p className="mt-3 text-text-light dark:text-gray-400 max-w-xl mx-auto">
+        <p className="mt-3 text-text-light dark:text-muted max-w-xl mx-auto">
           {t("instagram_desc")}
         </p>
       </div>
@@ -84,7 +84,7 @@ export function InstagramCarousel() {
       <div className="relative max-w-7xl mx-auto">
         <button
           aria-label="Scroll left"
-          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-[44px] h-[44px] rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md items-center justify-center hover:bg-primary hover:text-white hover:scale-110 transition-all"
+          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-[44px] h-[44px] rounded-full bg-white/80 dark:bg-surface-alt/80 shadow-md items-center justify-center hover:bg-primary hover:text-white hover:scale-110 transition-all"
           onClick={() => scroll("left")}
         >
           <ChevronLeftIcon size={20} />
@@ -105,7 +105,7 @@ export function InstagramCarousel() {
             : posts.map((post) => (
                 <a
                   key={post.id}
-                  className="flex-shrink-0 w-[280px] h-[280px] rounded-2xl overflow-hidden relative group instagram-card-hover border border-[rgba(88,22,104,0.05)] shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
+                  className="flex-shrink-0 w-[280px] h-[280px] rounded-2xl overflow-hidden relative group instagram-card-hover border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
                   href={post.permalink}
                   rel="noopener noreferrer"
                   target="_blank"
@@ -158,7 +158,7 @@ export function InstagramCarousel() {
 
         <button
           aria-label="Scroll right"
-          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-[44px] h-[44px] rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md items-center justify-center hover:bg-primary hover:text-white hover:scale-110 transition-all"
+          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-[44px] h-[44px] rounded-full bg-white/80 dark:bg-surface-alt/80 shadow-md items-center justify-center hover:bg-primary hover:text-white hover:scale-110 transition-all"
           onClick={() => scroll("right")}
         >
           <ChevronRightIcon size={20} />

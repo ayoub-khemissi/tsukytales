@@ -411,7 +411,7 @@ export default function AccountPage() {
                 gold: (chunks) => <span className="magic-text">{chunks}</span>,
               })}
             </h1>
-            <p className="text-sm text-text-light dark:text-gray-400">
+            <p className="text-sm text-text-light dark:text-muted">
               {profile?.email || session?.user?.email}
             </p>
           </div>
@@ -461,7 +461,7 @@ export default function AccountPage() {
       <div className="w-full">
         {/* Profile */}
         {activeTab === "profile" && (
-          <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+          <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10">
             <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white mb-6">
               {t("profile_title")}
             </h2>
@@ -522,11 +522,11 @@ export default function AccountPage() {
         {activeTab === "orders" && (
           <div className="space-y-4">
             {orders.length === 0 ? (
-              <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] text-center px-5 py-12 sm:px-8 sm:py-16">
+              <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] text-center px-5 py-12 sm:px-8 sm:py-16">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl mx-auto mb-4">
                   <FontAwesomeIcon icon={faBoxOpen} />
                 </div>
-                <p className="text-text-light dark:text-gray-400">
+                <p className="text-text-light dark:text-muted">
                   {t("orders_empty")}
                 </p>
               </div>
@@ -534,7 +534,7 @@ export default function AccountPage() {
               orders.map((order) => (
                 <div
                   key={order.id}
-                  className="bg-white dark:bg-gray-900 rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
+                  className="bg-white dark:bg-surface rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                     <span className="font-heading font-semibold text-text-brand dark:text-white">
@@ -566,12 +566,12 @@ export default function AccountPage() {
                       </Chip>
                     </div>
                   </div>
-                  <p className="text-sm text-text-light dark:text-gray-400 mb-2">
+                  <p className="text-sm text-text-light dark:text-muted mb-2">
                     {t("order_date", {
                       date: new Date(order.createdAt).toLocaleDateString(),
                     })}
                   </p>
-                  <div className="text-sm text-text-brand dark:text-gray-300 mb-3">
+                  <div className="text-sm text-text-brand dark:text-muted-light mb-3">
                     {order.items?.map((item, i) => (
                       <span key={i}>
                         {item.name} x{item.quantity}
@@ -580,7 +580,7 @@ export default function AccountPage() {
                     ))}
                   </div>
                   {order.shipping_address && (
-                    <div className="flex items-start gap-2 text-sm text-text-light dark:text-gray-400 mb-3">
+                    <div className="flex items-start gap-2 text-sm text-text-light dark:text-muted mb-3">
                       <FontAwesomeIcon
                         className="mt-0.5 text-xs"
                         icon={faTruck}
@@ -645,7 +645,7 @@ export default function AccountPage() {
           <div className="space-y-4">
             {!subscription?.active ? (
               <>
-                <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+                <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                       <FontAwesomeIcon icon={faSyncAlt} />
@@ -660,7 +660,7 @@ export default function AccountPage() {
                   {subscription?.product_name && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                       <div>
-                        <p className="text-sm text-text-light dark:text-gray-400">
+                        <p className="text-sm text-text-light dark:text-muted">
                           {t("subscription_product")}
                         </p>
                         <p className="font-semibold text-text-brand dark:text-white">
@@ -669,7 +669,7 @@ export default function AccountPage() {
                       </div>
                       {subscription.product_price != null && (
                         <div>
-                          <p className="text-sm text-text-light dark:text-gray-400">
+                          <p className="text-sm text-text-light dark:text-muted">
                             {t("subscription_price_label")}
                           </p>
                           <p className="font-semibold text-primary">
@@ -695,7 +695,7 @@ export default function AccountPage() {
             ) : (
               <>
                 {/* Subscription info card */}
-                <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+                <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                       <FontAwesomeIcon icon={faSyncAlt} />
@@ -712,7 +712,7 @@ export default function AccountPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     {!!subscription.is_preorder && (
                       <div>
-                        <p className="text-sm text-text-light dark:text-gray-400">
+                        <p className="text-sm text-text-light dark:text-muted">
                           {t("subscription_product")}
                         </p>
                         <p className="font-semibold text-text-brand dark:text-white">
@@ -721,7 +721,7 @@ export default function AccountPage() {
                       </div>
                     )}
                     <div>
-                      <p className="text-sm text-text-light dark:text-gray-400">
+                      <p className="text-sm text-text-light dark:text-muted">
                         {t("subscription_price_label")}
                       </p>
                       <p className="font-semibold text-primary">
@@ -736,7 +736,7 @@ export default function AccountPage() {
                   {/* Upcoming dates */}
                   {subscription.phases && subscription.phases.length > 0 && (
                     <div className="mb-6">
-                      <p className="text-sm text-text-light dark:text-gray-400 mb-3">
+                      <p className="text-sm text-text-light dark:text-muted mb-3">
                         <FontAwesomeIcon
                           className="mr-2"
                           icon={faCalendarAlt}
@@ -753,7 +753,7 @@ export default function AccountPage() {
                           return (
                             <div
                               key={phase.start}
-                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-bg-brand dark:bg-gray-800"
+                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-bg-brand dark:bg-surface-alt"
                             >
                               <div className="flex items-center gap-2">
                                 <span className="font-medium text-text-brand dark:text-white">
@@ -846,7 +846,7 @@ export default function AccountPage() {
                     subscription.product_image ||
                     subscription.product_description
                   ) && (
-                    <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] overflow-hidden">
+                    <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] overflow-hidden">
                       <div className="grid grid-cols-1 md:grid-cols-3">
                         {subscription.product_image && (
                           <div className="relative md:col-span-1 aspect-square">
@@ -870,7 +870,7 @@ export default function AccountPage() {
                             {subscription.product_name}
                           </h3>
                           {subscription.product_description && (
-                            <p className="text-text-light dark:text-gray-400 leading-relaxed whitespace-pre-line">
+                            <p className="text-text-light dark:text-muted leading-relaxed whitespace-pre-line">
                               {subscription.product_description}
                             </p>
                           )}
@@ -883,7 +883,7 @@ export default function AccountPage() {
 
             {/* Payment receipts (Stripe invoices) */}
             {subscription && (subscription.invoices?.length ?? 0) > 0 && (
-              <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+              <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10">
                 <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white mb-6">
                   {t("subscription_invoices_title")}
                 </h2>
@@ -891,7 +891,7 @@ export default function AccountPage() {
                   {subscription.invoices!.map((inv, i) => (
                     <div
                       key={i}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-bg-brand dark:bg-gray-800"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-bg-brand dark:bg-surface-alt"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm shrink-0">
@@ -905,7 +905,7 @@ export default function AccountPage() {
                               year: "numeric",
                             })}
                           </span>
-                          <span className="text-sm text-text-light dark:text-gray-400 ml-2">
+                          <span className="text-sm text-text-light dark:text-muted ml-2">
                             {inv.amount.toFixed(2).replace(".", ",")}
                             {common("currency")}
                           </span>
@@ -947,7 +947,7 @@ export default function AccountPage() {
 
             {/* Subscription order history */}
             {subscription && (subscription.history?.length ?? 0) > 0 && (
-              <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] px-5 py-6 sm:px-10 sm:py-10">
+              <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10">
                 <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white mb-6">
                   {t("subscription_history_title")}
                 </h2>
@@ -955,7 +955,7 @@ export default function AccountPage() {
                   {subscription.history!.map((order) => (
                     <div
                       key={order.id}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-bg-brand dark:bg-gray-800"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-2xl bg-bg-brand dark:bg-surface-alt"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm shrink-0">
@@ -965,7 +965,7 @@ export default function AccountPage() {
                           <span className="font-medium text-text-brand dark:text-white">
                             {t("subscription_history_order", { id: order.id })}
                           </span>
-                          <span className="text-sm text-text-light dark:text-gray-400 ml-2">
+                          <span className="text-sm text-text-light dark:text-muted ml-2">
                             {new Date(order.createdAt).toLocaleDateString(
                               "fr-FR",
                               {
@@ -1018,7 +1018,7 @@ export default function AccountPage() {
             )}
 
             {creatingAddress && (
-              <div className="bg-white dark:bg-gray-900 rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] px-4 py-5 sm:px-8 sm:py-6">
+              <div className="bg-white dark:bg-surface rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-4 py-5 sm:px-8 sm:py-6">
                 <h3 className="font-heading font-semibold text-text-brand dark:text-white mb-4">
                   {t("addresses_add")}
                 </h3>
@@ -1150,11 +1150,11 @@ export default function AccountPage() {
             )}
 
             {addresses.length === 0 && !creatingAddress ? (
-              <div className="bg-white dark:bg-gray-900 rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] text-center px-5 py-12 sm:px-8 sm:py-16">
+              <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] text-center px-5 py-12 sm:px-8 sm:py-16">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl mx-auto mb-4">
                   <FontAwesomeIcon icon={faMapMarkerAlt} />
                 </div>
-                <p className="text-text-light dark:text-gray-400">
+                <p className="text-text-light dark:text-muted">
                   {t("addresses_empty")}
                 </p>
               </div>
@@ -1163,7 +1163,7 @@ export default function AccountPage() {
                 {addresses.map((addr) => (
                   <div
                     key={addr.id}
-                    className="bg-white dark:bg-gray-900 rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
+                    className="bg-white dark:bg-surface rounded-[20px] sm:rounded-[24px] shadow-md border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg px-4 py-5 sm:px-8 sm:py-6"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
                       <div className="flex items-center gap-3">
@@ -1344,7 +1344,7 @@ export default function AccountPage() {
                         </div>
                       </Form>
                     ) : (
-                      <p className="text-sm text-text-light dark:text-gray-400 sm:ml-12">
+                      <p className="text-sm text-text-light dark:text-muted sm:ml-12">
                         {addr.first_name} {addr.last_name}
                         <br />
                         {addr.street}

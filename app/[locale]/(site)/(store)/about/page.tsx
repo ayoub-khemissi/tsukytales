@@ -45,7 +45,7 @@ export default function AboutPage() {
               {t("hero_title_2")}{" "}
               <span className="magic-text">{t("hero_title_accent")}</span>
             </h1>
-            <p className="text-[1rem] sm:text-[1.2rem] md:text-[1.4rem] font-medium max-w-[700px] mx-auto text-primary dark:text-gray-300">
+            <p className="text-[1rem] sm:text-[1.2rem] md:text-[1.4rem] font-medium max-w-[700px] mx-auto text-primary dark:text-muted-light">
               {t("hero_desc")}
             </p>
           </div>
@@ -109,10 +109,10 @@ export default function AboutPage() {
                   {t("story_lead").slice(1)}
                 </p>
               </div>
-              <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-gray-300 mb-8 clear-left">
+              <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-muted-light mb-8 clear-left">
                 {t("story_p1")}
               </p>
-              <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-gray-300">
+              <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-muted-light">
                 {t("story_p2")}
               </p>
             </div>
@@ -155,7 +155,7 @@ export default function AboutPage() {
             {VALUES.map((v, i) => (
               <div
                 key={v.key}
-                className={`group bg-white dark:bg-gray-900 rounded-[30px] text-center shadow-md border border-[rgba(88,22,104,0.05)] relative transition-all duration-500 ease-out hover:-translate-y-5 hover:shadow-lg px-5 pb-8 pt-14 sm:px-10 sm:pb-16 sm:pt-20 md:px-12 md:pb-20 md:pt-[5.5rem] mt-10${i === VALUES.length - 1 ? " sm:col-span-2 sm:max-w-[50%] sm:mx-auto lg:col-span-1 lg:max-w-none" : ""}`}
+                className={`group bg-white dark:bg-surface rounded-[30px] text-center shadow-md border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] relative transition-all duration-500 ease-out hover:-translate-y-5 hover:shadow-lg px-5 pb-8 pt-14 sm:px-10 sm:pb-16 sm:pt-20 md:px-12 md:pb-20 md:pt-[5.5rem] mt-10${i === VALUES.length - 1 ? " sm:col-span-2 sm:max-w-[50%] sm:mx-auto lg:col-span-1 lg:max-w-none" : ""}`}
               >
                 {/* Icon circle attached to card top */}
                 <div className="absolute -top-[35px] left-1/2 -translate-x-1/2 z-10 w-[70px] h-[70px] rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary text-2xl transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:rotate-[10deg]">
@@ -164,7 +164,7 @@ export default function AboutPage() {
                 <h3 className="font-heading italic text-[1.5rem] font-bold text-text-brand dark:text-white mb-8">
                   {t(`value_${v.key}`)}
                 </h3>
-                <p className="text-text-light dark:text-gray-400 leading-loose">
+                <p className="text-text-light dark:text-muted leading-loose">
                   {t(`value_${v.key}_text`)}
                 </p>
               </div>

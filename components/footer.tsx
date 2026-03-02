@@ -2,9 +2,9 @@
 
 import { Divider } from "@heroui/divider";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 import { Link } from "@/i18n/navigation";
+import { ThemedLogo } from "@/components/themed-logo";
 import { InstagramIcon, XTwitterIcon, TiktokIcon } from "@/components/icons";
 
 export function Footer() {
@@ -16,11 +16,11 @@ export function Footer() {
         {/* Logo centered */}
         <div className="flex justify-center mb-6">
           <Link href="/">
-            <Image
+            <ThemedLogo
               alt="Tsuky Tales"
               className="object-contain"
               height={130}
-              src="/assets/img/logo.svg"
+              variant="logo"
               width={130}
             />
           </Link>
@@ -60,19 +60,19 @@ export function Footer() {
         {/* Legal links */}
         <div className="flex flex-wrap justify-center gap-6 mb-6">
           <Link
-            className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-gray-400 hover:text-primary transition-colors"
+            className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-muted hover:text-primary transition-colors"
             href="/terms"
           >
             {t("terms")}
           </Link>
           <Link
-            className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-gray-400 hover:text-primary transition-colors"
+            className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-muted hover:text-primary transition-colors"
             href="/legal"
           >
             {t("legal")}
           </Link>
           <Link
-            className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-gray-400 hover:text-primary transition-colors"
+            className="text-[0.8rem] uppercase tracking-[1.5px] font-medium text-text-light dark:text-muted hover:text-primary transition-colors"
             href="/privacy"
           >
             {t("privacy")}
