@@ -244,6 +244,8 @@ export default function BrandingPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("social");
   const [customWidth, setCustomWidth] = useState(1200);
   const [customHeight, setCustomHeight] = useState(630);
+  const [inputWidth, setInputWidth] = useState("1200");
+  const [inputHeight, setInputHeight] = useState("630");
   const [locked, setLocked] = useState(false);
 
   const resizableRef = useRef<HTMLDivElement>(null);
@@ -264,6 +266,8 @@ export default function BrandingPage() {
         if (w > 0 && h > 0) {
           setCustomWidth(w);
           setCustomHeight(h);
+          setInputWidth(String(w));
+          setInputHeight(String(h));
         }
       }
     });
@@ -299,19 +303,33 @@ export default function BrandingPage() {
     return () => clearTimeout(timer);
   }, [customWidth, customHeight]);
 
-  const clamp = (v: number) => Math.max(100, Math.min(5000, v));
+  const clamp = (v: number) => Math.max(1, Math.min(5000, v));
 
-  const handleWidthChange = useCallback((val: string) => {
-    const n = parseInt(val, 10);
+  const commitWidth = useCallback(() => {
+    const n = parseInt(inputWidth, 10);
 
-    if (!isNaN(n)) setCustomWidth(clamp(n));
-  }, []);
+    if (!isNaN(n) && n > 0) {
+      const clamped = clamp(n);
 
-  const handleHeightChange = useCallback((val: string) => {
-    const n = parseInt(val, 10);
+      setCustomWidth(clamped);
+      setInputWidth(String(clamped));
+    } else {
+      setInputWidth(String(customWidth));
+    }
+  }, [inputWidth, customWidth]);
 
-    if (!isNaN(n)) setCustomHeight(clamp(n));
-  }, []);
+  const commitHeight = useCallback(() => {
+    const n = parseInt(inputHeight, 10);
+
+    if (!isNaN(n) && n > 0) {
+      const clamped = clamp(n);
+
+      setCustomHeight(clamped);
+      setInputHeight(String(clamped));
+    } else {
+      setInputHeight(String(customHeight));
+    }
+  }, [inputHeight, customHeight]);
 
   const categoryTranslationKey: Record<Category, string> = {
     social: "preset_social",
@@ -437,21 +455,21 @@ export default function BrandingPage() {
             className="flex-1"
             endContent={<span className="text-default-400 text-xs">px</span>}
             label={t("width")}
-            max={5000}
-            min={100}
             type="number"
-            value={String(customWidth)}
-            onValueChange={handleWidthChange}
+            value={inputWidth}
+            onBlur={commitWidth}
+            onKeyDown={(e) => e.key === "Enter" && commitWidth()}
+            onValueChange={setInputWidth}
           />
           <Input
             className="flex-1"
             endContent={<span className="text-default-400 text-xs">px</span>}
             label={t("height")}
-            max={5000}
-            min={100}
             type="number"
-            value={String(customHeight)}
-            onValueChange={handleHeightChange}
+            value={inputHeight}
+            onBlur={commitHeight}
+            onKeyDown={(e) => e.key === "Enter" && commitHeight()}
+            onValueChange={setInputHeight}
           />
         </div>
 
@@ -470,11 +488,10 @@ export default function BrandingPage() {
         <div className="flex justify-center overflow-auto pb-4">
           <div
             ref={resizableRef}
-            className="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-default-300"
+            className="relative flex flex-col items-center justify-center border border-primary"
             style={{
               width: customWidth,
               height: customHeight,
-              maxWidth: "100%",
               maxHeight: 800,
               resize: locked ? "none" : "both",
               overflow: "hidden",

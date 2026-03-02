@@ -1023,7 +1023,7 @@ export default function AccountPage() {
                   {t("addresses_add")}
                 </h3>
                 <Form
-                  className="space-y-4 w-full overflow-hidden"
+                  className="w-full flex flex-col items-stretch space-y-5"
                   validationBehavior="native"
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -1032,86 +1032,82 @@ export default function AccountPage() {
                 >
                   <Input
                     isRequired
+                    className="w-full"
                     label={t("addresses_label")}
                     maxLength={50}
-                    size="sm"
                     value={addressForm.label}
                     onValueChange={(v) =>
                       setAddressForm((f) => ({ ...f, label: v }))
                     }
                   />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Input
-                      isRequired
-                      label={auth("first_name")}
-                      maxLength={100}
-                      size="sm"
-                      value={addressForm.first_name}
-                      onValueChange={(v) =>
-                        setAddressForm((f) => ({ ...f, first_name: v }))
-                      }
-                    />
-                    <Input
-                      isRequired
-                      label={auth("last_name")}
-                      maxLength={100}
-                      size="sm"
-                      value={addressForm.last_name}
-                      onValueChange={(v) =>
-                        setAddressForm((f) => ({ ...f, last_name: v }))
-                      }
-                    />
-                  </div>
                   <Input
                     isRequired
+                    className="w-full"
+                    label={auth("first_name")}
+                    maxLength={100}
+                    value={addressForm.first_name}
+                    onValueChange={(v) =>
+                      setAddressForm((f) => ({ ...f, first_name: v }))
+                    }
+                  />
+                  <Input
+                    isRequired
+                    className="w-full"
+                    label={auth("last_name")}
+                    maxLength={100}
+                    value={addressForm.last_name}
+                    onValueChange={(v) =>
+                      setAddressForm((f) => ({ ...f, last_name: v }))
+                    }
+                  />
+                  <Input
+                    isRequired
+                    className="w-full"
                     label={t("addresses_street")}
                     maxLength={255}
-                    size="sm"
                     value={addressForm.street}
                     onValueChange={(v) =>
                       setAddressForm((f) => ({ ...f, street: v }))
                     }
                   />
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <Input
-                      isRequired
-                      label={t("addresses_zip_code")}
-                      maxLength={10}
-                      size="sm"
-                      value={addressForm.zip_code}
-                      onValueChange={(v) =>
-                        setAddressForm((f) => ({ ...f, zip_code: v }))
-                      }
-                    />
-                    <Input
-                      isRequired
-                      label={t("addresses_city")}
-                      maxLength={100}
-                      size="sm"
-                      value={addressForm.city}
-                      onValueChange={(v) =>
-                        setAddressForm((f) => ({ ...f, city: v }))
-                      }
-                    />
-                    <Input
-                      isRequired
-                      label={t("addresses_country")}
-                      maxLength={2}
-                      size="sm"
-                      value={addressForm.country}
-                      onValueChange={(v) =>
-                        setAddressForm((f) => ({
-                          ...f,
-                          country: v.toUpperCase(),
-                        }))
-                      }
-                    />
-                  </div>
                   <Input
                     isRequired
+                    className="w-full"
+                    label={t("addresses_zip_code")}
+                    maxLength={10}
+                    value={addressForm.zip_code}
+                    onValueChange={(v) =>
+                      setAddressForm((f) => ({ ...f, zip_code: v }))
+                    }
+                  />
+                  <Input
+                    isRequired
+                    className="w-full"
+                    label={t("addresses_city")}
+                    maxLength={100}
+                    value={addressForm.city}
+                    onValueChange={(v) =>
+                      setAddressForm((f) => ({ ...f, city: v }))
+                    }
+                  />
+                  <Input
+                    isRequired
+                    className="w-full"
+                    label={t("addresses_country")}
+                    maxLength={2}
+                    value={addressForm.country}
+                    onValueChange={(v) =>
+                      setAddressForm((f) => ({
+                        ...f,
+                        country: v.toUpperCase(),
+                      }))
+                    }
+                  />
+                  <Input
+                    isRequired
+                    className="w-full"
                     errorMessage={t("addresses_error_phone")}
                     label={t("addresses_phone")}
-                    size="sm"
                     type="tel"
                     validate={(value) =>
                       !isValidPhoneNumber(
@@ -1218,7 +1214,7 @@ export default function AccountPage() {
 
                     {editingAddress === addr.id ? (
                       <Form
-                        className="mt-4 space-y-4 w-full overflow-hidden"
+                        className="mt-4 w-full flex flex-col items-stretch space-y-5"
                         validationBehavior="native"
                         onSubmit={(e) => {
                           e.preventDefault();
@@ -1227,86 +1223,82 @@ export default function AccountPage() {
                       >
                         <Input
                           isRequired
+                          className="w-full"
                           label={t("addresses_label")}
                           maxLength={50}
-                          size="sm"
                           value={addressForm.label}
                           onValueChange={(v) =>
                             setAddressForm((f) => ({ ...f, label: v }))
                           }
                         />
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <Input
-                            isRequired
-                            label={auth("first_name")}
-                            maxLength={100}
-                            size="sm"
-                            value={addressForm.first_name}
-                            onValueChange={(v) =>
-                              setAddressForm((f) => ({ ...f, first_name: v }))
-                            }
-                          />
-                          <Input
-                            isRequired
-                            label={auth("last_name")}
-                            maxLength={100}
-                            size="sm"
-                            value={addressForm.last_name}
-                            onValueChange={(v) =>
-                              setAddressForm((f) => ({ ...f, last_name: v }))
-                            }
-                          />
-                        </div>
                         <Input
                           isRequired
+                          className="w-full"
+                          label={auth("first_name")}
+                          maxLength={100}
+                          value={addressForm.first_name}
+                          onValueChange={(v) =>
+                            setAddressForm((f) => ({ ...f, first_name: v }))
+                          }
+                        />
+                        <Input
+                          isRequired
+                          className="w-full"
+                          label={auth("last_name")}
+                          maxLength={100}
+                          value={addressForm.last_name}
+                          onValueChange={(v) =>
+                            setAddressForm((f) => ({ ...f, last_name: v }))
+                          }
+                        />
+                        <Input
+                          isRequired
+                          className="w-full"
                           label={t("addresses_street")}
                           maxLength={255}
-                          size="sm"
                           value={addressForm.street}
                           onValueChange={(v) =>
                             setAddressForm((f) => ({ ...f, street: v }))
                           }
                         />
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          <Input
-                            isRequired
-                            label={t("addresses_zip_code")}
-                            maxLength={10}
-                            size="sm"
-                            value={addressForm.zip_code}
-                            onValueChange={(v) =>
-                              setAddressForm((f) => ({ ...f, zip_code: v }))
-                            }
-                          />
-                          <Input
-                            isRequired
-                            label={t("addresses_city")}
-                            maxLength={100}
-                            size="sm"
-                            value={addressForm.city}
-                            onValueChange={(v) =>
-                              setAddressForm((f) => ({ ...f, city: v }))
-                            }
-                          />
-                          <Input
-                            isRequired
-                            label={t("addresses_country")}
-                            maxLength={2}
-                            size="sm"
-                            value={addressForm.country}
-                            onValueChange={(v) =>
-                              setAddressForm((f) => ({
-                                ...f,
-                                country: v.toUpperCase(),
-                              }))
-                            }
-                          />
-                        </div>
                         <Input
                           isRequired
+                          className="w-full"
+                          label={t("addresses_zip_code")}
+                          maxLength={10}
+                          value={addressForm.zip_code}
+                          onValueChange={(v) =>
+                            setAddressForm((f) => ({ ...f, zip_code: v }))
+                          }
+                        />
+                        <Input
+                          isRequired
+                          className="w-full"
+                          label={t("addresses_city")}
+                          maxLength={100}
+                          value={addressForm.city}
+                          onValueChange={(v) =>
+                            setAddressForm((f) => ({ ...f, city: v }))
+                          }
+                        />
+                        <Input
+                          isRequired
+                          className="w-full"
+                          label={t("addresses_country")}
+                          maxLength={2}
+                          value={addressForm.country}
+                          onValueChange={(v) =>
+                            setAddressForm((f) => ({
+                              ...f,
+                              country: v.toUpperCase(),
+                            }))
+                          }
+                        />
+                        <Input
+                          isRequired
+                          className="w-full"
                           errorMessage={t("addresses_error_phone")}
                           label={t("addresses_phone")}
-                          size="sm"
                           type="tel"
                           validate={(value) =>
                             !isValidPhoneNumber(
