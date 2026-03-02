@@ -136,12 +136,19 @@ export async function POST(req: NextRequest) {
             fulfillment_status: "shipped",
             metadata: JSON.stringify(meta),
           });
+          const shippingAddr = order.shipping_address || {};
+          const shippingCountry =
+            (shippingAddr as any).country ||
+            (order.metadata?.shipping_country as string) ||
+            "FR";
+
           mailService
             .sendShippingNotification({
               email: order.email,
               orderId: order.id,
               trackingNumber,
               labelUrl: meta.label_url as string | undefined,
+              country: shippingCountry,
             })
             .catch((err) =>
               logger.error(

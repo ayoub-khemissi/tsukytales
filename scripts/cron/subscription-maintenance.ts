@@ -16,6 +16,7 @@
 import Stripe from "stripe";
 import mysql from "mysql2/promise";
 import { sendBillingReminder } from "@/lib/mail";
+import { getDateLocale } from "@/lib/mail/i18n";
 
 // ─── Config ─────────────────────────────────────────────────────────
 
@@ -110,8 +111,16 @@ async function sendBillingReminders() {
           diff < 3.5 * 24 * 3600 * 1000 &&
           !skippedPhases.includes(phaseDate)
         ) {
+          // Fetch customer's default address for locale
+          const [addrRows] = await pool.execute<mysql.RowDataPacket[]>(
+            "SELECT country FROM addresses WHERE customer_id = ? LIMIT 1",
+            [customer.id],
+          );
+          const country = (addrRows[0]?.country as string) || "FR";
+          const dateLocale = getDateLocale(country);
+
           const formattedDate = new Date(phaseStart).toLocaleDateString(
-            "fr-FR",
+            dateLocale,
             { day: "2-digit", month: "long", year: "numeric" },
           );
 
@@ -120,6 +129,7 @@ async function sendBillingReminders() {
             firstName: customer.first_name,
             formattedDate,
             accountUrl: `${BASE_URL}/account?tab=subscription`,
+            country,
           });
 
           sent++;

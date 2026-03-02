@@ -110,6 +110,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       email: order.email,
       orderId: order.id,
       total: Number(order.total),
+      country: (order.metadata?.shipping_country as string) || "FR",
     })
     .catch((err) =>
       logger.error(

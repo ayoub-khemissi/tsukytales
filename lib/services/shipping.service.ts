@@ -603,12 +603,20 @@ export async function handleStatusUpdate(
 
   if (newStatus === "in_transit" && order.fulfillment_status !== "shipped") {
     await orderRepository.update(order.id, { fulfillment_status: "shipped" });
+
+    const addr = order.shipping_address || {};
+    const country =
+      (addr as any).country ||
+      (order.metadata?.shipping_country as string) ||
+      "FR";
+
     mailService
       .sendShippingNotification({
         email: order.email,
         orderId: order.id,
         trackingNumber,
         labelUrl: order.metadata?.label_url as string | undefined,
+        country,
       })
       .catch((err) =>
         logger.error(

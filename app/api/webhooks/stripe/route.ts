@@ -137,6 +137,7 @@ export async function POST(req: NextRequest) {
                 ? Number(order.metadata.shipping_cost)
                 : undefined,
             total: Number(order.total),
+            country: (order.metadata?.shipping_country as string) || "FR",
           })
           .catch((err) =>
             logger.error(
@@ -256,6 +257,7 @@ export async function POST(req: NextRequest) {
               email: order.email,
               orderId: order.id,
               total: Number(order.total),
+              country: (order.metadata?.shipping_country as string) || "FR",
             })
             .catch((err) =>
               logger.error(
@@ -457,6 +459,7 @@ export async function POST(req: NextRequest) {
                   ? Number(order.metadata.shipping_cost)
                   : undefined,
               total: Number(order.total),
+              country: (order.metadata?.shipping_country as string) || "FR",
             })
             .catch((err) =>
               logger.error(
@@ -496,11 +499,17 @@ export async function POST(req: NextRequest) {
 
           // Send payment-failed email with Stripe hosted invoice link
           if (invoice.hosted_invoice_url) {
+            const addresses = await addressRepository.findByCustomerId(
+              customer.id,
+            );
+            const paymentCountry = addresses[0]?.country || "FR";
+
             mailService
               .sendPaymentFailed({
                 email: customer.email,
                 firstName: customer.first_name ?? null,
                 hostedInvoiceUrl: invoice.hosted_invoice_url,
+                country: paymentCountry,
               })
               .catch((err) =>
                 logger.error(

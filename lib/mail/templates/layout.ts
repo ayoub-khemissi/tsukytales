@@ -4,15 +4,23 @@ interface LayoutOptions {
   badge: string;
   headline: string;
   body: string;
+  locale?: string;
+  footerTagline?: string;
 }
 
-export function emailLayout({ badge, headline, body }: LayoutOptions): string {
+export function emailLayout({
+  badge,
+  headline,
+  body,
+  locale = "fr",
+  footerTagline = "Cr&eacute;ateur d'imaginaires",
+}: LayoutOptions): string {
   const logoUrl = `${BASE_URL}/assets/img/logo.png`;
   const bgUrl = `${BASE_URL}/assets/img/bg.png`;
 
   return `
     <!DOCTYPE html>
-    <html lang="fr">
+    <html lang="${locale}">
     <head><meta charset="utf-8"></head>
     <body style="margin: 0; padding: 0; background-color: #FDF7FF;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FDF7FF; background-image: url('${bgUrl}'); background-repeat: repeat; background-size: auto;">
@@ -38,7 +46,7 @@ export function emailLayout({ badge, headline, body }: LayoutOptions): string {
               <!-- Footer -->
               <tr>
                 <td align="center" style="background-color: #fcfaff; padding: 25px 20px; border-radius: 0 0 16px 16px; border: 1px solid #f0e6f2; border-top: none;">
-                  <p style="margin: 0 0 6px; color: #8e7a91; font-size: 12px; font-family: Georgia, 'Times New Roman', serif; font-style: italic;">Cr&eacute;ateur d'imaginaires</p>
+                  <p style="margin: 0 0 6px; color: #8e7a91; font-size: 12px; font-family: Georgia, 'Times New Roman', serif; font-style: italic;">${footerTagline}</p>
                   <a href="${BASE_URL}" style="color: #581668; font-size: 12px; text-decoration: none; font-weight: 600;">tsukytales.com</a>
                   <p style="margin: 10px 0 0; color: #b8a5bb; font-size: 11px;">&copy; 2026 Tsuky Tales</p>
                 </td>

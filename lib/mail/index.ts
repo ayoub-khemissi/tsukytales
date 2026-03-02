@@ -1,7 +1,9 @@
 export { transport } from "./transport";
 export { sendMail } from "./send";
+export { getEmailT, countryToLocale, getDateLocale } from "./i18n";
 
 import { sendMail } from "./send";
+import { getEmailT } from "./i18n";
 import { orderConfirmationHtml } from "./templates/order-confirmation";
 import { shippingNotificationHtml } from "./templates/shipping-notification";
 import { contactHtml } from "./templates/contact";
@@ -23,15 +25,22 @@ export async function sendOrderConfirmation(params: {
   items: OrderItem[];
   shippingCost?: number;
   total: number;
+  country?: string;
 }) {
+  const t = getEmailT(params.country || "FR");
+
   await sendMail({
     to: params.email,
-    subject: `Confirmation de commande TSK-${params.orderId} - Tsuky Tales`,
+    subject: t.subject_order_confirmation.replace(
+      "{orderId}",
+      String(params.orderId),
+    ),
     html: orderConfirmationHtml({
       orderId: params.orderId,
       items: params.items,
       shippingCost: params.shippingCost,
       total: params.total,
+      t,
     }),
   });
 }
@@ -43,14 +52,18 @@ export async function sendShippingNotification(params: {
   orderId: number;
   trackingNumber: string;
   labelUrl?: string;
+  country?: string;
 }) {
+  const t = getEmailT(params.country || "FR");
+
   await sendMail({
     to: params.email,
-    subject: `Votre commande TSK-${params.orderId} est en route !`,
+    subject: t.subject_shipping.replace("{orderId}", String(params.orderId)),
     html: shippingNotificationHtml({
       orderId: params.orderId,
       trackingNumber: params.trackingNumber,
       labelUrl: params.labelUrl,
+      t,
     }),
   });
 }
@@ -90,14 +103,18 @@ export async function sendBillingReminder(params: {
   firstName?: string | null;
   formattedDate: string;
   accountUrl: string;
+  country?: string;
 }) {
+  const t = getEmailT(params.country || "FR");
+
   await sendMail({
     to: params.email,
-    subject: `Rappel : votre prochaine box Tsuky Tales le ${params.formattedDate}`,
+    subject: t.subject_billing_reminder.replace("{date}", params.formattedDate),
     html: billingReminderHtml({
       firstName: params.firstName,
       formattedDate: params.formattedDate,
       accountUrl: params.accountUrl,
+      t,
     }),
   });
 }
@@ -108,13 +125,17 @@ export async function sendRefundConfirmation(params: {
   email: string;
   orderId: number;
   total: number;
+  country?: string;
 }) {
+  const t = getEmailT(params.country || "FR");
+
   await sendMail({
     to: params.email,
-    subject: `Remboursement de votre commande TSK-${params.orderId} - Tsuky Tales`,
+    subject: t.subject_refund.replace("{orderId}", String(params.orderId)),
     html: refundConfirmationHtml({
       orderId: params.orderId,
       total: params.total,
+      t,
     }),
   });
 }
@@ -125,13 +146,17 @@ export async function sendPaymentFailed(params: {
   email: string;
   firstName?: string | null;
   hostedInvoiceUrl: string;
+  country?: string;
 }) {
+  const t = getEmailT(params.country || "FR");
+
   await sendMail({
     to: params.email,
-    subject: "Problème de paiement pour votre abonnement Tsuky Tales",
+    subject: t.subject_payment_failed,
     html: paymentFailedHtml({
       firstName: params.firstName,
       hostedInvoiceUrl: params.hostedInvoiceUrl,
+      t,
     }),
   });
 }
