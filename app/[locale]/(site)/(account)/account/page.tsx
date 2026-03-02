@@ -1128,7 +1128,7 @@ export default function AccountPage() {
                     isRequired
                     className="w-full"
                     label={t("addresses_country")}
-                    selectedKeys={new Set([addressForm.country])}
+                    selectedKeys={[addressForm.country]}
                     onSelectionChange={(keys) => {
                       const value = Array.from(keys)[0] as string;
 
@@ -1324,7 +1324,7 @@ export default function AccountPage() {
                           isRequired
                           className="w-full"
                           label={t("addresses_country")}
-                          selectedKeys={new Set([addressForm.country])}
+                          selectedKeys={[addressForm.country]}
                           onSelectionChange={(keys) => {
                             const value = Array.from(keys)[0] as string;
 
@@ -1337,7 +1337,7 @@ export default function AccountPage() {
                         >
                           {EUROPEAN_COUNTRIES.map((code) => (
                             <SelectItem key={code}>
-                              {countriesT(code)}
+                              {countryFlag(code)} {countriesT(code)}
                             </SelectItem>
                           ))}
                         </Select>

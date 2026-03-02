@@ -595,7 +595,7 @@ export default function CheckoutPage() {
                     <Select
                       isRequired
                       label={t("country")}
-                      selectedKeys={new Set([address.country])}
+                      selectedKeys={[address.country]}
                       onSelectionChange={(keys) => {
                         const value = Array.from(keys)[0] as string;
 

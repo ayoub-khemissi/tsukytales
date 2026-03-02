@@ -672,7 +672,7 @@ export default function SubscribePage() {
                     <Select
                       isRequired
                       label={ct("country")}
-                      selectedKeys={new Set([address.country])}
+                      selectedKeys={[address.country]}
                       onSelectionChange={(keys) => {
                         const value = Array.from(keys)[0] as string;
 
