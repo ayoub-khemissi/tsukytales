@@ -130,10 +130,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Maintenance mode — block all pages except admin
-  if (
-    process.env.MAINTENANCE_MODE === "true" &&
-    !pathname.includes("/admin")
-  ) {
+  if (process.env.MAINTENANCE_MODE === "true" && !pathname.includes("/admin")) {
     return new NextResponse(MAINTENANCE_HTML, {
       status: 503,
       headers: {
