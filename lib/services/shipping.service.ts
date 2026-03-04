@@ -202,15 +202,37 @@ export async function cancelShipment(
   }
 }
 
-function getOfferCode(isRelay: boolean, country: string): string {
-  if (isRelay) {
-    return country === "FR" ? "MONR-CpourToi" : "MONR-CpourToiEurope";
-  }
-  if (country === "FR") return "POFR-ColissimoAccess";
-  if (HOME_OM_COUNTRIES.includes(country))
-    return "POFR-ColissimoAccessOutreMer";
+const DEFAULT_OFFER_CODES: Record<string, string> = {
+  shipping_offer_relay: "MONR-CpourToi",
+  shipping_offer_home_fr: "POFR-ColissimoAccess",
+  shipping_offer_home_international: "POFR-ColissimoAccessInternational",
+};
 
-  return "POFR-ColissimoAccessInternational";
+const OFFER_CODE_KEYS = Object.keys(DEFAULT_OFFER_CODES);
+
+export { DEFAULT_OFFER_CODES as SHIPPING_DEFAULT_OFFER_CODES };
+
+async function getOfferCode(
+  isRelay: boolean,
+  country: string,
+): Promise<string> {
+  let codes: Record<string, string>;
+
+  try {
+    const dbCodes = await settingsRepository.getMultiple(OFFER_CODE_KEYS);
+
+    codes = { ...DEFAULT_OFFER_CODES };
+    for (const key of OFFER_CODE_KEYS) {
+      if (dbCodes[key]) codes[key] = dbCodes[key];
+    }
+  } catch {
+    codes = DEFAULT_OFFER_CODES;
+  }
+
+  if (isRelay) return codes.shipping_offer_relay;
+  if (country === "FR") return codes.shipping_offer_home_fr;
+
+  return codes.shipping_offer_home_international;
 }
 
 export async function createShipment(orderId: number) {
@@ -265,7 +287,7 @@ export async function createShipment(orderId: number) {
     "FR"
   ).toUpperCase();
 
-  const offerCode = getOfferCode(isRelay, destCountry);
+  const offerCode = await getOfferCode(isRelay, destCountry);
 
   // A2: Use shipping address name, fallback to email only if absent
   const firstName =
@@ -337,7 +359,7 @@ export async function createShipment(orderId: number) {
           countryIsoCode: destCountry,
         },
       },
-      ...(isRelay && relayCode ? { dropOffPointCode: relayCode } : {}),
+      ...(isRelay && relayCode ? { pickupPointCode: relayCode } : {}),
     },
   };
 
@@ -355,11 +377,16 @@ export async function createShipment(orderId: number) {
         },
       },
     );
-  } catch (err) {
+  } catch (err: any) {
     // Rollback: restore fulfillment_status and flag the failure
     const msg = err instanceof Error ? err.message : String(err);
+    const detail = err?.response?.data
+      ? JSON.stringify(err.response.data)
+      : "no response body";
 
-    logger.error(`[Shipping] Boxtal API failed for order ${orderId}: ${msg}`);
+    logger.error(
+      `[Shipping] Boxtal API failed for order ${orderId}: ${msg} | Detail: ${detail}`,
+    );
     await orderRepository.update(orderId, {
       fulfillment_status: "not_fulfilled",
       metadata: JSON.stringify({

@@ -155,6 +155,14 @@ export default function SettingsPage() {
   const [dateError, setDateError] = useState("");
   const [dateSaving, setDateSaving] = useState(false);
 
+  // Shipping offer codes state
+  const [offerCodes, setOfferCodes] = useState<Record<string, string> | null>(
+    null,
+  );
+  const [offerCodesSaving, setOfferCodesSaving] = useState(false);
+  const [offerCodesSuccess, setOfferCodesSuccess] = useState("");
+  const [offerCodesError, setOfferCodesError] = useState("");
+
   // Product settings state
   const [showProductDetail, setShowProductDetail] = useState(true);
   const [productSettingsLoading, setProductSettingsLoading] = useState(true);
@@ -297,7 +305,21 @@ export default function SettingsPage() {
       const res = await fetch("/api/admin/settings/shipping");
 
       if (res.ok) {
-        setRates(await res.json());
+        const data = await res.json();
+        const {
+          shipping_offer_relay,
+          shipping_offer_home_fr,
+          shipping_offer_home_international,
+          ...ratesOnly
+        } = data;
+
+        setRates(ratesOnly as AllRates);
+        setOfferCodes({
+          shipping_offer_relay: shipping_offer_relay || "",
+          shipping_offer_home_fr: shipping_offer_home_fr || "",
+          shipping_offer_home_international:
+            shipping_offer_home_international || "",
+        });
       }
     } catch {
       // silently fail, will show empty
@@ -336,6 +358,33 @@ export default function SettingsPage() {
       setError(t("settings_password_error"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOfferCodesSave = async () => {
+    if (!offerCodes) return;
+    setOfferCodesError("");
+    setOfferCodesSuccess("");
+    setOfferCodesSaving(true);
+
+    try {
+      const res = await fetch("/api/admin/settings/shipping", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(offerCodes),
+      });
+
+      if (res.ok) {
+        setOfferCodesSuccess(t("settings_offer_codes_saved"));
+      } else {
+        const data = await res.json().catch(() => null);
+
+        setOfferCodesError(data?.error || t("settings_offer_codes_error"));
+      }
+    } catch {
+      setOfferCodesError(t("settings_offer_codes_error"));
+    } finally {
+      setOfferCodesSaving(false);
     }
   };
 
@@ -538,6 +587,83 @@ export default function SettingsPage() {
                 >
                   {dateError}
                 </Chip>
+              )}
+            </CardBody>
+          </Card>
+
+          {/* Offer Codes Card */}
+          <Card className="admin-glass rounded-xl">
+            <CardHeader className="flex-col items-start gap-1 px-6 pt-6">
+              <h2 className="font-heading text-lg font-semibold">
+                {t("settings_offer_codes_title")}
+              </h2>
+              <p className="text-xs text-default-400">
+                {t("settings_offer_codes_desc")}
+              </p>
+            </CardHeader>
+            <CardBody className="px-6 pb-6 space-y-4">
+              {offerCodes ? (
+                <>
+                  <Input
+                    label={t("settings_offer_code_relay")}
+                    size="sm"
+                    value={offerCodes.shipping_offer_relay}
+                    onValueChange={(v) =>
+                      setOfferCodes({ ...offerCodes, shipping_offer_relay: v })
+                    }
+                  />
+                  <Input
+                    label={t("settings_offer_code_home_fr")}
+                    size="sm"
+                    value={offerCodes.shipping_offer_home_fr}
+                    onValueChange={(v) =>
+                      setOfferCodes({
+                        ...offerCodes,
+                        shipping_offer_home_fr: v,
+                      })
+                    }
+                  />
+                  <Input
+                    label={t("settings_offer_code_home_international")}
+                    size="sm"
+                    value={offerCodes.shipping_offer_home_international}
+                    onValueChange={(v) =>
+                      setOfferCodes({
+                        ...offerCodes,
+                        shipping_offer_home_international: v,
+                      })
+                    }
+                  />
+                  <Button
+                    color="primary"
+                    isLoading={offerCodesSaving}
+                    onPress={handleOfferCodesSave}
+                  >
+                    {t("settings_offer_codes_save")}
+                  </Button>
+                  {offerCodesSuccess && (
+                    <Chip
+                      className="w-full max-w-full py-4 text-center"
+                      color="success"
+                      variant="flat"
+                    >
+                      {offerCodesSuccess}
+                    </Chip>
+                  )}
+                  {offerCodesError && (
+                    <Chip
+                      className="w-full max-w-full py-4 text-center"
+                      color="danger"
+                      variant="flat"
+                    >
+                      {offerCodesError}
+                    </Chip>
+                  )}
+                </>
+              ) : (
+                <div className="flex justify-center py-4">
+                  <Spinner size="sm" />
+                </div>
               )}
             </CardBody>
           </Card>
