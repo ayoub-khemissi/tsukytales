@@ -339,7 +339,7 @@ export async function createShipment(orderId: number) {
         contact: {
           firstName: process.env.BOXTAL_SENDER_FIRST_NAME || "Tsuky",
           lastName: process.env.BOXTAL_SENDER_LAST_NAME || "Tales",
-          email: process.env.BOXTAL_SENDER_EMAIL || "hello@tsukytales.com",
+          email: process.env.BOXTAL_SENDER_EMAIL || "contact@tsukytales.com",
           phone: process.env.BOXTAL_SENDER_PHONE || "0600000000",
         },
         location: {

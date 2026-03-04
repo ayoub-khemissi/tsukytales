@@ -5,7 +5,7 @@ import { transport } from "./transport";
 import { logger } from "@/lib/utils/logger";
 
 const DEFAULT_FROM =
-  process.env.MAIL_FROM || "Tsuky Tales <hello@tsukytales.com>";
+  process.env.MAIL_FROM || "Tsuky Tales <contact@tsukytales.com>";
 
 interface SendMailOptions {
   to: string | string[];

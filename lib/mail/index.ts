@@ -81,7 +81,7 @@ export async function sendContactEmail(
 
   await sendMail({
     to: contactEmail,
-    from: "Formulaire Contact <hello@tsukytales.com>",
+    from: `Formulaire Contact <${process.env.MAIL_FROM}>`,
     replyTo: data.email,
     subject: `[Contact] ${data.subject}`,
     html: contactHtml({
