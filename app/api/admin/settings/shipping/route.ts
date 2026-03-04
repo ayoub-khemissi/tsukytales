@@ -21,7 +21,8 @@ const RATE_KEYS = [
 ] as const;
 
 const OFFER_CODE_KEYS = [
-  "shipping_offer_relay",
+  "shipping_offer_relay_fr",
+  "shipping_offer_relay_eu",
   "shipping_offer_home_fr",
   "shipping_offer_home_international",
 ] as const;

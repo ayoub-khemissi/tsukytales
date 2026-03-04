@@ -307,7 +307,8 @@ export default function SettingsPage() {
       if (res.ok) {
         const data = await res.json();
         const {
-          shipping_offer_relay,
+          shipping_offer_relay_fr,
+          shipping_offer_relay_eu,
           shipping_offer_home_fr,
           shipping_offer_home_international,
           ...ratesOnly
@@ -315,7 +316,8 @@ export default function SettingsPage() {
 
         setRates(ratesOnly as AllRates);
         setOfferCodes({
-          shipping_offer_relay: shipping_offer_relay || "",
+          shipping_offer_relay_fr: shipping_offer_relay_fr || "",
+          shipping_offer_relay_eu: shipping_offer_relay_eu || "",
           shipping_offer_home_fr: shipping_offer_home_fr || "",
           shipping_offer_home_international:
             shipping_offer_home_international || "",
@@ -605,11 +607,19 @@ export default function SettingsPage() {
               {offerCodes ? (
                 <>
                   <Input
-                    label={t("settings_offer_code_relay")}
+                    label={t("settings_offer_code_relay_fr")}
                     size="sm"
-                    value={offerCodes.shipping_offer_relay}
+                    value={offerCodes.shipping_offer_relay_fr}
                     onValueChange={(v) =>
-                      setOfferCodes({ ...offerCodes, shipping_offer_relay: v })
+                      setOfferCodes({ ...offerCodes, shipping_offer_relay_fr: v })
+                    }
+                  />
+                  <Input
+                    label={t("settings_offer_code_relay_eu")}
+                    size="sm"
+                    value={offerCodes.shipping_offer_relay_eu}
+                    onValueChange={(v) =>
+                      setOfferCodes({ ...offerCodes, shipping_offer_relay_eu: v })
                     }
                   />
                   <Input

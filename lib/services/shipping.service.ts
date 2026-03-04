@@ -203,7 +203,8 @@ export async function cancelShipment(
 }
 
 const DEFAULT_OFFER_CODES: Record<string, string> = {
-  shipping_offer_relay: "MONR-CpourToi",
+  shipping_offer_relay_fr: "MONR-CpourToi",
+  shipping_offer_relay_eu: "MONR-CpourToiEurope",
   shipping_offer_home_fr: "POFR-ColissimoAccess",
   shipping_offer_home_international: "POFR-ColissimoAccessInternational",
 };
@@ -229,7 +230,11 @@ async function getOfferCode(
     codes = DEFAULT_OFFER_CODES;
   }
 
-  if (isRelay) return codes.shipping_offer_relay;
+  if (isRelay) {
+    return country === "FR"
+      ? codes.shipping_offer_relay_fr
+      : codes.shipping_offer_relay_eu;
+  }
   if (country === "FR") return codes.shipping_offer_home_fr;
 
   return codes.shipping_offer_home_international;

@@ -248,7 +248,8 @@ INSERT IGNORE INTO `settings` (`key`, `value`) VALUES
 ('shipping_rates_home_world','[{"maxWeight":0.5,"price":16.9},{"maxWeight":1,"price":22.9},{"maxWeight":2,"price":29.9},{"maxWeight":5,"price":42.9},{"maxWeight":10,"price":59.9}]'),
 ('subscription_dates', '["2026-04-01","2026-07-01","2026-10-01","2027-01-01"]'),
 ('show_product_detail', 'true'),
-('shipping_offer_relay', '"MONR-CpourToi"'),
+('shipping_offer_relay_fr', '"MONR-CpourToi"'),
+('shipping_offer_relay_eu', '"MONR-CpourToiEurope"'),
 ('shipping_offer_home_fr', '"POFR-ColissimoAccess"'),
 ('shipping_offer_home_international', '"POFR-ColissimoAccessInternational"');
 
