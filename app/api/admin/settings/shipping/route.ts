@@ -60,7 +60,9 @@ export const GET = withErrorHandler(async () => {
   for (const key of OFFER_CODE_KEYS) {
     result[key] =
       dbValues[key] ||
-      SHIPPING_DEFAULT_OFFER_CODES[key as keyof typeof SHIPPING_DEFAULT_OFFER_CODES];
+      SHIPPING_DEFAULT_OFFER_CODES[
+        key as keyof typeof SHIPPING_DEFAULT_OFFER_CODES
+      ];
   }
 
   return NextResponse.json(result);

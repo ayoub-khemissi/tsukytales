@@ -611,7 +611,10 @@ export default function SettingsPage() {
                     size="sm"
                     value={offerCodes.shipping_offer_relay_fr}
                     onValueChange={(v) =>
-                      setOfferCodes({ ...offerCodes, shipping_offer_relay_fr: v })
+                      setOfferCodes({
+                        ...offerCodes,
+                        shipping_offer_relay_fr: v,
+                      })
                     }
                   />
                   <Input
@@ -619,7 +622,10 @@ export default function SettingsPage() {
                     size="sm"
                     value={offerCodes.shipping_offer_relay_eu}
                     onValueChange={(v) =>
-                      setOfferCodes({ ...offerCodes, shipping_offer_relay_eu: v })
+                      setOfferCodes({
+                        ...offerCodes,
+                        shipping_offer_relay_eu: v,
+                      })
                     }
                   />
                   <Input
