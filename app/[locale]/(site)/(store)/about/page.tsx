@@ -109,11 +109,8 @@ export default function AboutPage() {
                   {t("story_lead").slice(1)}
                 </p>
               </div>
-              <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-muted-light mb-8 clear-left">
+              <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-muted-light clear-left">
                 {t("story_p1")}
-              </p>
-              <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-muted-light">
-                {t("story_p2")}
               </p>
             </div>
           </div>
