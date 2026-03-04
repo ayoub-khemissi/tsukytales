@@ -20,6 +20,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const skippedPhases = (customer.metadata?.subscription_skipped ||
     []) as string[];
 
+  if (skippedPhases.includes(phase_date)) {
+    throw new AppError("Cette phase est déjà en pause.", 400);
+  }
+
   // Check phase is in future (> 24h)
   const phaseTs = new Date(phase_date + "T00:00:00Z").getTime();
 

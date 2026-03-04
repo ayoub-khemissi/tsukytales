@@ -333,6 +333,14 @@ export async function POST(req: NextRequest) {
 
         if (!invoice.subscription) break;
 
+        // Skip $0 invoices (skipped phase)
+        if (invoice.amount_paid === 0) {
+          logger.info(
+            `[Stripe Webhook] invoice.paid $0 for ${invoice.id} — skipped phase, no order created`,
+          );
+          break;
+        }
+
         // Idempotence: check if order with this invoice already exists
         const existingOrder = await orderRepository.findByInvoiceId(
           invoice.id as string,
@@ -627,6 +635,7 @@ export async function POST(req: NextRequest) {
 
             delete meta.subscription_schedule_id;
             delete meta.subscription_product_id;
+            delete meta.subscription_skipped;
             await customerRepository.updateMetadata(cust.id, meta);
             logger.info(
               `[Stripe Webhook] Subscription schedule cancelled for customer ${custId}`,
