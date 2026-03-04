@@ -36,6 +36,15 @@ const LOCALE_LABELS: Record<string, string> = {
   it: "Italiano",
 };
 
+function slugify(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 const INITIAL_FORM: ProductForm = {
   name: "",
   slug: "",
@@ -62,6 +71,7 @@ export default function ProductEditPage() {
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [subDates, setSubDates] = useState<string[]>([]);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(!isNew);
   const [saveStatus, setSaveStatus] = useState<"success" | "error" | null>(
     null,
   );
@@ -232,7 +242,23 @@ export default function ProductEditPage() {
                       label={t("products_field_name")}
                       maxLength={200}
                       value={form.name}
-                      onValueChange={(v) => updateField("name", v)}
+                      onValueChange={(v) => {
+                        updateField("name", v);
+                        if (!slugManuallyEdited) {
+                          updateField("slug", slugify(v));
+                        }
+                      }}
+                    />
+                    <Input
+                      isRequired
+                      description={t("products_slug_hint")}
+                      label={t("products_field_slug")}
+                      maxLength={200}
+                      value={form.slug}
+                      onValueChange={(v) => {
+                        setSlugManuallyEdited(v !== "");
+                        updateField("slug", v);
+                      }}
                     />
                     <Textarea
                       label={t("products_field_description")}
@@ -281,14 +307,6 @@ export default function ProductEditPage() {
                     />
                   </>
                 )}
-
-                <Input
-                  description={t("products_slug_hint")}
-                  label={t("products_field_slug")}
-                  maxLength={200}
-                  value={form.slug}
-                  onValueChange={(v) => updateField("slug", v)}
-                />
                 <div className="grid grid-cols-3 gap-4">
                   <Input
                     isRequired
