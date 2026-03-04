@@ -112,7 +112,7 @@ export default function AboutPage() {
               <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-muted-light clear-left">
                 {t("story_p1")}
               </p>
-              <p className="text-base sm:text-[1.1rem] text-text-brand dark:text-muted-light">
+              <p className="mt-4 text-base sm:text-[1.1rem] text-text-brand dark:text-muted-light">
                 {t("story_p2")}
               </p>
             </div>
