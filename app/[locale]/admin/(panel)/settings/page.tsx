@@ -170,6 +170,13 @@ export default function SettingsPage() {
   const [productSettingsSuccess, setProductSettingsSuccess] = useState("");
   const [productSettingsError, setProductSettingsError] = useState("");
 
+  // Maintenance mode state
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(true);
+  const [maintenanceSaving, setMaintenanceSaving] = useState(false);
+  const [maintenanceSuccess, setMaintenanceSuccess] = useState("");
+  const [maintenanceError, setMaintenanceError] = useState("");
+
   const fetchSubDates = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/settings/subscription-dates");
@@ -207,6 +214,52 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchProductSettings();
   }, [fetchProductSettings]);
+
+  const fetchMaintenance = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/settings/maintenance");
+
+      if (res.ok) {
+        const data = await res.json();
+
+        setMaintenanceMode(data.maintenance_mode ?? false);
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setMaintenanceLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMaintenance();
+  }, [fetchMaintenance]);
+
+  const handleToggleMaintenance = async (value: boolean) => {
+    setMaintenanceSaving(true);
+    setMaintenanceSuccess("");
+    setMaintenanceError("");
+    setMaintenanceMode(value);
+    try {
+      const res = await fetch("/api/admin/settings/maintenance", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ maintenance_mode: value }),
+      });
+
+      if (res.ok) {
+        setMaintenanceSuccess(t("settings_maintenance_saved"));
+      } else {
+        setMaintenanceMode(!value);
+        setMaintenanceError(t("settings_maintenance_error"));
+      }
+    } catch {
+      setMaintenanceMode(!value);
+      setMaintenanceError(t("settings_maintenance_error"));
+    } finally {
+      setMaintenanceSaving(false);
+    }
+  };
 
   const handleToggleProductDetail = async (value: boolean) => {
     setProductSettingsSaving(true);
@@ -680,6 +733,58 @@ export default function SettingsPage() {
                 <div className="flex justify-center py-4">
                   <Spinner size="sm" />
                 </div>
+              )}
+            </CardBody>
+          </Card>
+
+          {/* Maintenance Mode Card */}
+          <Card className="admin-glass rounded-xl">
+            <CardHeader className="flex-col items-start gap-1 px-6 pt-6">
+              <h2 className="font-heading text-lg font-semibold">
+                {t("settings_maintenance_title")}
+              </h2>
+            </CardHeader>
+            <CardBody className="px-6 pb-6 space-y-3">
+              {maintenanceLoading ? (
+                <div className="flex justify-center py-4">
+                  <Spinner size="sm" />
+                </div>
+              ) : (
+                <>
+                  <Switch
+                    color="danger"
+                    isDisabled={maintenanceSaving}
+                    isSelected={maintenanceMode}
+                    onValueChange={handleToggleMaintenance}
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {t("settings_maintenance_toggle")}
+                      </span>
+                      <span className="text-xs text-default-400">
+                        {t("settings_maintenance_desc")}
+                      </span>
+                    </div>
+                  </Switch>
+                  {maintenanceSuccess && (
+                    <Chip
+                      className="w-full max-w-full py-4 text-center"
+                      color="success"
+                      variant="flat"
+                    >
+                      {maintenanceSuccess}
+                    </Chip>
+                  )}
+                  {maintenanceError && (
+                    <Chip
+                      className="w-full max-w-full py-4 text-center"
+                      color="danger"
+                      variant="flat"
+                    >
+                      {maintenanceError}
+                    </Chip>
+                  )}
+                </>
               )}
             </CardBody>
           </Card>

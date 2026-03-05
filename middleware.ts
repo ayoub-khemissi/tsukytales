@@ -5,6 +5,7 @@ import NextAuth from "next-auth";
 import { routing } from "./i18n/routing";
 
 import { authConfig } from "@/lib/auth/auth.config";
+import { isMaintenanceMode } from "@/lib/maintenance";
 
 const intlMiddleware = createMiddleware(routing);
 const { auth } = NextAuth(authConfig);
@@ -130,7 +131,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Maintenance mode — block all pages except admin
-  if (process.env.MAINTENANCE_MODE === "true" && !pathname.includes("/admin")) {
+  if (!pathname.includes("/admin") && (await isMaintenanceMode())) {
     return new NextResponse(MAINTENANCE_HTML, {
       status: 503,
       headers: {
