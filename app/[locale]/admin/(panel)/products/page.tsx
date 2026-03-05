@@ -44,6 +44,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string | null>(null);
@@ -68,6 +69,7 @@ export default function ProductsPage() {
       const data = await res.json();
 
       setProducts(data.items || []);
+      setTotal(data.total || 0);
       setTotalPages(Math.ceil((data.total || 0) / (data.limit || limit)));
     } finally {
       setLoading(false);
@@ -146,6 +148,12 @@ export default function ProductsPage() {
           },
         }}
       />
+
+      {!loading && (
+        <p className="text-xs text-default-400">
+          {total} {t("products_title").toLowerCase()}
+        </p>
+      )}
 
       {/* Content */}
       {loading ? (

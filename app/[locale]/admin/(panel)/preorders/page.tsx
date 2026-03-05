@@ -194,6 +194,12 @@ export default function PreordersPage() {
         }}
       />
 
+      {!loading && (
+        <p className="text-xs text-default-400">
+          {total} {t("preorders_title").toLowerCase()}
+        </p>
+      )}
+
       {loading ? (
         <div className="flex justify-center py-20">
           <Spinner color="primary" size="lg" />

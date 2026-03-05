@@ -84,6 +84,7 @@ export default function OrdersPage() {
   const [fulfillmentFilter, setFulfillmentFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [exporting, setExporting] = useState(false);
   const [sortBy, setSortBy] = useState<string | null>(null);
@@ -114,6 +115,7 @@ export default function OrdersPage() {
       const data = await res.json();
 
       setOrders(data.items || []);
+      setTotal(data.total || 0);
       setTotalPages(Math.ceil((data.total || 0) / (data.limit || limit)));
     } finally {
       setLoading(false);
@@ -359,6 +361,12 @@ export default function OrdersPage() {
           },
         }}
       />
+
+      {!loading && (
+        <p className="text-xs text-default-400">
+          {total} {t("orders_title").toLowerCase()}
+        </p>
+      )}
 
       {/* Content */}
       {loading ? (

@@ -56,6 +56,7 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [accountFilter, setAccountFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [exporting, setExporting] = useState(false);
   const [sortBy, setSortBy] = useState<string | null>(null);
@@ -82,6 +83,7 @@ export default function CustomersPage() {
         const data: CustomersResponse = await res.json();
 
         setCustomers(data.items || []);
+        setTotal(data.total || 0);
         setTotalPages(Math.ceil((data.total || 0) / limit) || 1);
       }
     } finally {
@@ -185,6 +187,12 @@ export default function CustomersPage() {
           },
         }}
       />
+
+      {!loading && (
+        <p className="text-xs text-default-400">
+          {total} {t("customers_title").toLowerCase()}
+        </p>
+      )}
 
       {/* Content */}
       {loading ? (

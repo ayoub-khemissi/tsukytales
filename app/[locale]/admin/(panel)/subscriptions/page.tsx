@@ -208,6 +208,12 @@ export default function SubscriptionsPage() {
         }}
       />
 
+      {!loading && (
+        <p className="text-xs text-default-400">
+          {total} {t("subscriptions_title").toLowerCase()}
+        </p>
+      )}
+
       {loading ? (
         <div className="flex justify-center py-20">
           <Spinner color="primary" size="lg" />
