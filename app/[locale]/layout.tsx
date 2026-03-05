@@ -7,6 +7,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import clsx from "clsx";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 import { Providers } from "./providers";
 
@@ -107,6 +108,9 @@ export default async function LocaleLayout({
       <head>
         <JsonLd data={organizationJsonLd} />
         <JsonLd data={websiteJsonLd} />
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
       </head>
       <body
         className={clsx(
