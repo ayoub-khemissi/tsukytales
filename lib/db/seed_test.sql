@@ -14,7 +14,6 @@ SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE `contact_messages`;
 TRUNCATE TABLE `carts`;
 TRUNCATE TABLE `orders`;
-TRUNCATE TABLE `product_variants`;
 TRUNCATE TABLE `products`;
 TRUNCATE TABLE `addresses`;
 TRUNCATE TABLE `accounts`;
@@ -34,20 +33,14 @@ INSERT INTO `customers` (`id`, `first_name`, `last_name`, `email`, `password`, `
   JSON_OBJECT(
     'stripe_customer_id', 'cus_test_marie_001',
     'subscription_schedule_id', 'sub_sched_test_marie',
-    'address', '12 Rue de Rivoli',
-    'zip_code', '75001',
-    'city', 'Paris',
-    'phone', '+33612345678'
+    'subscription_product_id', 1,
+    'subscription_shipping', JSON_OBJECT('method', 'home', 'country', 'FR')
   ),
   DATE_SUB(@now, INTERVAL 6 MONTH)
 ),
 (2, 'Lucas', 'Martin', 'lucas.martin@test.com', @pwd, 1,
   JSON_OBJECT(
-    'stripe_customer_id', 'cus_test_lucas_002',
-    'address', '8 Avenue Jean Jaures',
-    'zip_code', '69007',
-    'city', 'Lyon',
-    'phone', '+33698765432'
+    'stripe_customer_id', 'cus_test_lucas_002'
   ),
   DATE_SUB(@now, INTERVAL 4 MONTH)
 ),
@@ -55,20 +48,15 @@ INSERT INTO `customers` (`id`, `first_name`, `last_name`, `email`, `password`, `
   JSON_OBJECT(
     'stripe_customer_id', 'cus_test_emma_003',
     'subscription_schedule_id', 'sub_sched_test_emma',
-    'address', '25 Boulevard Gambetta',
-    'zip_code', '34000',
-    'city', 'Montpellier',
-    'phone', '+33611223344'
+    'subscription_product_id', 1,
+    'subscription_shipping', JSON_OBJECT('method', 'home', 'country', 'FR'),
+    'subscription_skipped', JSON_ARRAY()
   ),
   DATE_SUB(@now, INTERVAL 8 MONTH)
 ),
 (4, 'Thomas', 'Leroy', 'thomas.leroy@test.com', @pwd, 1,
   JSON_OBJECT(
-    'stripe_customer_id', 'cus_test_thomas_004',
-    'address', '3 Place Bellecour',
-    'zip_code', '69002',
-    'city', 'Lyon',
-    'phone', '+33677889900'
+    'stripe_customer_id', 'cus_test_thomas_004'
   ),
   DATE_SUB(@now, INTERVAL 2 MONTH)
 ),
@@ -76,10 +64,9 @@ INSERT INTO `customers` (`id`, `first_name`, `last_name`, `email`, `password`, `
   JSON_OBJECT(
     'stripe_customer_id', 'cus_test_chloe_005',
     'subscription_schedule_id', 'sub_sched_test_chloe',
-    'address', '14 Rue Sainte-Catherine',
-    'zip_code', '33000',
-    'city', 'Bordeaux',
-    'phone', '+33655443322'
+    'subscription_product_id', 1,
+    'subscription_shipping', JSON_OBJECT('method', 'home', 'country', 'FR'),
+    'subscription_skipped', JSON_ARRAY()
   ),
   DATE_SUB(@now, INTERVAL 10 MONTH)
 ),
@@ -148,17 +135,6 @@ INSERT INTO `products` (`id`, `name`, `slug`, `description`, `price`, `stock`, `
 );
 
 -- ============================================================
--- Product Variants
--- ============================================================
-INSERT INTO `product_variants` (`id`, `product_id`, `title`, `sku`, `inventory_quantity`, `price`) VALUES
--- Le Voyage de Tsuky
-(1, 1, 'Édition Standard', 'TSUKY-VOY-STD', 40, 24.90),
-(2, 1, 'Édition Collector', 'TSUKY-VOY-COL', 10, 34.90),
--- L'Oiseau de Papier (preorder)
-(3, 2, 'Édition Standard', 'TSUKY-OIS-STD', 20, 27.90),
-(4, 2, 'Édition Limitée Signée', 'TSUKY-OIS-LIM', 10, 39.90);
-
--- ============================================================
 -- Discounts
 -- ============================================================
 INSERT INTO `discounts` (`id`, `code`, `is_dynamic`, `rule`, `is_disabled`, `starts_at`, `ends_at`, `usage_limit`, `usage_count`) VALUES
@@ -218,17 +194,21 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5),
-    JSON_OBJECT('product_id', 1, 'variant_id', 2, 'name', 'Le Voyage de Tsuky — Édition Collector', 'quantity', 1, 'price', 34.90, 'unit_price', 34.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5),
+    JSON_OBJECT('product_id', 1, 'name', 'Le Voyage de Tsuky — Édition Collector', 'quantity', 1, 'price', 34.90, 'unit_price', 34.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_001',
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR123456789',
     'total_weight', 0.90,
     'discount_code', 'BIENVENUE10',
+    'discount_id', 1,
     'discount_amount', 5.98,
+    'discount_incremented', true,
     'history', JSON_ARRAY(
       JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 5 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'pending', 'label', 'Commande créée'),
       JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 5 MONTH), INTERVAL 2 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'completed', 'label', 'Paiement confirmé'),
@@ -254,14 +234,17 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'zip_code', '69007', 'city', 'Lyon', 'country', 'FR', 'phone', '+33698765432'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_002',
+    'payment_method', 'card',
     'shipping_method', 'relay',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR987654321',
     'shipping_order_id', 'boxtal_test_002',
+    'relay_code', 'FR-12345',
     'total_weight', 0.45,
     'history', JSON_ARRAY(
       JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 3 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
@@ -287,11 +270,13 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Montpellier', 'country', 'FR', 'phone', '+33611223344'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 2, 'variant_id', 3, 'name', 'L''Oiseau de Papier — Édition Standard', 'quantity', 1, 'price', 27.90, 'unit_price', 27.90, 'weight', 0.50, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 2, 'name', 'L''Oiseau de Papier — Édition Standard', 'quantity', 1, 'price', 27.90, 'unit_price', 27.90, 'weight', 0.50, 'length', 25, 'width', 18, 'height', 1.5, 'is_preorder', true)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_003',
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 0,
     'history', JSON_ARRAY(
       JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 1 HOUR), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created')
@@ -315,16 +300,20 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'zip_code', '75002', 'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 2, 'variant_id', 4, 'name', 'L''Oiseau de Papier — Édition Limitée Signée', 'quantity', 1, 'price', 39.90, 'unit_price', 39.90, 'weight', 0.50, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 2, 'name', 'L''Oiseau de Papier — Édition Limitée Signée', 'quantity', 1, 'price', 39.90, 'unit_price', 39.90, 'weight', 0.50, 'length', 25, 'width', 18, 'height', 1.5, 'is_preorder', true)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_004',
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR111222333',
     'discount_code', 'NOEL2025',
+    'discount_id', 3,
     'discount_amount', 5.99,
-    'notes', 'Cadeau — merci d''emballer soigneusement',
+    'discount_incremented', true,
+    'internal_notes', JSON_ARRAY(JSON_OBJECT('id', 'n001', 'note', 'Cadeau — merci d''emballer soigneusement', 'createdAt', DATE_FORMAT(DATE_SUB(@now, INTERVAL 2 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'))),
     'history', JSON_ARRAY(
       JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 2 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'pending', 'label', 'Commande créée'),
       JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 MONTH), INTERVAL 2 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'completed', 'label', 'Paiement confirmé via webhook'),
@@ -350,13 +339,17 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'zip_code', '69002', 'city', 'Lyon', 'country', 'FR', 'phone', '+33677889900'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_005',
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 0,
-    'notes', 'Client a demandé annulation avant expédition',
+    'refunded_by', 'admin',
+    'refunded_at', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 WEEK), INTERVAL 4 HOUR), '%Y-%m-%dT%H:%i:%s.000Z'),
+    'internal_notes', JSON_ARRAY(JSON_OBJECT('id', 'n002', 'note', 'Client a demandé annulation avant expédition', 'createdAt', DATE_FORMAT(DATE_SUB(@now, INTERVAL 2 WEEK), '%Y-%m-%dT%H:%i:%s.000Z'))),
     'history', JSON_ARRAY(
       JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 2 WEEK), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
       JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 2 WEEK), INTERVAL 1 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'payment_confirmed'),
@@ -382,12 +375,14 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 2, 'name', 'Le Voyage de Tsuky — Édition Collector', 'quantity', 1, 'price', 34.90, 'unit_price', 34.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5),
-    JSON_OBJECT('product_id', 2, 'variant_id', 3, 'name', 'L''Oiseau de Papier — Édition Standard', 'quantity', 1, 'price', 27.90, 'unit_price', 27.90, 'weight', 0.50, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Le Voyage de Tsuky — Édition Collector', 'quantity', 1, 'price', 34.90, 'unit_price', 34.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5),
+    JSON_OBJECT('product_id', 2, 'name', 'L''Oiseau de Papier — Édition Standard', 'quantity', 1, 'price', 27.90, 'unit_price', 27.90, 'weight', 0.50, 'length', 25, 'width', 18, 'height', 1.5, 'is_preorder', true)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_006',
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR444555666',
     'total_weight', 0.95,
@@ -416,14 +411,18 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Paris', 'country', 'FR', 'phone', '+33699887766'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Le Voyage de Tsuky — Édition Standard', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_007',
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR333444555',
-    'notes', 'Livre arrivé abîmé — remboursement partiel de 12.00 EUR',
+    'refunded_by', 'admin',
+    'refunded_at', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 10 DAY), '%Y-%m-%dT%H:%i:%s.000Z'),
+    'internal_notes', JSON_ARRAY(JSON_OBJECT('id', 'n003', 'note', 'Livre arrivé abîmé — remboursement partiel de 12.00 EUR', 'createdAt', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 10 DAY), '%Y-%m-%dT%H:%i:%s.000Z'))),
     'history', JSON_ARRAY(
       JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 1 MONTH), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
       JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 1 MONTH), INTERVAL 1 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'payment_confirmed'),
@@ -450,13 +449,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'zip_code', '69002', 'city', 'Lyon', 'country', 'FR', 'phone', '+33677889900'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 2, 'variant_id', 4, 'name', 'L''Oiseau de Papier — Édition Limitée Signée', 'quantity', 1, 'price', 39.90, 'unit_price', 39.90, 'weight', 0.50, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 2, 'name', 'L''Oiseau de Papier — Édition Limitée Signée', 'quantity', 1, 'price', 39.90, 'unit_price', 39.90, 'weight', 0.50, 'length', 25, 'width', 18, 'height', 1.5, 'is_preorder', true)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_008',
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
-    'notes', 'Précommande — expédition prévue mars 2026',
+    'internal_notes', JSON_ARRAY(JSON_OBJECT('id', 'n004', 'note', 'Précommande — expédition prévue mars 2026', 'createdAt', DATE_FORMAT(DATE_SUB(@now, INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'))),
     'history', JSON_ARRAY(
       JSON_OBJECT('date', DATE_FORMAT(DATE_SUB(@now, INTERVAL 5 DAY), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'created'),
       JSON_OBJECT('date', DATE_FORMAT(DATE_ADD(DATE_SUB(@now, INTERVAL 5 DAY), INTERVAL 2 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'), 'status', 'payment_confirmed')
@@ -480,13 +481,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_009',
     'stripe_subscription_id', 'sub_test_marie_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR777888999',
     'total_weight', 0.45,
@@ -514,13 +517,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_010',
     'stripe_subscription_id', 'sub_test_marie_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR777889000',
     'total_weight', 0.45,
@@ -548,13 +553,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Paris', 'country', 'FR', 'phone', '+33612345678'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_011',
     'stripe_subscription_id', 'sub_test_marie_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR777889001',
     'total_weight', 0.45,
@@ -582,13 +589,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Montpellier', 'country', 'FR', 'phone', '+33611223344'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_012',
     'stripe_subscription_id', 'sub_test_emma_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR888111222',
     'total_weight', 0.45,
@@ -616,13 +625,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Montpellier', 'country', 'FR', 'phone', '+33611223344'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_013',
     'stripe_subscription_id', 'sub_test_emma_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR888111333',
     'total_weight', 0.45,
@@ -650,13 +661,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_014',
     'stripe_subscription_id', 'sub_test_chloe_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR999111222',
     'total_weight', 0.45,
@@ -684,13 +697,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_015',
     'stripe_subscription_id', 'sub_test_chloe_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR999111333',
     'total_weight', 0.45,
@@ -718,13 +733,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_016',
     'stripe_subscription_id', 'sub_test_chloe_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR999111444',
     'total_weight', 0.45,
@@ -752,13 +769,15 @@ INSERT INTO `orders` (`id`, `display_id`, `customer_id`, `email`, `status`, `ful
     'city', 'Bordeaux', 'country', 'FR', 'phone', '+33655443322'
   ),
   JSON_ARRAY(
-    JSON_OBJECT('product_id', 1, 'variant_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
+    JSON_OBJECT('product_id', 1, 'name', 'Box Littéraire Tsuky Tales', 'quantity', 1, 'price', 24.90, 'unit_price', 24.90, 'weight', 0.45, 'length', 25, 'width', 18, 'height', 1.5)
   ),
   JSON_OBJECT(
     'payment_intent_id', 'pi_test_017',
     'stripe_subscription_id', 'sub_test_chloe_001',
     'subscription', true,
+    'payment_method', 'card',
     'shipping_method', 'home',
+    'shipping_country', 'FR',
     'shipping_cost', 4.90,
     'tracking_number', 'FR999111555',
     'total_weight', 0.45,
@@ -778,8 +797,8 @@ INSERT INTO `carts` (`id`, `customer_id`, `email`, `items`, `context`, `complete
 -- Active cart: Chloe browsing
 ('cart-test-001', 5, 'chloe.moreau@test.com',
   JSON_ARRAY(
-    JSON_OBJECT('variant_id', 1, 'quantity', 1),
-    JSON_OBJECT('variant_id', 3, 'quantity', 2)
+    JSON_OBJECT('product_id', 1, 'quantity', 1),
+    JSON_OBJECT('product_id', 2, 'quantity', 2)
   ),
   JSON_OBJECT(),
   NULL,
@@ -788,7 +807,7 @@ INSERT INTO `carts` (`id`, `customer_id`, `email`, `items`, `context`, `complete
 -- Active cart: anonymous visitor
 ('cart-test-002', NULL, NULL,
   JSON_ARRAY(
-    JSON_OBJECT('variant_id', 1, 'quantity', 1)
+    JSON_OBJECT('product_id', 1, 'quantity', 1)
   ),
   JSON_OBJECT(),
   NULL,
@@ -797,8 +816,8 @@ INSERT INTO `carts` (`id`, `customer_id`, `email`, `items`, `context`, `complete
 -- Active cart with discount applied
 ('cart-test-003', 4, 'thomas.leroy@test.com',
   JSON_ARRAY(
-    JSON_OBJECT('variant_id', 2, 'quantity', 1),
-    JSON_OBJECT('variant_id', 4, 'quantity', 1)
+    JSON_OBJECT('product_id', 1, 'quantity', 1),
+    JSON_OBJECT('product_id', 2, 'quantity', 1)
   ),
   JSON_OBJECT(
     'discount_code', 'BIENVENUE10',
@@ -811,8 +830,8 @@ INSERT INTO `carts` (`id`, `customer_id`, `email`, `items`, `context`, `complete
 -- Completed cart (Marie's old order)
 ('cart-test-004', 1, 'marie.dupont@test.com',
   JSON_ARRAY(
-    JSON_OBJECT('variant_id', 1, 'quantity', 1),
-    JSON_OBJECT('variant_id', 2, 'quantity', 1)
+    JSON_OBJECT('product_id', 1, 'quantity', 1),
+    JSON_OBJECT('product_id', 1, 'quantity', 1)
   ),
   JSON_OBJECT('discount_code', 'BIENVENUE10', 'discount_amount', 5.98),
   DATE_SUB(@now, INTERVAL 5 MONTH),
