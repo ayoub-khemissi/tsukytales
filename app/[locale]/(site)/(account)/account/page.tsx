@@ -436,8 +436,7 @@ export default function AccountPage() {
         <Tabs
           classNames={{
             tabList: "gap-2",
-            tabContent:
-              "group-data-[selected=true]:!text-[#B5347A] dark:group-data-[selected=true]:!text-[#EDC8E0]",
+            tabContent: "group-data-[selected=true]:!text-white",
           }}
           color="primary"
           selectedKey={activeTab}
