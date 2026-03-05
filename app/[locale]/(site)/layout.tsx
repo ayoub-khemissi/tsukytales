@@ -3,6 +3,7 @@ import { Footer } from "@/components/footer";
 import { ReadingProgress } from "@/components/reading-progress";
 import { Particles } from "@/components/particles";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { CookieBanner } from "@/components/cookie-banner";
 
 export default function SiteLayout({
   children,
@@ -17,6 +18,7 @@ export default function SiteLayout({
       <Navbar />
       <main className="flex-grow relative z-10">{children}</main>
       <Footer />
+      <CookieBanner />
     </div>
   );
 }

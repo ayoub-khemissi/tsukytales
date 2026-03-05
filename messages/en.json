@@ -806,13 +806,13 @@
     "section_1_title": "1. Data controller",
     "section_1_text": "The data controller is:\nTSUKY TALES — SASU\n60 rue François Ier, 75008 Paris, France\nEmail: contact@tsukytales.com",
     "section_2_title": "2. Data collected",
-    "section_2_text": "We collect the following data:\n• Identification data: surname, first name, email address\n• Delivery data: postal address, phone number\n• Payment data: processed directly by Stripe (we do not store your banking information)\n• Browsing data: strictly necessary cookies\n• Order data: purchase history, subscriptions",
+    "section_2_text": "We collect the following data:\n• Identification data: surname, first name, email address\n• Delivery data: postal address, phone number\n• Payment data: processed directly by Stripe (we do not store your banking information)\n• Browsing data: strictly necessary cookies and, subject to your consent, analytics cookies (Google Analytics)\n• Order data: purchase history, subscriptions\n• Audience measurement data: pages viewed, visit duration, device type (collected only with your consent via Google Analytics)",
     "section_3_title": "3. Purposes of processing",
     "section_3_text": "Your data is used for:\n• Managing and processing your orders\n• Managing your customer account\n• Managing your subscription\n• Sending order confirmations and delivery notifications\n• Processing your contact requests\n• Complying with our legal and accounting obligations",
     "section_4_title": "4. Legal basis",
-    "section_4_text": "The processing of your data is based on:\n• Performance of a contract (orders, subscriptions)\n• Your consent (contact form)\n• Our legitimate interest (service improvement)\n• Our legal obligations (invoicing, accounting)",
+    "section_4_text": "The processing of your data is based on:\n• Performance of a contract (orders, subscriptions)\n• Your consent (contact form, analytics cookies)\n• Our legitimate interest (service improvement)\n• Our legal obligations (invoicing, accounting)",
     "section_5_title": "5. Data recipients",
-    "section_5_text": "Your data may be shared with:\n• Stripe: payment processing\n• Boxtal / Mondial Relay: order shipment\n• Our hosting provider (OVH): website hosting\n• Our email service providers\n\nNo data is sold to third parties for commercial purposes.",
+    "section_5_text": "Your data may be shared with:\n• Stripe: payment processing\n• Boxtal / Mondial Relay: order shipment\n• Our hosting provider (OVH): website hosting\n• Our email service providers\n• Google Analytics: audience measurement (only if you accept analytics cookies)\n\nNo data is sold to third parties for commercial purposes.",
     "section_6_title": "6. Data retention",
     "section_6_text": "Your data is retained for:\n• Account data: lifetime of the account + 3 years after deletion\n• Order data: 10 years (accounting obligations)\n• Contact data: 3 years after the last contact\n• Cookies: 13 months maximum",
     "section_7_title": "7. Your rights",
@@ -820,7 +820,7 @@
     "section_8_title": "8. Security",
     "section_8_text": "We implement appropriate technical and organisational measures to protect your data: SSL/TLS encryption, restricted access, secure payments via Stripe, regular backups.",
     "section_9_title": "9. Cookies",
-    "section_9_text": "The website only uses strictly necessary cookies for the service:\n• Session cookie (authentication)\n• Cart cookie\n• Language preference cookie\n\nNo advertising or analytics cookies are placed without your consent.",
+    "section_9_text": "The website uses the following cookies:\n\nStrictly necessary cookies (set without consent):\n• Session cookie (authentication)\n• Cart storage (localStorage)\n• Theme preference (localStorage)\n• Stripe cookies (payment processing and fraud prevention)\n\nAnalytics cookies (set only with your consent):\n• _ga, _ga_*: Google Analytics — audience measurement, retention period: 13 months\n\nOn your first visit, a banner allows you to accept or decline analytics cookies. Your choice is remembered and can be changed at any time by clearing the \"tsuky-cookie-consent\" key from your browser (localStorage). No advertising cookies are used.",
     "section_10_title": "10. Complaints",
     "section_10_text": "If you believe that the processing of your data does not comply with regulations, you may file a complaint with the CNIL:\nCommission Nationale de l'Informatique et des Libertés\n3 place de Fontenoy, TSA 80715\n75334 Paris Cedex 07, France\nhttps://www.cnil.fr"
   },
@@ -892,5 +892,10 @@
     "SE": "Sweden",
     "SI": "Slovenia",
     "SK": "Slovakia"
+  },
+  "cookies": {
+    "message": "This site uses analytics cookies to improve your experience. See our <privacy>privacy policy</privacy>.",
+    "accept": "Accept",
+    "refuse": "Decline"
   }
 }

@@ -806,13 +806,13 @@
     "section_1_title": "1. Responsable du traitement",
     "section_1_text": "Le responsable du traitement des données est :\nTSUKY TALES — SASU\n60 rue François Ier, 75008 Paris\nEmail : contact@tsukytales.com",
     "section_2_title": "2. Données collectées",
-    "section_2_text": "Nous collectons les données suivantes :\n• Données d'identification : nom, prénom, adresse email\n• Données de livraison : adresse postale, numéro de téléphone\n• Données de paiement : traitées directement par Stripe (nous ne stockons pas vos données bancaires)\n• Données de navigation : cookies strictement nécessaires\n• Données de commande : historique d'achats, abonnements",
+    "section_2_text": "Nous collectons les données suivantes :\n• Données d'identification : nom, prénom, adresse email\n• Données de livraison : adresse postale, numéro de téléphone\n• Données de paiement : traitées directement par Stripe (nous ne stockons pas vos données bancaires)\n• Données de navigation : cookies strictement nécessaires et, sous réserve de votre consentement, cookies analytiques (Google Analytics)\n• Données de commande : historique d'achats, abonnements\n• Données de mesure d'audience : pages consultées, durée de visite, type d'appareil (collectées uniquement avec votre consentement via Google Analytics)",
     "section_3_title": "3. Finalités du traitement",
     "section_3_text": "Vos données sont utilisées pour :\n• La gestion et le traitement de vos commandes\n• La gestion de votre compte client\n• La gestion de votre abonnement\n• L'envoi de confirmations de commande et de notifications de livraison\n• Le traitement de vos demandes de contact\n• Le respect de nos obligations légales et comptables",
     "section_4_title": "4. Base légale",
-    "section_4_text": "Le traitement de vos données repose sur :\n• L'exécution du contrat (commandes, abonnements)\n• Votre consentement (formulaire de contact)\n• Notre intérêt légitime (amélioration du service)\n• Nos obligations légales (facturation, comptabilité)",
+    "section_4_text": "Le traitement de vos données repose sur :\n• L'exécution du contrat (commandes, abonnements)\n• Votre consentement (formulaire de contact, cookies analytiques)\n• Notre intérêt légitime (amélioration du service)\n• Nos obligations légales (facturation, comptabilité)",
     "section_5_title": "5. Destinataires des données",
-    "section_5_text": "Vos données peuvent être transmises à :\n• Stripe : traitement des paiements\n• Boxtal / Mondial Relay : expédition des commandes\n• Notre hébergeur (OVH) : hébergement du site\n• Nos prestataires d'envoi d'emails\n\nAucune donnée n'est vendue à des tiers à des fins commerciales.",
+    "section_5_text": "Vos données peuvent être transmises à :\n• Stripe : traitement des paiements\n• Boxtal / Mondial Relay : expédition des commandes\n• Notre hébergeur (OVH) : hébergement du site\n• Nos prestataires d'envoi d'emails\n• Google Analytics : mesure d'audience (uniquement si vous acceptez les cookies analytiques)\n\nAucune donnée n'est vendue à des tiers à des fins commerciales.",
     "section_6_title": "6. Durée de conservation",
     "section_6_text": "Vos données sont conservées pendant :\n• Données de compte : durée de vie du compte + 3 ans après suppression\n• Données de commande : 10 ans (obligations comptables)\n• Données de contact : 3 ans après le dernier contact\n• Cookies : 13 mois maximum",
     "section_7_title": "7. Vos droits",
@@ -820,7 +820,7 @@
     "section_8_title": "8. Sécurité",
     "section_8_text": "Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données : chiffrement SSL/TLS, accès restreint, paiements sécurisés via Stripe, sauvegardes régulières.",
     "section_9_title": "9. Cookies",
-    "section_9_text": "Le site utilise uniquement des cookies strictement nécessaires au fonctionnement du service :\n• Cookie de session (authentification)\n• Cookie de panier\n• Cookie de préférence de langue\n\nAucun cookie publicitaire ou analytique n'est déposé sans votre consentement.",
+    "section_9_text": "Le site utilise les cookies suivants :\n\nCookies strictement nécessaires (déposés sans consentement) :\n• Cookie de session (authentification)\n• Cookie de panier (localStorage)\n• Cookie de préférence de thème (localStorage)\n• Cookies Stripe (traitement des paiements et prévention de la fraude)\n\nCookies analytiques (déposés uniquement avec votre consentement) :\n• _ga, _ga_* : Google Analytics — mesure d'audience, durée de conservation : 13 mois\n\nLors de votre première visite, une bannière vous permet d'accepter ou de refuser les cookies analytiques. Votre choix est mémorisé et peut être modifié à tout moment en supprimant la clé « tsuky-cookie-consent » de votre navigateur (localStorage). Aucun cookie publicitaire n'est utilisé.",
     "section_10_title": "10. Réclamation",
     "section_10_text": "Si vous estimez que le traitement de vos données ne respecte pas la réglementation, vous pouvez introduire une réclamation auprès de la CNIL :\nCommission Nationale de l'Informatique et des Libertés\n3 place de Fontenoy, TSA 80715\n75334 Paris Cedex 07\nhttps://www.cnil.fr"
   },
@@ -892,5 +892,10 @@
     "SE": "Suède",
     "SI": "Slovénie",
     "SK": "Slovaquie"
+  },
+  "cookies": {
+    "message": "Ce site utilise des cookies analytiques pour améliorer votre expérience. Consultez notre <privacy>politique de confidentialité</privacy>.",
+    "accept": "Accepter",
+    "refuse": "Refuser"
   }
 }
