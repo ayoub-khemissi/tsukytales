@@ -5,7 +5,6 @@ import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Form } from "@heroui/form";
 import { useTranslations } from "next-intl";
-import { signIn } from "next-auth/react";
 import Image from "next/image";
 
 export default function AdminLoginPage() {
@@ -19,16 +18,22 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
 
-    const result = await signIn("admin-credentials", {
-      password,
-      redirect: false,
-    });
+    try {
+      const res = await fetch("/api/admin/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
 
-    if (result?.error) {
+      if (!res.ok) {
+        setError(t("login_error"));
+        setLoading(false);
+      } else {
+        window.location.href = "/admin";
+      }
+    } catch {
       setError(t("login_error"));
       setLoading(false);
-    } else {
-      window.location.href = "/admin";
     }
   };
 

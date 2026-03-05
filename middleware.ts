@@ -5,7 +5,6 @@ import NextAuth from "next-auth";
 import { routing } from "./i18n/routing";
 
 import { authConfig } from "@/lib/auth/auth.config";
-import { isMaintenanceMode } from "@/lib/maintenance";
 
 const intlMiddleware = createMiddleware(routing);
 const { auth } = NextAuth(authConfig);
@@ -130,8 +129,13 @@ export default async function middleware(req: NextRequest) {
     return;
   }
 
-  // Maintenance mode — block all pages except admin
-  if (!pathname.includes("/admin") && (await isMaintenanceMode())) {
+  // Maintenance mode — block all pages except admin & API
+  const isMaintenance = await fetch(new URL("/api/maintenance", req.url))
+    .then((r) => r.json())
+    .then((d) => d.maintenance === true)
+    .catch(() => false);
+
+  if (!pathname.includes("/admin") && isMaintenance) {
     return new NextResponse(MAINTENANCE_HTML, {
       status: 503,
       headers: {
@@ -151,44 +155,43 @@ export default async function middleware(req: NextRequest) {
     ? "/" + pathname.split("/").slice(2).join("/")
     : pathname;
 
-  const needsAuth =
-    strippedPath.startsWith("/account") || strippedPath.startsWith("/admin");
+  const needsCustomerAuth = strippedPath.startsWith("/account");
+  const needsAdminAuth =
+    strippedPath.startsWith("/admin") &&
+    !strippedPath.startsWith("/admin/login");
   const isGuestOnly = strippedPath === "/login" || strippedPath === "/register";
 
-  if (needsAuth || isGuestOnly) {
-    const session = await auth();
-    const locale = pathnameHasLocale
-      ? pathname.split("/")[1]
-      : routing.defaultLocale;
-    const buildUrl = (path: string) =>
-      new URL(
-        locale === routing.defaultLocale ? path : `/${locale}${path}`,
-        req.url,
-      );
+  const locale = pathnameHasLocale
+    ? pathname.split("/")[1]
+    : routing.defaultLocale;
+  const buildUrl = (path: string) =>
+    new URL(
+      locale === routing.defaultLocale ? path : `/${locale}${path}`,
+      req.url,
+    );
 
-    // Logged-in customers cannot access login/register → redirect to account
+  // Customer auth checks (NextAuth session)
+  if (needsCustomerAuth || isGuestOnly) {
+    const session = await auth();
+
     if (isGuestOnly && session?.user?.role === "customer") {
       return Response.redirect(buildUrl("/account"));
     }
 
-    // Non-customer users cannot access /account → redirect to login
-    if (
-      strippedPath.startsWith("/account") &&
-      session?.user?.role !== "customer"
-    ) {
+    if (needsCustomerAuth && session?.user?.role !== "customer") {
       const loginUrl = buildUrl("/login");
 
       loginUrl.searchParams.set("callbackUrl", pathname);
 
       return Response.redirect(loginUrl);
     }
+  }
 
-    // Non-admin users cannot access /admin (except /admin/login)
-    if (
-      strippedPath.startsWith("/admin") &&
-      !strippedPath.startsWith("/admin/login") &&
-      session?.user?.role !== "admin"
-    ) {
+  // Admin auth checks — cookie presence gate (actual validation in requireAdmin API-side)
+  if (needsAdminAuth) {
+    const hasAdminCookie = req.cookies.has("admin-session");
+
+    if (!hasAdminCookie) {
       return Response.redirect(buildUrl("/admin/login"));
     }
   }

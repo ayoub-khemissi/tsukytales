@@ -1,4 +1,4 @@
-import type { CustomerRow, AdminRow } from "@/types/db.types";
+import type { CustomerRow } from "@/types/db.types";
 
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -48,39 +48,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               .join(" ") || null,
           role: "customer" as const,
           customerId: customer.id,
-        };
-      },
-    }),
-
-    // Admin login — password only (username hardcoded to "admin")
-    Credentials({
-      id: "admin-credentials",
-      name: "Admin",
-      credentials: {
-        password: { label: "Mot de passe", type: "password" },
-      },
-      async authorize(credentials) {
-        const password = credentials?.password as string;
-
-        if (!password) return null;
-
-        const [rows] = await pool.execute<AdminRow[]>(
-          "SELECT * FROM admins WHERE username = ? LIMIT 1",
-          ["admin"],
-        );
-        const admin = rows[0];
-
-        if (!admin) return null;
-
-        const valid = await bcrypt.compare(password, admin.password);
-
-        if (!valid) return null;
-
-        return {
-          id: `admin-${admin.id}`,
-          email: "admin@tsukytales.com",
-          name: "Admin",
-          role: "admin" as const,
         };
       },
     }),

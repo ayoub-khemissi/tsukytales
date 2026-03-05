@@ -1,4 +1,5 @@
 import { auth } from "./auth";
+import { getAdminSession } from "./admin-session";
 
 import { AppError } from "@/lib/errors/app-error";
 
@@ -23,10 +24,10 @@ export async function requireCustomer() {
 }
 
 export async function requireAdmin() {
-  const session = await requireAuth();
+  const session = await getAdminSession();
 
-  if (session.user.role !== "admin") {
-    throw new AppError("Accès réservé aux administrateurs", 403);
+  if (!session.isLoggedIn) {
+    throw new AppError("Non authentifié", 401);
   }
 
   return session;

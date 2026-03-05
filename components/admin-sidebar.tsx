@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import Image from "next/image";
 
@@ -252,7 +252,13 @@ const navItems = [
 export function AdminSidebar() {
   const t = useTranslations("admin");
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await fetch("/api/admin/auth/logout", { method: "POST" });
+    router.push("/");
+  };
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -331,7 +337,7 @@ export function AdminSidebar() {
         <Button
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/60 hover:text-red-400 hover:bg-white/5 transition-colors w-full justify-start cursor-pointer"
           variant="light"
-          onPress={() => signOut({ callbackUrl: "/" })}
+          onPress={handleLogout}
         >
           <svg
             fill="none"

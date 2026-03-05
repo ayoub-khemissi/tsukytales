@@ -68,7 +68,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Restore stock + update order in a single transaction
   // If Stripe refund succeeded but DB fails, the charge.refunded webhook acts as safety net
-  const adminEmail = session.user.email || "admin";
+  const adminEmail = session.email || "admin";
 
   try {
     await withTransaction(async (connection) => {

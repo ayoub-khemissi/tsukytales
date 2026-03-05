@@ -20,11 +20,7 @@ export const authConfig = {
         return auth?.user?.role === "customer";
       }
 
-      // Protected admin routes
-      if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-        return auth?.user?.role === "admin";
-      }
-
+      // Admin routes are protected via iron-session in middleware
       return true;
     },
 
