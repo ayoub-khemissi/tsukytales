@@ -11,6 +11,7 @@ import { billingReminderHtml } from "./templates/billing-reminder";
 import { paymentFailedHtml } from "./templates/payment-failed";
 import { refundConfirmationHtml } from "./templates/refund-confirmation";
 import { subscriptionConfirmationHtml } from "./templates/subscription-confirmation";
+import { passwordResetHtml } from "./templates/password-reset";
 
 // ─── Order Confirmation ─────────────────────────────────────────
 
@@ -165,6 +166,25 @@ export async function sendSubscriptionConfirmation(params: {
       billingDates: params.billingDates,
       t,
     }),
+  });
+}
+
+// ─── Password Reset ─────────────────────────────────────────────
+
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+
+export async function sendPasswordReset(params: {
+  email: string;
+  token: string;
+  country?: string;
+}) {
+  const t = getEmailT(params.country || "FR");
+  const resetUrl = `${BASE_URL}/reset-password?token=${params.token}`;
+
+  await sendMail({
+    to: params.email,
+    subject: t.subject_password_reset,
+    html: passwordResetHtml({ resetUrl, t }),
   });
 }
 

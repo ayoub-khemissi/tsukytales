@@ -200,6 +200,19 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+-- Password Reset Tokens
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+  `email` VARCHAR(255) NOT NULL,
+  `token` VARCHAR(255) NOT NULL UNIQUE,
+  `expires` DATETIME NOT NULL,
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`email`, `token`),
+  INDEX `idx_prt_token` (`token`),
+  INDEX `idx_prt_expires` (`expires`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 -- NextAuth — Verification Tokens
 -- ============================================================
 CREATE TABLE IF NOT EXISTS `verification_tokens` (

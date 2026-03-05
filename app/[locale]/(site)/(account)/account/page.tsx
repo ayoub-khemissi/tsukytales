@@ -26,6 +26,7 @@ import {
   faBan,
   faCreditCard,
   faPlus,
+  faLock,
 } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 import { isValidPhoneNumber } from "libphonenumber-js";
@@ -107,6 +108,128 @@ interface SubscriptionData {
   phases?: { start: string; end: string; skipped: boolean }[];
   history?: SubscriptionHistoryOrder[];
   invoices?: SubscriptionInvoice[];
+}
+
+function ChangePasswordSection() {
+  const t = useTranslations("account");
+  const auth = useTranslations("auth");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+
+    if (newPassword !== confirmPassword) {
+      setError(auth("error_passwords_mismatch"));
+
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/store/customer/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+
+        setError(data.error || t("change_password_error"));
+        setLoading(false);
+
+        return;
+      }
+      setSuccess(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setSuccess(false), 3000);
+    } catch {
+      setError(t("change_password_error"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10 mt-6">
+      <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white mb-6">
+        {t("change_password_title")}
+      </h2>
+      <Form
+        className="w-full flex flex-col items-stretch space-y-5"
+        validationBehavior="native"
+        onSubmit={handleSubmit}
+      >
+        {error && (
+          <div className="bg-danger-50 text-danger text-sm p-3 rounded-lg">
+            {error}
+          </div>
+        )}
+        <Input
+          isRequired
+          autoComplete="current-password"
+          className="w-full"
+          label={t("current_password")}
+          type="password"
+          value={currentPassword}
+          onValueChange={setCurrentPassword}
+        />
+        <Input
+          isRequired
+          autoComplete="new-password"
+          className="w-full"
+          description={auth("password_min")}
+          errorMessage={auth("error_password_min")}
+          label={auth("new_password")}
+          minLength={8}
+          type="password"
+          value={newPassword}
+          onValueChange={setNewPassword}
+        />
+        <Input
+          isRequired
+          autoComplete="new-password"
+          className="w-full"
+          errorMessage={auth("error_passwords_mismatch")}
+          label={auth("password_confirm")}
+          type="password"
+          validate={(value) =>
+            value !== newPassword ? auth("error_passwords_mismatch") : true
+          }
+          value={confirmPassword}
+          onValueChange={setConfirmPassword}
+        />
+        <div className="flex flex-col gap-3">
+          <Button
+            className="w-full"
+            color="primary"
+            isLoading={loading}
+            startContent={<FontAwesomeIcon icon={faLock} />}
+            type="submit"
+          >
+            {t("change_password_button")}
+          </Button>
+          {success && (
+            <span className="text-success text-sm font-medium text-center">
+              {t("change_password_success")}
+            </span>
+          )}
+        </div>
+      </Form>
+    </div>
+  );
 }
 
 export default function AccountPage() {
@@ -468,61 +591,66 @@ export default function AccountPage() {
       <div className="w-full">
         {/* Profile */}
         {activeTab === "profile" && (
-          <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10">
-            <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white mb-6">
-              {t("profile_title")}
-            </h2>
-            <Form
-              className="w-full flex flex-col items-stretch space-y-5"
-              validationBehavior="native"
-              onSubmit={(e) => {
-                e.preventDefault();
-                saveProfile();
-              }}
-            >
-              <Input
-                isRequired
-                className="w-full"
-                label={auth("first_name")}
-                maxLength={100}
-                value={profileForm.first_name}
-                onValueChange={(v) =>
-                  setProfileForm((f) => ({ ...f, first_name: v }))
-                }
-              />
-              <Input
-                isRequired
-                className="w-full"
-                label={auth("last_name")}
-                maxLength={100}
-                value={profileForm.last_name}
-                onValueChange={(v) =>
-                  setProfileForm((f) => ({ ...f, last_name: v }))
-                }
-              />
-              <Input
-                isReadOnly
-                className="w-full"
-                label="Email"
-                value={profile?.email || session?.user?.email || ""}
-              />
-              <div className="flex flex-col gap-3">
-                <Button
+          <>
+            <div className="bg-white dark:bg-surface rounded-[24px] sm:rounded-[30px] shadow-lg border border-[rgba(88,22,104,0.05)] dark:border-[rgba(180,150,210,0.1)] px-5 py-6 sm:px-10 sm:py-10">
+              <h2 className="font-heading italic text-xl font-bold text-text-brand dark:text-white mb-6">
+                {t("profile_title")}
+              </h2>
+              <Form
+                className="w-full flex flex-col items-stretch space-y-5"
+                validationBehavior="native"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  saveProfile();
+                }}
+              >
+                <Input
+                  isRequired
                   className="w-full"
-                  color="primary"
-                  startContent={<FontAwesomeIcon icon={faSave} />}
-                  type="submit"
-                >
-                  {common("save")}
-                </Button>
-                {profileSaved && (
-                  <span className="text-success text-sm font-medium text-center">
-                    {t("profile_saved")}
-                  </span>
-                )}
-              </div>
-            </Form>
-          </div>
+                  label={auth("first_name")}
+                  maxLength={100}
+                  value={profileForm.first_name}
+                  onValueChange={(v) =>
+                    setProfileForm((f) => ({ ...f, first_name: v }))
+                  }
+                />
+                <Input
+                  isRequired
+                  className="w-full"
+                  label={auth("last_name")}
+                  maxLength={100}
+                  value={profileForm.last_name}
+                  onValueChange={(v) =>
+                    setProfileForm((f) => ({ ...f, last_name: v }))
+                  }
+                />
+                <Input
+                  isReadOnly
+                  className="w-full"
+                  label="Email"
+                  value={profile?.email || session?.user?.email || ""}
+                />
+                <div className="flex flex-col gap-3">
+                  <Button
+                    className="w-full"
+                    color="primary"
+                    startContent={<FontAwesomeIcon icon={faSave} />}
+                    type="submit"
+                  >
+                    {common("save")}
+                  </Button>
+                  {profileSaved && (
+                    <span className="text-success text-sm font-medium text-center">
+                      {t("profile_saved")}
+                    </span>
+                  )}
+                </div>
+              </Form>
+            </div>
+
+            {/* Change password */}
+            <ChangePasswordSection />
+          </>
         )}
 
         {/* Orders */}

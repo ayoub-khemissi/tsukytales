@@ -74,6 +74,14 @@ export default function LoginPage() {
               value={password}
               onValueChange={setPassword}
             />
+            <div className="flex justify-end">
+              <Link
+                className="text-sm text-primary font-medium"
+                href="/forgot-password"
+              >
+                {t("forgot_password")}
+              </Link>
+            </div>
             <Button
               className="btn-brand bg-primary mt-2 w-full font-semibold"
               isLoading={loading}

@@ -71,6 +71,14 @@ export interface EmailTranslations {
   sub_closing: string;
   sub_team: string;
 
+  // Password reset
+  subject_password_reset: string;
+  reset_badge: string;
+  reset_headline: string;
+  reset_body: string;
+  reset_cta: string;
+  reset_ignore: string;
+
   // Refund confirmation
   refund_badge: string;
   refund_title: string;
@@ -160,6 +168,16 @@ const fr: EmailTranslations = {
   payment_error_contact:
     "Si vous pensez qu'il s'agit d'une erreur, n'h&eacute;sitez pas &agrave; nous contacter.",
 
+  subject_password_reset:
+    "R\u00e9initialisation de votre mot de passe - Tsuky Tales",
+  reset_badge: "S&eacute;curit&eacute;",
+  reset_headline: "R&eacute;initialisation du mot de passe",
+  reset_body:
+    "Vous avez demand&eacute; la r&eacute;initialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe. Ce lien est valable <strong>1 heure</strong>.",
+  reset_cta: "R&eacute;initialiser mon mot de passe",
+  reset_ignore:
+    "Si vous n'avez pas fait cette demande, vous pouvez ignorer cet email en toute s&eacute;curit&eacute;.",
+
   refund_badge: "Remboursement",
   refund_title: "Votre remboursement a &eacute;t&eacute; effectu&eacute;",
   refund_body:
@@ -243,6 +261,15 @@ const en: EmailTranslations = {
   payment_update_card: "Update my card",
   payment_error_contact:
     "If you think this is an error, please don&rsquo;t hesitate to contact us.",
+
+  subject_password_reset: "Reset your password - Tsuky Tales",
+  reset_badge: "Security",
+  reset_headline: "Password Reset",
+  reset_body:
+    "You requested a password reset. Click the button below to choose a new password. This link is valid for <strong>1 hour</strong>.",
+  reset_cta: "Reset my password",
+  reset_ignore:
+    "If you did not make this request, you can safely ignore this email.",
 
   refund_badge: "Refund",
   refund_title: "Your refund has been processed",
@@ -331,6 +358,15 @@ const es: EmailTranslations = {
   payment_error_contact:
     "Si crees que se trata de un error, no dudes en contactarnos.",
 
+  subject_password_reset: "Restablece tu contrase\u00f1a - Tsuky Tales",
+  reset_badge: "Seguridad",
+  reset_headline: "Restablecer contrase&ntilde;a",
+  reset_body:
+    "Has solicitado restablecer tu contrase&ntilde;a. Haz clic en el bot&oacute;n de abajo para elegir una nueva contrase&ntilde;a. Este enlace es v&aacute;lido durante <strong>1 hora</strong>.",
+  reset_cta: "Restablecer mi contrase&ntilde;a",
+  reset_ignore:
+    "Si no realizaste esta solicitud, puedes ignorar este correo con total seguridad.",
+
   refund_badge: "Reembolso",
   refund_title: "Tu reembolso ha sido procesado",
   refund_body:
@@ -417,6 +453,15 @@ const de: EmailTranslations = {
   payment_error_contact:
     "Wenn Sie glauben, dass es sich um einen Fehler handelt, z&ouml;gern Sie nicht, uns zu kontaktieren.",
 
+  subject_password_reset: "Passwort zur\u00fccksetzen - Tsuky Tales",
+  reset_badge: "Sicherheit",
+  reset_headline: "Passwort zur&uuml;cksetzen",
+  reset_body:
+    "Sie haben das Zur&uuml;cksetzen Ihres Passworts angefordert. Klicken Sie auf die Schaltfl&auml;che unten, um ein neues Passwort zu w&auml;hlen. Dieser Link ist <strong>1 Stunde</strong> g&uuml;ltig.",
+  reset_cta: "Mein Passwort zur&uuml;cksetzen",
+  reset_ignore:
+    "Wenn Sie diese Anfrage nicht gestellt haben, k&ouml;nnen Sie diese E-Mail bedenkenlos ignorieren.",
+
   refund_badge: "R&uuml;ckerstattung",
   refund_title: "Ihre R&uuml;ckerstattung wurde veranlasst",
   refund_body:
@@ -501,6 +546,15 @@ const it: EmailTranslations = {
   payment_update_card: "Aggiornare la mia carta",
   payment_error_contact:
     "Se pensi che si tratti di un errore, non esitare a contattarci.",
+
+  subject_password_reset: "Reimposta la tua password - Tsuky Tales",
+  reset_badge: "Sicurezza",
+  reset_headline: "Reimposta password",
+  reset_body:
+    "Hai richiesto la reimpostazione della tua password. Clicca sul pulsante qui sotto per scegliere una nuova password. Questo link &egrave; valido per <strong>1 ora</strong>.",
+  reset_cta: "Reimposta la mia password",
+  reset_ignore:
+    "Se non hai effettuato questa richiesta, puoi ignorare questa email in tutta sicurezza.",
 
   refund_badge: "Rimborso",
   refund_title: "Il tuo rimborso &egrave; stato effettuato",

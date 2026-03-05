@@ -159,7 +159,11 @@ export default async function middleware(req: NextRequest) {
   const needsAdminAuth =
     strippedPath.startsWith("/admin") &&
     !strippedPath.startsWith("/admin/login");
-  const isGuestOnly = strippedPath === "/login" || strippedPath === "/register";
+  const isGuestOnly =
+    strippedPath === "/login" ||
+    strippedPath === "/register" ||
+    strippedPath === "/forgot-password" ||
+    strippedPath === "/reset-password";
 
   const locale = pathnameHasLocale
     ? pathname.split("/")[1]
