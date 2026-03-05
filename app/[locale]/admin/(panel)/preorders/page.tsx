@@ -196,7 +196,7 @@ export default function PreordersPage() {
 
       {!loading && (
         <p className="text-xs text-default-400">
-          {total} {t("preorders_title").toLowerCase()}
+          {t("preorders_count_label", { count: total })}
         </p>
       )}
 

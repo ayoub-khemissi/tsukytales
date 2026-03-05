@@ -210,7 +210,7 @@ export default function SubscriptionsPage() {
 
       {!loading && (
         <p className="text-xs text-default-400">
-          {total} {t("subscriptions_title").toLowerCase()}
+          {t("subscriptions_count_label", { count: total })}
         </p>
       )}
 

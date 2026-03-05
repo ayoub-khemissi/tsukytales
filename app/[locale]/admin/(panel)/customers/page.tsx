@@ -190,7 +190,7 @@ export default function CustomersPage() {
 
       {!loading && (
         <p className="text-xs text-default-400">
-          {total} {t("customers_title").toLowerCase()}
+          {t("customers_count_label", { count: total })}
         </p>
       )}
 

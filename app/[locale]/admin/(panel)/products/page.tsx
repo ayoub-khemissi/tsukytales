@@ -151,7 +151,7 @@ export default function ProductsPage() {
 
       {!loading && (
         <p className="text-xs text-default-400">
-          {total} {t("products_title").toLowerCase()}
+          {t("products_count_label", { count: total })}
         </p>
       )}
 

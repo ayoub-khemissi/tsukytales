@@ -364,7 +364,7 @@ export default function OrdersPage() {
 
       {!loading && (
         <p className="text-xs text-default-400">
-          {total} {t("orders_title").toLowerCase()}
+          {t("orders_count_label", { count: total })}
         </p>
       )}
 
